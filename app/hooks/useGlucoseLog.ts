@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Glucometry, GlucometryType, MEAL_TIME_SLOTS, GLUCOSE_RANGES } from '@/app/types/diabetes';
 import { 
   format, 
@@ -81,6 +81,16 @@ interface UseGlucoseLogReturn {
 
 export function useGlucoseLog(initialRecords: Glucometry[] = []): UseGlucoseLogReturn {
   const [records, setRecords] = useState<Glucometry[]>(initialRecords);
+
+  // Sync records when initialRecords length changes (avoids infinite loop from array reference)
+  const recordsLength = initialRecords.length;
+  const firstRecordId = initialRecords[0]?.id;
+  const lastRecordId = initialRecords[initialRecords.length - 1]?.id;
+  
+  useEffect(() => {
+    setRecords(initialRecords);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recordsLength, firstRecordId, lastRecordId]);
 
   // Get records for a specific date grouped by type
   const getRecordsByDate = useCallback((date: Date): Map<GlucometryType, Glucometry> => {

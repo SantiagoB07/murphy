@@ -26,11 +26,13 @@ export function usePatients() {
 
 /**
  * Hook para obtener un paciente por ID con todos sus datos
+ * @param patientId - ID del paciente
+ * @param daysBack - Días hacia atrás para obtener datos históricos (default: 30)
  */
-export function usePatient(patientId: string | null) {
+export function usePatient(patientId: string | null, daysBack: number = 30) {
   return useQuery<Patient | null>({
-    queryKey: ['patient', patientId],
-    queryFn: () => patientId ? fetchPatientWithData(patientId) : null,
+    queryKey: ['patient', patientId, daysBack],
+    queryFn: () => patientId ? fetchPatientWithData(patientId, daysBack) : null,
     enabled: !!patientId,
     staleTime: 30 * 1000, // 30 segundos
     refetchInterval: 30 * 1000, // Refrescar cada 30 segundos

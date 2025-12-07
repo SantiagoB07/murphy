@@ -207,8 +207,10 @@ export async function getAllPatients(): Promise<Patient[]> {
 
 /**
  * Obtiene un paciente por ID con todos sus datos relacionados
+ * @param patientId - ID del paciente
+ * @param daysBack - Días hacia atrás para obtener datos históricos (default: 30)
  */
-export async function getPatientWithData(patientId: string): Promise<Patient | null> {
+export async function getPatientWithData(patientId: string, daysBack: number = 30): Promise<Patient | null> {
   // Fetch patient
   const { data: patient, error: patientError } = await supabase
     .from('patients')
@@ -226,10 +228,10 @@ export async function getPatientWithData(patientId: string): Promise<Patient | n
 
   // Fetch all related data in parallel
   const [glucometries, insulinDoses, sleepLogs, symptomLogs, alerts, treatmentSchedule] = await Promise.all([
-    getPatientGlucometries(patientId),
-    getPatientInsulinDoses(patientId),
-    getPatientSleepLogs(patientId),
-    getPatientSymptomLogs(patientId),
+    getPatientGlucometries(patientId, daysBack),
+    getPatientInsulinDoses(patientId, daysBack),
+    getPatientSleepLogs(patientId, daysBack),
+    getPatientSymptomLogs(patientId, daysBack),
     getPatientAlerts(patientId),
     getPatientTreatmentSchedule(patientId),
   ])

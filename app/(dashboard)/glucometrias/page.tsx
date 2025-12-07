@@ -28,7 +28,7 @@ import {
 import { inferGlucometryType } from '@/app/lib/mappers/patient';
 import { type SupabaseAlert, type AlertChannel } from '@/app/lib/services/alerts';
 import { cn } from '@/app/lib/utils';
-import { format, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, parseISO } from 'date-fns';
+import { format, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, parseISO, endOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { CalendarIcon, Share2, TrendingUp, Activity, Loader2, Bell, Plus, Phone, MessageCircle, Trash2, Droplets } from 'lucide-react';
 
@@ -67,18 +67,32 @@ export default function GlucometriasPage() {
     }
   }, []);
 
-  // Fetch patient data from Supabase
-  const { data: currentPatient, isLoading, isPending, status } = usePatient(patientId);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [viewMode, setViewMode] = useState<ViewMode>('daily');
+
+  // Calculate daysBack based on view mode for efficient data loading
+  const daysBack = useMemo(() => {
+    switch (viewMode) {
+      case 'quarterly':
+        return 120; // ~4 months for quarterly view
+      case 'monthly':
+        return 60;  // ~2 months for monthly navigation
+      case 'weekly':
+      case 'daily':
+      default:
+        return 30;  // 1 month for daily/weekly
+    }
+  }, [viewMode]);
+
+  // Fetch patient data from Supabase with dynamic daysBack
+  const { data: currentPatient, isLoading, isPending, status } = usePatient(patientId, daysBack);
   const userName = currentPatient?.name ?? 'Cargando...';
   
-  console.log('[Glucometrias] Query state:', { patientId, isLoading, isPending, status, hasPatient: !!currentPatient });
+  console.log('[Glucometrias] Query state:', { patientId, daysBack, isLoading, isPending, status, hasPatient: !!currentPatient });
   
   // Determine if we're in a loading state
   const isPageLoading = patientId !== null && (isLoading || isPending);
 
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<ViewMode>('daily');
-  
   // State for selected slot - can be either TreatmentSlot or legacy type
   const [selectedSlot, setSelectedSlot] = useState<{
     treatmentSlot?: TreatmentSlot;
@@ -227,13 +241,27 @@ export default function GlucometriasPage() {
     }
   }, [viewMode, selectedDate]);
 
-  // Get records for the selected period
+  // Get records for the selected period - use patient data directly for better sync
   const periodRecords = useMemo(() => {
+    if (!currentPatient?.glucometrias) return [];
+    
+    const glucometrias = currentPatient.glucometrias;
+    
     if (viewMode === 'daily') {
-      return Array.from(getRecordsByDate(selectedDate).values());
+      return glucometrias.filter(g => isSameDay(parseISO(g.timestamp), selectedDate));
     }
-    return getRecordsInRange(startDate, endDate);
-  }, [viewMode, selectedDate, startDate, endDate, getRecordsByDate, getRecordsInRange]);
+    
+    // For weekly/monthly/quarterly, filter by date range
+    const startInterval = startOfWeek(startDate, { weekStartsOn: 1 });
+    const endInterval = endOfDay(endDate);
+    
+    return glucometrias
+      .filter(record => {
+        const recordDate = parseISO(record.timestamp);
+        return recordDate >= startInterval && recordDate <= endInterval;
+      })
+      .sort((a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime());
+  }, [currentPatient?.glucometrias, viewMode, selectedDate, startDate, endDate]);
 
   // Get records for selected date (for daily view) - legacy format
   const dayRecords = useMemo(() => {

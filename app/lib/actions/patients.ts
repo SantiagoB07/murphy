@@ -31,9 +31,11 @@ export async function fetchAllPatients(): Promise<Patient[]> {
 
 /**
  * Obtiene un paciente por ID con todos sus datos
+ * @param patientId - ID del paciente
+ * @param daysBack - Días hacia atrás para obtener datos históricos (default: 30)
  */
-export async function fetchPatientWithData(patientId: string): Promise<Patient | null> {
-  return getPatientWithData(patientId)
+export async function fetchPatientWithData(patientId: string, daysBack: number = 30): Promise<Patient | null> {
+  return getPatientWithData(patientId, daysBack)
 }
 
 /**
