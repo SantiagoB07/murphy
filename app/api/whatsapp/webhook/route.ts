@@ -1,5 +1,8 @@
-import { generateText } from 'ai'
+import { generateText, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
+import { createMurphyTools } from '@/app/lib/tools'
+import { getPatientByPhone } from '@/app/lib/services/patient'
+import { saveMessage, getMessageHistory } from '@/app/lib/services/messages'
 
 export const runtime = "edge";
 
@@ -39,6 +42,24 @@ async function sendWhatsAppMessage(to: string, body: string) {
   }
 }
 
+const SYSTEM_PROMPT = `Eres Murphy, un asistente amable para pacientes con diabetes.
+
+Tienes las siguientes herramientas disponibles:
+- save_glucometry: Para registrar niveles de glucosa/azúcar
+- update_glucometry: Para corregir el último registro de glucosa
+- save_insulin: Para registrar dosis de insulina
+- update_insulin: Para corregir la última dosis de insulina
+- save_sleep: Para registrar horas de sueño
+- update_sleep: Para corregir las horas de sueño
+- save_symptom: Para registrar síntomas (estrés/ansiedad o mareos)
+- update_symptom: Para corregir un síntoma registrado
+
+Instrucciones:
+- Cuando el usuario mencione datos de salud, usa la herramienta correspondiente para registrarlos
+- Responde de forma breve y concisa en español
+- Sé amable y motivador
+- Si el usuario quiere corregir algo, usa las herramientas de update`;
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
@@ -75,20 +96,74 @@ export async function POST(request: Request) {
 
     console.log(`Message from ${from}: ${text}`);
 
-    // Generar respuesta con AI SDK
-    const { text: aiResponse } = await generateText({
+    // 1. Buscar paciente por teléfono
+    const patient = await getPatientByPhone(from);
+
+    if (!patient) {
+      console.log(`Patient not found for phone: ${from}`);
+      await sendWhatsAppMessage(from, "No te reconozco. Contacta a tu médico para registrarte.");
+      return Response.json({ success: true, message: "Unknown patient" });
+    }
+
+    console.log(`Patient found: ${patient.name} (${patient.id})`);
+
+    // 2. Obtener historial de mensajes (últimos 10)
+    const history = await getMessageHistory(patient.id, 10);
+    console.log(`Message history: ${history.length} messages`);
+
+    // Convertir historial a formato de mensajes para AI SDK
+    const previousMessages = history.flatMap(msg => [
+      { role: 'user' as const, content: msg.user_message },
+      { role: 'assistant' as const, content: msg.bot_response },
+    ]);
+
+    // 3. Crear tools para el paciente
+    const tools = createMurphyTools(patient.id);
+
+    // 4. Generar respuesta con AI SDK + Tools
+    const { text: aiResponse, steps } = await generateText({
       model: openai('gpt-4o-mini'),
-      system: 'Eres Murphy, un asistente amable para pacientes con diabetes. Responde de forma breve y concisa en español.',
-      prompt: text,
+      system: SYSTEM_PROMPT,
+      tools,
+      stopWhen: stepCountIs(3),
+      messages: [
+        ...previousMessages,
+        { role: 'user', content: text },
+      ],
     });
 
+    // 5. Extraer tool calls de los steps
+    const toolCalls = steps.flatMap(step => 
+      (step.toolCalls || []).map(tc => ({
+        toolName: tc.toolName,
+        args: tc.input as Record<string, unknown>,
+      }))
+    );
+
+    console.log(`AI Response: ${aiResponse}`);
+    if (toolCalls.length > 0) {
+      console.log(`Tool calls: ${JSON.stringify(toolCalls)}`);
+    }
+
+    // 6. Guardar mensaje en la base de datos
+    await saveMessage({
+      patientId: patient.id,
+      userMessage: text,
+      botResponse: aiResponse,
+      toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+      source: 'whatsapp',
+    });
+
+    // 7. Enviar respuesta
     await sendWhatsAppMessage(from, aiResponse);
 
     return Response.json({ 
       success: true,
       from,
+      patient: patient.name,
       message_received: text,
-      response_sent: aiResponse
+      response_sent: aiResponse,
+      tool_calls: toolCalls,
     });
 
   } catch (error) {
@@ -103,5 +178,5 @@ export async function POST(request: Request) {
 
 // Kapso puede enviar GET para verificar el webhook
 export async function GET() {
-  return Response.json({ status: "ok", message: "Echo server is active" });
+  return Response.json({ status: "ok", message: "Murphy WhatsApp bot is active" });
 }
