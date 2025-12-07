@@ -1,43 +1,33 @@
-import { supabase } from "@/app/lib/supabase";
+import { updateSleep } from "@/app/lib/tools/sleep";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const { patient_id, hours } = await request.json();
+  try {
+    const body = await request.json();
 
-  // 1. Find the most recent sleep record
-  const { data: latest, error: findError } = await supabase
-    .from("sleep_logs")
-    .select("id, hours")
-    .eq("patient_id", patient_id)
-    .order("date", { ascending: false })
-    .limit(1)
-    .single();
+    console.log("=== BODY RECIBIDO (update-sleep) ===");
+    console.log(JSON.stringify(body, null, 2));
 
-  if (findError || !latest) {
-    return Response.json({
-      success: false,
-      message: "No hay registros de sueño para actualizar",
-    });
+    const patient_id = body.patient_id || body.sleep_data?.patient_id;
+    const hours = body.hours || body.sleep_data?.hours;
+
+    if (!patient_id || !hours) {
+      return Response.json(
+        { error: "patient_id y hours son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
+    const result = await updateSleep(patient_id, parseFloat(hours), false);
+
+    return Response.json(result);
+  } catch (error) {
+    console.error("Error en update-sleep:", error);
+    return Response.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
-
-  const oldHours = latest.hours;
-
-  // 2. Update the record
-  const { error: updateError } = await supabase
-    .from("sleep_logs")
-    .update({ hours })
-    .eq("id", latest.id);
-
-  if (updateError) {
-    return Response.json({
-      success: false,
-      message: "Error al actualizar las horas de sueño",
-    });
-  }
-
-  return Response.json({
-    success: true,
-    message: `Horas de sueño actualizadas de ${oldHours} a ${hours} horas`,
-  });
 }

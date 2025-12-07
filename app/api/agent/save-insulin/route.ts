@@ -1,53 +1,31 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/app/lib/supabase";
+import { saveInsulin } from "@/app/lib/tools/insulin";
 
 export const runtime = "edge";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    console.log("=== BODY RECIBIDO (insulin) ===");
+    console.log("=== BODY RECIBIDO (save-insulin) ===");
     console.log(JSON.stringify(body, null, 2));
 
-    // ElevenLabs puede enviar los datos anidados en diferentes estructuras
     const patient_id = body.patient_id || body.insulin_data?.patient_id;
     const dose = body.dose || body.insulin_data?.dose;
 
     if (!patient_id || !dose) {
-      return NextResponse.json(
+      return Response.json(
         { error: "patient_id y dose son requeridos" },
         { status: 400 }
       );
     }
 
-    // Guardar dosis de insulina en Supabase (sin await - respuesta inmediata)
-    supabase
-      .from("insulin_doses")
-      .insert({
-        patient_id,
-        dose: parseFloat(dose),
-        unit: "units",
-        scheduled_time: new Date().toTimeString().split(" ")[0],
-        administered_at: new Date().toISOString(),
-        source: "call",
-      })
-      .then(({ error }) => {
-        if (error) {
-          console.error("Error guardando insulina:", error);
-        } else {
-          console.log("Insulina guardada exitosamente");
-        }
-      });
+    // Fire-and-forget para llamadas (awaitResponse = false)
+    const result = await saveInsulin(patient_id, parseFloat(dose), "call", false);
 
-    // Respuesta inmediata para el agente de ElevenLabs
-    return NextResponse.json({
-      success: true,
-      message: `Perfecto, registré tu dosis de ${dose} unidades de insulina`,
-    });
+    return Response.json(result);
   } catch (error) {
     console.error("Error en save-insulin:", error);
-    return NextResponse.json(
+    return Response.json(
       { error: "Error interno del servidor" },
       { status: 500 }
     );

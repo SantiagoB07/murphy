@@ -1,7 +1,7 @@
 import { generateText, stepCountIs } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { createMurphyTools } from '@/app/lib/tools'
-import { getPatientByPhone } from '@/app/lib/services/patient'
+import { getPatientByPhone, getPatientContext, PatientContext } from '@/app/lib/services/patient'
 import { saveMessage, getMessageHistory } from '@/app/lib/services/messages'
 
 export const runtime = "edge";
@@ -42,7 +42,7 @@ async function sendWhatsAppMessage(to: string, body: string) {
   }
 }
 
-const SYSTEM_PROMPT = `Eres Murphy, un asistente amable para pacientes con diabetes.
+const BASE_SYSTEM_PROMPT = `Eres Murphy, un asistente amable para pacientes con diabetes.
 
 Tienes las siguientes herramientas disponibles:
 - save_glucometry: Para registrar niveles de glucosa/azúcar
@@ -58,7 +58,23 @@ Instrucciones:
 - Cuando el usuario mencione datos de salud, usa la herramienta correspondiente para registrarlos
 - Responde de forma breve y concisa en español
 - Sé amable y motivador
-- Si el usuario quiere corregir algo, usa las herramientas de update`;
+- Si el usuario quiere corregir algo, usa las herramientas de update
+- Usa la información del paciente de la base de datos para personalizar tus respuestas`;
+
+function buildSystemPrompt(context: PatientContext): string {
+  return `${BASE_SYSTEM_PROMPT}
+
+=== INFORMACIÓN DEL PACIENTE (Base de datos) ===
+Nombre: ${context.name}
+Edad: ${context.age}
+Tipo de diabetes: ${context.diabetesType}
+Año de diagnóstico: ${context.diagnosisYear}
+
+=== REGISTROS RECIENTES ===
+Glucometrías: ${context.recentGlucometries}
+Horas de sueño: ${context.recentSleep}
+Dosis de insulina: ${context.recentInsulin}`;
+}
 
 export async function POST(request: Request) {
   try {
@@ -107,7 +123,11 @@ export async function POST(request: Request) {
 
     console.log(`Patient found: ${patient.name} (${patient.id})`);
 
-    // 2. Obtener historial de mensajes (últimos 10)
+    // 2. Obtener contexto del paciente (info + métricas recientes)
+    const context = await getPatientContext(patient);
+    console.log(`Patient context loaded`);
+
+    // 3. Obtener historial de mensajes (últimos 10)
     const history = await getMessageHistory(patient.id, 10);
     console.log(`Message history: ${history.length} messages`);
 
@@ -117,13 +137,13 @@ export async function POST(request: Request) {
       { role: 'assistant' as const, content: msg.bot_response },
     ]);
 
-    // 3. Crear tools para el paciente
+    // 4. Crear tools para el paciente
     const tools = createMurphyTools(patient.id);
 
-    // 4. Generar respuesta con AI SDK + Tools
+    // 5. Generar respuesta con AI SDK + Tools
     const { text: aiResponse, steps } = await generateText({
       model: openai('gpt-4o-mini'),
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(context),
       tools,
       stopWhen: stepCountIs(3),
       messages: [
@@ -132,7 +152,7 @@ export async function POST(request: Request) {
       ],
     });
 
-    // 5. Extraer tool calls de los steps
+    // 6. Extraer tool calls de los steps
     const toolCalls = steps.flatMap(step => 
       (step.toolCalls || []).map(tc => ({
         toolName: tc.toolName,
@@ -145,7 +165,7 @@ export async function POST(request: Request) {
       console.log(`Tool calls: ${JSON.stringify(toolCalls)}`);
     }
 
-    // 6. Guardar mensaje en la base de datos
+    // 7. Guardar mensaje en la base de datos
     await saveMessage({
       patientId: patient.id,
       userMessage: text,
@@ -154,7 +174,7 @@ export async function POST(request: Request) {
       source: 'whatsapp',
     });
 
-    // 7. Enviar respuesta
+    // 8. Enviar respuesta
     await sendWhatsAppMessage(from, aiResponse);
 
     return Response.json({ 

@@ -1,43 +1,33 @@
-import { supabase } from "@/app/lib/supabase";
+import { updateGlucometry } from "@/app/lib/tools/glucometry";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const { patient_id, value } = await request.json();
+  try {
+    const body = await request.json();
 
-  // 1. Find the most recent glucometry record
-  const { data: latest, error: findError } = await supabase
-    .from("glucometries")
-    .select("id, value")
-    .eq("patient_id", patient_id)
-    .order("measured_at", { ascending: false })
-    .limit(1)
-    .single();
+    console.log("=== BODY RECIBIDO (update-glucometry) ===");
+    console.log(JSON.stringify(body, null, 2));
 
-  if (findError || !latest) {
-    return Response.json({
-      success: false,
-      message: "No hay registros de glucosa para actualizar",
-    });
+    const patient_id = body.patient_id || body.glucometry_data?.patient_id;
+    const value = body.value || body.glucometry_data?.value;
+
+    if (!patient_id || !value) {
+      return Response.json(
+        { error: "patient_id y value son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
+    const result = await updateGlucometry(patient_id, parseFloat(value), false);
+
+    return Response.json(result);
+  } catch (error) {
+    console.error("Error en update-glucometry:", error);
+    return Response.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
-
-  const oldValue = latest.value;
-
-  // 2. Update the record
-  const { error: updateError } = await supabase
-    .from("glucometries")
-    .update({ value })
-    .eq("id", latest.id);
-
-  if (updateError) {
-    return Response.json({
-      success: false,
-      message: "Error al actualizar la glucosa",
-    });
-  }
-
-  return Response.json({
-    success: true,
-    message: `Glucosa actualizada de ${oldValue} a ${value} mg/dL`,
-  });
 }

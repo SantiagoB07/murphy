@@ -164,6 +164,8 @@ async function makeCall() {
     recent_glucometries: formatGlucometries(glucometries),
     recent_sleep: formatSleepLogs(sleepLogs),
     recent_insulin: formatInsulinDoses(insulinDoses),
+    is_reminder: "false",
+    alert_type: "",
   };
 
   console.log("👤 Paciente:", patient.name);

@@ -1,49 +1,33 @@
-import { supabase } from "@/app/lib/supabase";
+import { updateInsulin } from "@/app/lib/tools/insulin";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const { patient_id, dose, unit } = await request.json();
+  try {
+    const body = await request.json();
 
-  // 1. Find the most recent insulin record
-  const { data: latest, error: findError } = await supabase
-    .from("insulin_doses")
-    .select("id, dose, unit")
-    .eq("patient_id", patient_id)
-    .order("administered_at", { ascending: false })
-    .limit(1)
-    .single();
+    console.log("=== BODY RECIBIDO (update-insulin) ===");
+    console.log(JSON.stringify(body, null, 2));
 
-  if (findError || !latest) {
-    return Response.json({
-      success: false,
-      message: "No hay registros de insulina para actualizar",
-    });
+    const patient_id = body.patient_id || body.insulin_data?.patient_id;
+    const dose = body.dose || body.insulin_data?.dose;
+
+    if (!patient_id || !dose) {
+      return Response.json(
+        { error: "patient_id y dose son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
+    const result = await updateInsulin(patient_id, parseFloat(dose), false);
+
+    return Response.json(result);
+  } catch (error) {
+    console.error("Error en update-insulin:", error);
+    return Response.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
-
-  const oldDose = latest.dose;
-  const oldUnit = latest.unit || "UI";
-
-  // 2. Update the record
-  const updateData: { dose: number; unit?: string } = { dose };
-  if (unit) {
-    updateData.unit = unit;
-  }
-
-  const { error: updateError } = await supabase
-    .from("insulin_doses")
-    .update(updateData)
-    .eq("id", latest.id);
-
-  if (updateError) {
-    return Response.json({
-      success: false,
-      message: "Error al actualizar la dosis de insulina",
-    });
-  }
-
-  return Response.json({
-    success: true,
-    message: `Insulina actualizada de ${oldDose} ${oldUnit} a ${dose} ${unit || oldUnit}`,
-  });
 }

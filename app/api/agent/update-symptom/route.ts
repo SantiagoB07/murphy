@@ -1,58 +1,47 @@
-import { supabase } from "@/app/lib/supabase";
+import { updateSymptom, isValidSymptomType, type SymptomType } from "@/app/lib/tools/symptom";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const { patient_id, symptom_type, value } = await request.json();
+  try {
+    const body = await request.json();
 
-  // Validate symptom_type
-  const validSymptoms = ["stress", "dizziness"];
-  if (!validSymptoms.includes(symptom_type)) {
-    return Response.json({
-      success: false,
-      message: `Tipo de síntoma no válido. Usa: ${validSymptoms.join(", ")}`,
-    });
+    console.log("=== BODY RECIBIDO (update-symptom) ===");
+    console.log(JSON.stringify(body, null, 2));
+
+    const patient_id = body.patient_id || body.symptom_data?.patient_id;
+    const symptom_type = body.symptom_type || body.symptom_data?.symptom_type;
+    const value = body.value ?? body.symptom_data?.value;
+
+    if (!patient_id || !symptom_type || value === undefined) {
+      return Response.json(
+        { error: "patient_id, symptom_type y value son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Validar symptom_type
+    if (!isValidSymptomType(symptom_type)) {
+      return Response.json({
+        success: false,
+        message: `Tipo de síntoma no válido. Usa: stress, dizziness`,
+      });
+    }
+
+    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
+    const result = await updateSymptom(
+      patient_id,
+      symptom_type as SymptomType,
+      Boolean(value),
+      false
+    );
+
+    return Response.json(result);
+  } catch (error) {
+    console.error("Error en update-symptom:", error);
+    return Response.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
-
-  // 1. Find the most recent symptom record of this type
-  const { data: latest, error: findError } = await supabase
-    .from("symptom_logs")
-    .select("id, value")
-    .eq("patient_id", patient_id)
-    .eq("symptom_type", symptom_type)
-    .order("date", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (findError || !latest) {
-    const symptomName = symptom_type === "stress" ? "estrés/ansiedad" : "mareos";
-    return Response.json({
-      success: false,
-      message: `No hay registros de ${symptomName} para actualizar`,
-    });
-  }
-
-  const oldValue = latest.value;
-
-  // 2. Update the record
-  const { error: updateError } = await supabase
-    .from("symptom_logs")
-    .update({ value })
-    .eq("id", latest.id);
-
-  if (updateError) {
-    return Response.json({
-      success: false,
-      message: "Error al actualizar el síntoma",
-    });
-  }
-
-  const symptomName = symptom_type === "stress" ? "estrés/ansiedad" : "mareos";
-  const oldText = oldValue ? "sí" : "no";
-  const newText = value ? "sí" : "no";
-
-  return Response.json({
-    success: true,
-    message: `${symptomName} actualizado de ${oldText} a ${newText}`,
-  });
 }
