@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
-    const result = await updateSleep(patient_id, parseFloat(hours), false);
+    // Await response to ensure data is saved in Edge Runtime
+    const result = await updateSleep(patient_id, parseFloat(hours), true);
 
     return Response.json(result);
   } catch (error) {

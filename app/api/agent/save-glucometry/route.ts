@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget para llamadas (awaitResponse = false)
-    const result = await saveGlucometry(patient_id, parseFloat(value), "call", false);
+    const result = await saveGlucometry(patient_id, parseFloat(value), "call", true);
 
     return Response.json(result);
   } catch (error) {

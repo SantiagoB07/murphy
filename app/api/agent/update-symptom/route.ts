@@ -28,12 +28,12 @@ export async function POST(request: Request) {
       });
     }
 
-    // Update necesita await para obtener el registro previo, pero el update es fire-and-forget
+    // Await response to ensure data is saved in Edge Runtime
     const result = await updateSymptom(
       patient_id,
       symptom_type as SymptomType,
       Boolean(value),
-      false
+      true
     );
 
     return Response.json(result);

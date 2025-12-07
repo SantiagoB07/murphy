@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget para llamadas (awaitResponse = false)
-    const result = await saveSleep(patient_id, parseFloat(hours), "call", false);
+    const result = await saveSleep(patient_id, parseFloat(hours), "call", true);
 
     return Response.json(result);
   } catch (error) {

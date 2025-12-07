@@ -28,13 +28,13 @@ export async function POST(request: Request) {
       });
     }
 
-    // Fire-and-forget para llamadas (awaitResponse = false)
+    // Await response to ensure data is saved in Edge Runtime
     const result = await saveSymptom(
       patient_id,
       symptom_type as SymptomType,
       Boolean(value),
       "call",
-      false
+      true
     );
 
     return Response.json(result);

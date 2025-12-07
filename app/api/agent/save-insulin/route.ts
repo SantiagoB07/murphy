@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     // Fire-and-forget para llamadas (awaitResponse = false)
-    const result = await saveInsulin(patient_id, parseFloat(dose), "call", false);
+    const result = await saveInsulin(patient_id, parseFloat(dose), "call", true);
 
     return Response.json(result);
   } catch (error) {
