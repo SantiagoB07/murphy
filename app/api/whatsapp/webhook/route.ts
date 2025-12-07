@@ -117,7 +117,11 @@ export async function POST(request: Request) {
 
     if (!patient) {
       console.log(`Patient not found for phone: ${from}`);
-      await sendWhatsAppMessage(from, "No te reconozco. Contacta a tu médico para registrarte.");
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://murphy.vercel.app";
+      await sendWhatsAppMessage(
+        from, 
+        `¡Hola! Soy Murphy, tu asistente de salud. Aún no estás registrado.\n\nRegístrate aquí para comenzar:\n${appUrl}`
+      );
       return Response.json({ success: true, message: "Unknown patient" });
     }
 
@@ -142,7 +146,7 @@ export async function POST(request: Request) {
 
     // 5. Generar respuesta con AI SDK + Tools
     const { text: aiResponse, steps } = await generateText({
-      model: openai('gpt-4o-mini'),
+      model: openai('gpt-5.1'),
       system: buildSystemPrompt(context),
       tools,
       stopWhen: stepCountIs(3),

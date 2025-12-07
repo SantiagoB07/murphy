@@ -10,7 +10,7 @@ export const VIEW_MODE_LABELS: Record<ViewMode, string> = {
   quarterly: 'Trimestral',
 };
 
-export type DiabetesType = 'Tipo 1' | 'Tipo 2' | 'Gestacional' | 'LADA' | 'MODY';
+export type DiabetesType = 'Tipo 1' | 'Tipo 2' | 'Gestacional';
 
 // Expanded GlucometryType with mealtime-specific types + legacy support
 export type GlucometryType = 
@@ -164,8 +164,12 @@ export function getTimeSlotLabel(scheduledTime: string): string {
 export interface Patient {
   id: string;
   name: string;
+  phone: string;
   age: number;
+  sex: string | null;
   diabetesType: DiabetesType;
+  diagnosisYear: number | null;
+  residence: string | null;
   estrato: number;
   avatar: string | null;
   telegramConnected: boolean;

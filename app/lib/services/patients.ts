@@ -25,8 +25,24 @@ export interface CreatePatientInput {
   name: string
   phone: string
   age?: number | null
+  sex?: string | null
   diabetes_type?: string | null
   diagnosis_year?: number | null
+  residence?: string | null
+  socioeconomic_level?: number | null
+  timezone?: string | null
+}
+
+export interface UpdatePatientInput {
+  name?: string
+  phone?: string
+  age?: number | null
+  sex?: string | null
+  diabetes_type?: string | null
+  diagnosis_year?: number | null
+  residence?: string | null
+  socioeconomic_level?: number | null
+  timezone?: string | null
 }
 
 // ============================================
@@ -43,10 +59,14 @@ export async function createPatient(input: CreatePatientInput): Promise<Supabase
       name: input.name,
       phone: input.phone,
       age: input.age ?? null,
+      sex: input.sex ?? null,
       diabetes_type: input.diabetes_type ?? null,
       diagnosis_year: input.diagnosis_year ?? null,
+      residence: input.residence ?? null,
+      socioeconomic_level: input.socioeconomic_level ?? null,
+      timezone: input.timezone ?? 'America/Bogota',
     })
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone')
     .single()
 
   if (error) {
@@ -76,12 +96,44 @@ export async function deletePatient(patientId: string): Promise<boolean> {
 }
 
 /**
+ * Actualiza un paciente existente
+ */
+export async function updatePatient(patientId: string, input: UpdatePatientInput): Promise<SupabasePatient | null> {
+  // Build update object only with defined values
+  const updateData: Record<string, unknown> = {}
+  
+  if (input.name !== undefined) updateData.name = input.name
+  if (input.phone !== undefined) updateData.phone = input.phone
+  if (input.age !== undefined) updateData.age = input.age
+  if (input.sex !== undefined) updateData.sex = input.sex
+  if (input.diabetes_type !== undefined) updateData.diabetes_type = input.diabetes_type
+  if (input.diagnosis_year !== undefined) updateData.diagnosis_year = input.diagnosis_year
+  if (input.residence !== undefined) updateData.residence = input.residence
+  if (input.socioeconomic_level !== undefined) updateData.socioeconomic_level = input.socioeconomic_level
+  if (input.timezone !== undefined) updateData.timezone = input.timezone
+
+  const { data, error } = await supabase
+    .from('patients')
+    .update(updateData)
+    .eq('id', patientId)
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
+    .single()
+
+  if (error) {
+    console.error('[SERVICE] Error updating patient:', error)
+    return null
+  }
+
+  return data as SupabasePatient
+}
+
+/**
  * Obtiene un paciente por teléfono
  */
 export async function getPatientByPhone(phone: string): Promise<SupabasePatient | null> {
   const { data, error } = await supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .eq('phone', phone)
     .single()
 
@@ -101,7 +153,7 @@ export async function getPatientByPhone(phone: string): Promise<SupabasePatient 
 export async function getPatientById(patientId: string): Promise<SupabasePatient | null> {
   const { data, error } = await supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .eq('id', patientId)
     .single()
 
@@ -121,7 +173,7 @@ export async function getPatientById(patientId: string): Promise<SupabasePatient
 export async function getFirstPatient(): Promise<SupabasePatient | null> {
   const { data, error } = await supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .order('name')
     .limit(1)
     .single()
@@ -142,7 +194,7 @@ export async function getFirstPatient(): Promise<SupabasePatient | null> {
 export async function getAllPatients(): Promise<Patient[]> {
   const { data, error } = await supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .order('name')
 
   if (error) {
@@ -160,7 +212,7 @@ export async function getPatientWithData(patientId: string): Promise<Patient | n
   // Fetch patient
   const { data: patient, error: patientError } = await supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .eq('id', patientId)
     .single()
 
@@ -200,7 +252,7 @@ export async function getPatientsWithData(patientIds?: string[]): Promise<Patien
   // Fetch patients
   let query = supabase
     .from('patients')
-    .select('id, name, phone, age, diabetes_type, diagnosis_year')
+    .select('id, name, phone, age, sex, diabetes_type, diagnosis_year, residence, socioeconomic_level, timezone, telegram_id, doctor_id, created_at')
     .order('name')
 
   if (patientIds && patientIds.length > 0) {

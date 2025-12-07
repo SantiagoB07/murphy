@@ -1,10 +1,7 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -29,59 +26,109 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/app/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/app/components/ui/popover';
-import { Calendar } from '@/app/components/ui/calendar';
 import { useToast } from '@/app/hooks/use-toast';
-import { cn } from '@/app/lib/utils';
-import { DiabetesType } from '@/app/types/diabetes';
+import { updatePatient } from '@/app/lib/actions/patients';
+import type { Patient } from '@/app/types/diabetes';
 
-const formSchema = z.object({
-  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Ingresa un email válido'),
-  phone: z.string().optional(),
-  birthDate: z.date({ error: 'Selecciona tu fecha de nacimiento' }),
-  diabetesType: z.enum(['Tipo 1', 'Tipo 2', 'Gestacional', 'LADA', 'MODY'] as const),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+// Form input types
+interface PersonalDataFormInput {
+  name: string;
+  phone: string;
+  age: string;
+  sex: '' | 'M' | 'F';
+  diabetesType: '' | 'Tipo 1' | 'Tipo 2' | 'Gestacional';
+  diagnosisYear: string;
+  residence: string;
+  socioeconomicLevel: string;
+}
 
 interface PersonalDataSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  patient: Patient;
+  onSave?: () => void;
 }
 
-const DIABETES_TYPES: DiabetesType[] = ['Tipo 1', 'Tipo 2', 'Gestacional', 'LADA', 'MODY'];
-
-export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps) {
+export function PersonalDataSheet({ open, onOpenChange, patient, onSave }: PersonalDataSheetProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  // Extract phone without +57 prefix for display
+  const getPhoneWithoutPrefix = (phone: string) => {
+    if (phone.startsWith('+57')) {
+      return phone.slice(3);
+    }
+    return phone;
+  };
+
+  const form = useForm<PersonalDataFormInput>({
     defaultValues: {
-      name: 'Carlos García',
-      email: 'carlos.garcia@email.com',
-      phone: '+52 555 123 4567',
-      birthDate: new Date('1985-06-15'),
-      diabetesType: 'Tipo 2',
+      name: '',
+      phone: '',
+      age: '',
+      sex: '',
+      diabetesType: '',
+      diagnosisYear: '',
+      residence: '',
+      socioeconomicLevel: '',
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  // Reset form when patient changes or sheet opens
+  useEffect(() => {
+    if (open && patient) {
+      form.reset({
+        name: patient.name || '',
+        phone: getPhoneWithoutPrefix(patient.phone || ''),
+        age: patient.age ? patient.age.toString() : '',
+        sex: (patient.sex as '' | 'M' | 'F') || '',
+        diabetesType: patient.diabetesType || '',
+        diagnosisYear: patient.diagnosisYear?.toString() || '',
+        residence: patient.residence || '',
+        socioeconomicLevel: patient.estrato ? patient.estrato.toString() : '',
+      });
+    }
+  }, [open, patient, form]);
+
+  const onSubmit = async (data: PersonalDataFormInput) => {
     setIsSubmitting(true);
-    // Simular guardado
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsSubmitting(false);
-    
-    toast({
-      title: 'Datos actualizados',
-      description: 'Tus datos personales se han guardado correctamente.',
-    });
-    onOpenChange(false);
+
+    try {
+      const result = await updatePatient(patient.id, {
+        name: data.name,
+        phone: data.phone ? `+57${data.phone}` : undefined,
+        age: data.age ? parseInt(data.age, 10) : null,
+        sex: data.sex || null,
+        diabetes_type: data.diabetesType || null,
+        diagnosis_year: data.diagnosisYear ? parseInt(data.diagnosisYear, 10) : null,
+        residence: data.residence || null,
+        socioeconomic_level: data.socioeconomicLevel ? parseInt(data.socioeconomicLevel, 10) : null,
+      });
+
+      if (result) {
+        toast({
+          title: 'Datos actualizados',
+          description: 'Tus datos personales se han guardado correctamente.',
+        });
+        onSave?.();
+        onOpenChange(false);
+      } else {
+        toast({
+          title: 'Error',
+          description: 'No se pudieron guardar los cambios. Intenta de nuevo.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating patient:', error);
+      toast({
+        title: 'Error',
+        description: 'Ocurrió un error inesperado.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -96,109 +143,175 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+            {/* Nombre */}
             <FormField
               control={form.control}
               name="name"
+              rules={{ required: 'El nombre es requerido', minLength: { value: 2, message: 'Mínimo 2 caracteres' } }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre completo</FormLabel>
+                  <FormLabel>Nombre completo *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Tu nombre" {...field} />
+                    <Input placeholder="Ej: María García López" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="tu@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+            {/* Teléfono */}
             <FormField
               control={form.control}
               name="phone"
+              rules={{ 
+                required: 'El teléfono es requerido',
+                pattern: { value: /^\d{10}$/, message: 'Ingresa 10 dígitos' }
+              }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Teléfono (opcional)</FormLabel>
+                  <FormLabel>Teléfono WhatsApp *</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+52 555 000 0000" {...field} />
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+                        +57
+                      </span>
+                      <Input 
+                        placeholder="3001234567" 
+                        {...field}
+                        className="rounded-l-none"
+                        maxLength={10}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Edad */}
             <FormField
               control={form.control}
-              name="birthDate"
+              name="age"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de nacimiento</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP', { locale: es })
-                          ) : (
-                            <span>Seleccionar fecha</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem>
+                  <FormLabel>Edad</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="Ej: 45" 
+                      {...field}
+                      min={1}
+                      max={120}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Sexo */}
+            <FormField
+              control={form.control}
+              name="sex"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sexo</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="M">Masculino</SelectItem>
+                      <SelectItem value="F">Femenino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Tipo de Diabetes */}
             <FormField
               control={form.control}
               name="diabetesType"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tipo de diabetes</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el tipo" />
+                        <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {DIABETES_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="Tipo 1">Tipo 1</SelectItem>
+                      <SelectItem value="Tipo 2">Tipo 2</SelectItem>
+                      <SelectItem value="Gestacional">Gestacional</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Año de Diagnóstico */}
+            <FormField
+              control={form.control}
+              name="diagnosisYear"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Año de diagnóstico</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder={`Ej: ${new Date().getFullYear() - 5}`}
+                      {...field}
+                      min={1950}
+                      max={new Date().getFullYear()}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Ciudad de Residencia */}
+            <FormField
+              control={form.control}
+              name="residence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ciudad de residencia</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ej: Bogotá" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Estrato Socioeconómico */}
+            <FormField
+              control={form.control}
+              name="socioeconomicLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estrato socioeconómico</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1">Estrato 1</SelectItem>
+                      <SelectItem value="2">Estrato 2</SelectItem>
+                      <SelectItem value="3">Estrato 3</SelectItem>
+                      <SelectItem value="4">Estrato 4</SelectItem>
+                      <SelectItem value="5">Estrato 5</SelectItem>
+                      <SelectItem value="6">Estrato 6</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

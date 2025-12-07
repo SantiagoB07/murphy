@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Loader2 } from 'lucide-react';
+import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Loader2, Plus } from 'lucide-react';
 import { cn } from '@/app/lib/utils';
 import { UserRole, Patient } from '@/app/types/diabetes';
 import { getHomeRoute } from '@/app/lib/navigation';
 import { usePatients } from '@/app/hooks/usePatients';
+import { PatientRegistrationForm } from '@/app/components/forms/PatientRegistrationForm';
 
 interface RoleOption {
   role: UserRole;
@@ -20,6 +21,7 @@ export default function HomePage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   
   // Fetch patients from Supabase
   const { data: patients, isLoading: patientsLoading } = usePatients();
@@ -101,119 +103,140 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main id="main-content" className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          {/* Title */}
-          <h2 className="text-hig-3xl md:text-[clamp(2.5rem,5vw,4rem)] font-bold text-foreground mb-4 animate-fade-up leading-hig-tight">
-            Tu salud,{' '}
-            <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
-              bajo control
-            </span>
-          </h2>
-          
-          <p className="text-hig-lg md:text-hig-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-up stagger-1 leading-hig-normal">
-            Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp 
-            y análisis personalizado.
-          </p>
-
-          {/* Features */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-up stagger-2" role="list" aria-label="Características">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
-              <Zap className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-warning" aria-hidden="true" />
-              <span className="text-hig-sm text-muted-foreground">Tiempo real</span>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
-              <Shield className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-success" aria-hidden="true" />
-              <span className="text-hig-sm text-muted-foreground">Datos seguros</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Role Selection */}
-        <div className="w-full max-w-4xl mx-auto animate-fade-up stagger-3">
-          <p className="text-center text-muted-foreground mb-6 text-hig-base" id="role-selection-label">
-            Selecciona tu rol para continuar
-          </p>
-          
-          <div 
-            className="grid md:grid-cols-3 gap-4 mb-8"
-            role="radiogroup"
-            aria-labelledby="role-selection-label"
-          >
-            {roles.map(({ role, label, description, icon: Icon, color }) => (
-              <button
-                key={role}
-                role="radio"
-                aria-checked={selectedRole === role}
-                tabIndex={0}
-                onClick={() => setSelectedRole(role)}
-                onKeyDown={(e) => handleKeyDown(e, role)}
-                className={cn(
-                  "glass-card p-6 text-left",
-                  "transition-all duration-hig-fast ease-hig-out",
-                  "hover:shadow-elevation-2 focus-ring press-feedback",
-                  selectedRole === role && "ring-2 ring-primary elevation-2"
-                )}
-              >
-                <div className={cn(
-                  "w-14 h-14 rounded-hig-lg flex items-center justify-center mb-4",
-                  "bg-gradient-to-br elevation-1",
-                  color
-                )}>
-                  <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
-                </div>
-                <h3 className="font-semibold text-hig-lg text-foreground mb-2 leading-hig-tight">{label}</h3>
-                <p className="text-hig-sm text-muted-foreground leading-hig-normal">{description}</p>
-              </button>
-            ))}
-          </div>
-
-          {/* Patient Selection - only show for patient/coadmin roles */}
-          {selectedRole && selectedRole !== 'doctor' && (
-            <div className="mb-8 animate-fade-up">
-              <p className="text-center text-muted-foreground mb-4 text-hig-base">
-                Selecciona tu perfil de paciente
+        {showRegistrationForm ? (
+          /* Registration Form */
+          <PatientRegistrationForm onBack={() => setShowRegistrationForm(false)} />
+        ) : (
+          /* Role Selection View */
+          <>
+            <div className="max-w-4xl mx-auto text-center mb-12">
+              {/* Title */}
+              <h2 className="text-hig-3xl md:text-[clamp(2.5rem,5vw,4rem)] font-bold text-foreground mb-4 animate-fade-up leading-hig-tight">
+                Tu salud,{' '}
+                <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
+                  bajo control
+                </span>
+              </h2>
+              
+              <p className="text-hig-lg md:text-hig-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-up stagger-1 leading-hig-normal">
+                Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp 
+                y análisis personalizado.
               </p>
-              {patientsLoading ? (
-                <div className="flex justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : (
-                <div className="flex flex-wrap justify-center gap-3">
-                  {patients?.map((patient) => (
-                    <button
-                      key={patient.id}
-                      onClick={() => setSelectedPatientId(patient.id)}
-                      className={cn(
-                        "px-4 py-2 rounded-hig border transition-all",
-                        selectedPatientId === patient.id
-                          ? "border-primary bg-primary/20 text-foreground"
-                          : "border-border/50 bg-secondary/30 text-muted-foreground hover:bg-secondary/50"
-                      )}
-                    >
-                      {patient.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Continue Button */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleContinue}
-              disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
-              aria-disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
-              className={cn(
-                "btn-neon flex items-center gap-2 px-8 py-4 text-hig-lg focus-ring",
-                (!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)) && "opacity-50 cursor-not-allowed pointer-events-none"
+              {/* Features */}
+              <div className="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-up stagger-2" role="list" aria-label="Características">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
+                  <Zap className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-warning" aria-hidden="true" />
+                  <span className="text-hig-sm text-muted-foreground">Tiempo real</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
+                  <Shield className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-success" aria-hidden="true" />
+                  <span className="text-hig-sm text-muted-foreground">Datos seguros</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Role Selection */}
+            <div className="w-full max-w-4xl mx-auto animate-fade-up stagger-3">
+              <p className="text-center text-muted-foreground mb-6 text-hig-base" id="role-selection-label">
+                Selecciona tu rol para continuar
+              </p>
+              
+              <div 
+                className="grid md:grid-cols-3 gap-4 mb-8"
+                role="radiogroup"
+                aria-labelledby="role-selection-label"
+              >
+                {roles.map(({ role, label, description, icon: Icon, color }) => (
+                  <button
+                    key={role}
+                    role="radio"
+                    aria-checked={selectedRole === role}
+                    tabIndex={0}
+                    onClick={() => setSelectedRole(role)}
+                    onKeyDown={(e) => handleKeyDown(e, role)}
+                    className={cn(
+                      "glass-card p-6 text-left",
+                      "transition-all duration-hig-fast ease-hig-out",
+                      "hover:shadow-elevation-2 focus-ring press-feedback",
+                      selectedRole === role && "ring-2 ring-primary elevation-2"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-hig-lg flex items-center justify-center mb-4",
+                      "bg-gradient-to-br elevation-1",
+                      color
+                    )}>
+                      <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
+                    </div>
+                    <h3 className="font-semibold text-hig-lg text-foreground mb-2 leading-hig-tight">{label}</h3>
+                    <p className="text-hig-sm text-muted-foreground leading-hig-normal">{description}</p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Patient Selection - only show for patient/coadmin roles */}
+              {selectedRole && selectedRole !== 'doctor' && (
+                <div className="mb-8 animate-fade-up">
+                  <p className="text-center text-muted-foreground mb-4 text-hig-base">
+                    Selecciona tu perfil de paciente o regístrate
+                  </p>
+                  {patientsLoading ? (
+                    <div className="flex justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {patients?.map((patient) => (
+                        <button
+                          key={patient.id}
+                          onClick={() => setSelectedPatientId(patient.id)}
+                          className={cn(
+                            "px-4 py-2 rounded-hig border transition-all",
+                            selectedPatientId === patient.id
+                              ? "border-primary bg-primary/20 text-foreground"
+                              : "border-border/50 bg-secondary/30 text-muted-foreground hover:bg-secondary/50"
+                          )}
+                        >
+                          {patient.name}
+                        </button>
+                      ))}
+                      {/* New Patient Button */}
+                      {selectedRole === 'patient' && (
+                        <button
+                          onClick={() => setShowRegistrationForm(true)}
+                          className={cn(
+                            "px-4 py-2 rounded-hig border transition-all flex items-center gap-2",
+                            "border-dashed border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
+                          )}
+                        >
+                          <Plus className="w-4 h-4" />
+                          Nuevo paciente
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
-            >
-              Continuar
-              <ArrowRight className="w-[var(--icon-md)] h-[var(--icon-md)]" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
+
+              {/* Continue Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleContinue}
+                  disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
+                  aria-disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
+                  className={cn(
+                    "btn-neon flex items-center gap-2 px-8 py-4 text-hig-lg focus-ring",
+                    (!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)) && "opacity-50 cursor-not-allowed pointer-events-none"
+                  )}
+                >
+                  Continuar
+                  <ArrowRight className="w-[var(--icon-md)] h-[var(--icon-md)]" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       {/* Footer */}

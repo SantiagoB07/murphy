@@ -9,11 +9,14 @@ export interface Patient {
 }
 
 export async function getPatientByPhone(phone: string): Promise<Patient | null> {
-  // phone viene sin +, agregamos el + para buscar
+  // Kapso envía: 573012052395 (sin +)
+  // BD tiene: +573012052395 (con +)
+  const phoneWithPlus = phone.startsWith('+') ? phone : '+' + phone
+  
   const { data, error } = await supabase
     .from('patients')
     .select('id, name, age, diabetes_type, diagnosis_year')
-    .eq('phone', `+${phone}`)
+    .eq('phone', phoneWithPlus)
     .single()
 
   if (error) {

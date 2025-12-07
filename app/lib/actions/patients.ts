@@ -8,9 +8,19 @@
 import { 
   getAllPatients, 
   getPatientWithData, 
-  getPatientsWithData 
+  getPatientsWithData,
+  createPatient as createPatientService,
+  updatePatient as updatePatientService,
+  type CreatePatientInput,
+  type UpdatePatientInput,
 } from '@/app/lib/services/patients'
+import {
+  createCoadmin as createCoadminService,
+  type CreateCoadminInput,
+} from '@/app/lib/services/coadmins'
 import type { Patient } from '@/app/types/diabetes'
+import type { SupabasePatient } from '@/app/lib/mappers/patient'
+import type { SupabaseCoadmin } from '@/app/lib/services/coadmins'
 
 /**
  * Obtiene todos los pacientes (datos básicos)
@@ -31,4 +41,25 @@ export async function fetchPatientWithData(patientId: string): Promise<Patient |
  */
 export async function fetchPatientsWithData(patientIds?: string[]): Promise<Patient[]> {
   return getPatientsWithData(patientIds)
+}
+
+/**
+ * Crea un nuevo paciente
+ */
+export async function createPatient(input: CreatePatientInput): Promise<SupabasePatient | null> {
+  return createPatientService(input)
+}
+
+/**
+ * Crea un nuevo coadmin
+ */
+export async function createCoadmin(input: CreateCoadminInput): Promise<SupabaseCoadmin | null> {
+  return createCoadminService(input)
+}
+
+/**
+ * Actualiza un paciente existente
+ */
+export async function updatePatient(patientId: string, input: UpdatePatientInput): Promise<SupabasePatient | null> {
+  return updatePatientService(patientId, input)
 }

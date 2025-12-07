@@ -25,8 +25,15 @@ export interface SupabasePatient {
   name: string
   phone: string
   age: number | null
+  sex: string | null
   diabetes_type: string | null
   diagnosis_year: number | null
+  residence: string | null
+  socioeconomic_level: number | null
+  timezone: string | null
+  telegram_id: string | null
+  doctor_id: string | null
+  created_at?: string
 }
 
 export interface SupabaseGlucometry {
@@ -239,12 +246,15 @@ export function mapPatient(
   return {
     id: patient.id,
     name: patient.name,
+    phone: patient.phone,
     age: patient.age ?? 0,
+    sex: patient.sex ?? null,
     diabetesType: (patient.diabetes_type as Patient['diabetesType']) ?? 'Tipo 2',
-    // Campos que no existen en Supabase - valores por defecto
-    estrato: 3,
+    diagnosisYear: patient.diagnosis_year ?? null,
+    residence: patient.residence ?? null,
+    estrato: patient.socioeconomic_level ?? 3,
     avatar: null,
-    telegramConnected: false,
+    telegramConnected: !!patient.telegram_id,
     coadminId: null,
     // Datos relacionados mapeados
     glucometrias: glucometries.map(mapGlucometry),
@@ -264,11 +274,15 @@ export function mapPatientBasic(patient: SupabasePatient): Patient {
   return {
     id: patient.id,
     name: patient.name,
+    phone: patient.phone,
     age: patient.age ?? 0,
+    sex: patient.sex ?? null,
     diabetesType: (patient.diabetes_type as Patient['diabetesType']) ?? 'Tipo 2',
-    estrato: 3,
+    diagnosisYear: patient.diagnosis_year ?? null,
+    residence: patient.residence ?? null,
+    estrato: patient.socioeconomic_level ?? 3,
     avatar: null,
-    telegramConnected: false,
+    telegramConnected: !!patient.telegram_id,
     coadminId: null,
     glucometrias: [],
     insulina: [],

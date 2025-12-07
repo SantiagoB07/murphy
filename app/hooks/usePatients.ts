@@ -32,7 +32,8 @@ export function usePatient(patientId: string | null) {
     queryKey: ['patient', patientId],
     queryFn: () => patientId ? fetchPatientWithData(patientId) : null,
     enabled: !!patientId,
-    staleTime: 2 * 60 * 1000, // 2 minutos
+    staleTime: 30 * 1000, // 30 segundos
+    refetchInterval: 30 * 1000, // Refrescar cada 30 segundos
   })
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '@/app/components/dashboard/DashboardLayout';
 import { GlucoseSlotCard } from '@/app/components/glucose/GlucoseSlotCard';
 import { GlucoseTreatmentSlotCard } from '@/app/components/glucose/GlucoseTreatmentSlotCard';
+import { CreateAlertDialog } from '@/app/components/alerts/CreateAlertDialog';
 import { DailyLogInputDialog } from '@/app/components/daily-log/DailyLogInputDialog';
 import { ViewModeSelector } from '@/app/components/glucose/ViewModeSelector';
 import { WeeklyView } from '@/app/components/glucose/WeeklyView';
@@ -14,6 +15,7 @@ import { Calendar } from '@/app/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
 import { useGlucoseLog } from '@/app/hooks/useGlucoseLog';
 import { usePatient } from '@/app/hooks/usePatients';
+import { useQueryClient } from '@tanstack/react-query';
 import { 
   Glucometry, 
   GlucometryType, 
@@ -24,10 +26,11 @@ import {
   getTimeSlotIcon
 } from '@/app/types/diabetes';
 import { inferGlucometryType } from '@/app/lib/mappers/patient';
+import { type SupabaseAlert, type AlertChannel } from '@/app/lib/services/alerts';
 import { cn } from '@/app/lib/utils';
 import { format, isSameDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { CalendarIcon, Share2, TrendingUp, Activity, Loader2 } from 'lucide-react';
+import { CalendarIcon, Share2, TrendingUp, Activity, Loader2, Bell, Plus, Phone, MessageCircle, Trash2, Droplets } from 'lucide-react';
 
 // Helper to match a record to a treatment slot based on time window
 function recordMatchesSlot(record: Glucometry, slot: TreatmentSlot): boolean {
@@ -73,6 +76,96 @@ export default function GlucometriasPage() {
     record?: Glucometry;
   } | null>(null);
 
+  // State for alert dialog
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false);
+  
+  // State for alerts (loaded from Supabase)
+  const [alerts, setAlerts] = useState<SupabaseAlert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+
+  // State for editing a glucometry record
+  const [editingGlucometry, setEditingGlucometry] = useState<Glucometry | null>(null);
+  
+  // State for creating a new glucometry record
+  const [showCreateGlucometry, setShowCreateGlucometry] = useState(false);
+  
+  // Query client for refetching
+  const queryClient = useQueryClient();
+
+  // Load alerts when patient changes
+  useEffect(() => {
+    async function loadAlerts() {
+      if (!patientId) return;
+      
+      setAlertsLoading(true);
+      try {
+        const res = await fetch(`/api/alerts?patientId=${patientId}&alertType=glucometry`);
+        if (res.ok) {
+          const data = await res.json();
+          setAlerts(data.alerts ?? []);
+        } else {
+          console.error('Error loading alerts:', await res.text());
+        }
+      } catch (error) {
+        console.error('Error loading alerts:', error);
+      } finally {
+        setAlertsLoading(false);
+      }
+    }
+    
+    loadAlerts();
+  }, [patientId]);
+
+  // Reload alerts helper
+  const reloadAlerts = useCallback(async () => {
+    if (!patientId) return;
+    try {
+      const res = await fetch(`/api/alerts?patientId=${patientId}&alertType=glucometry`);
+      if (res.ok) {
+        const data = await res.json();
+        setAlerts(data.alerts ?? []);
+      }
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+    }
+  }, [patientId]);
+
+  // Handle create alert
+  const handleCreateAlert = useCallback(async (scheduledTime: string, channel: AlertChannel) => {
+    if (!patientId) return;
+
+    const res = await fetch('/api/alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patientId,
+        alertType: 'glucometry',
+        scheduledTime,
+        channel,
+      }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to create alert');
+    }
+
+    await reloadAlerts();
+  }, [patientId, reloadAlerts]);
+
+  // Handle delete alert
+  const handleDeleteAlert = useCallback(async (alertId: string) => {
+    const res = await fetch(`/api/alerts/${alertId}`, {
+      method: 'DELETE',
+    });
+
+    if (res.ok) {
+      await reloadAlerts();
+    } else {
+      console.error('Error deleting alert:', await res.text());
+    }
+  }, [reloadAlerts]);
+
   // Get glucose slots from treatment schedule
   const glucoseSlots = useMemo(() => {
     if (!currentPatient?.treatmentSchedule) return [];
@@ -92,6 +185,14 @@ export default function GlucometriasPage() {
     getRecordsByDate,
     getRecordsInRange 
   } = useGlucoseLog(currentPatient?.glucometrias ?? []);
+
+  // Get today's glucometries directly from patient data (refreshed every 30s)
+  const todayGlucometries = useMemo(() => {
+    if (!currentPatient?.glucometrias) return [];
+    return currentPatient.glucometrias
+      .filter(g => isSameDay(parseISO(g.timestamp), selectedDate))
+      .sort((a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime());
+  }, [currentPatient?.glucometrias, selectedDate]);
 
   // Calculate date range based on view mode
   const { startDate, endDate } = useMemo(() => {
@@ -198,6 +299,78 @@ export default function GlucometriasPage() {
       addRecord(glucometryType, value, notes);
     }
     setSelectedSlot(null);
+  };
+
+  // Handle editing a glucometry record
+  const handleEditGlucometry = async (value: number) => {
+    if (!editingGlucometry) return;
+
+    try {
+      const res = await fetch(`/api/glucometries/${editingGlucometry.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value }),
+      });
+
+      if (!res.ok) {
+        console.error('Error updating glucometry:', await res.text());
+        return;
+      }
+
+      // Refetch patient data to update the UI
+      await queryClient.invalidateQueries({ queryKey: ['patient', patientId] });
+    } catch (error) {
+      console.error('Error updating glucometry:', error);
+    } finally {
+      setEditingGlucometry(null);
+    }
+  };
+
+  // Handle deleting a glucometry record
+  const handleDeleteGlucometry = async (glucometryId: string) => {
+    try {
+      const res = await fetch(`/api/glucometries/${glucometryId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        console.error('Error deleting glucometry:', await res.text());
+        return;
+      }
+
+      // Refetch patient data to update the UI
+      await queryClient.invalidateQueries({ queryKey: ['patient', patientId] });
+    } catch (error) {
+      console.error('Error deleting glucometry:', error);
+    }
+  };
+
+  // Handle creating a new glucometry record
+  const handleCreateGlucometry = async (value: number) => {
+    if (!patientId) return;
+
+    try {
+      const res = await fetch('/api/glucometries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientId,
+          value,
+        }),
+      });
+
+      if (!res.ok) {
+        console.error('Error creating glucometry:', await res.text());
+        return;
+      }
+
+      // Refetch patient data to update the UI
+      await queryClient.invalidateQueries({ queryKey: ['patient', patientId] });
+    } catch (error) {
+      console.error('Error creating glucometry:', error);
+    } finally {
+      setShowCreateGlucometry(false);
+    }
   };
 
   // Loading state - AFTER all hooks have been called
@@ -323,57 +496,169 @@ export default function GlucometriasPage() {
             </div>
           )}
 
-          <section className="space-y-3">
-            <h2 className="text-hig-base font-semibold text-foreground mb-4">
-              Registros del día
-            </h2>
-            
-            {/* Use Treatment Slots if configured, otherwise fallback to MEAL_TIME_SLOTS */}
-            {useTreatmentSlots ? (
-              // Dynamic slots from treatment_schedule
-              glucoseSlots.map((slot, index) => (
-                <div 
-                  key={slot.id}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <GlucoseTreatmentSlotCard
-                    slot={slot}
-                    record={daySlotRecords.get(slot.id)}
-                    onClick={() => handleTreatmentSlotClick(slot)}
-                  />
-                </div>
-              ))
-            ) : (
-              // Fallback to fixed MEAL_TIME_SLOTS
-              MEAL_TIME_SLOTS.map((slot, index) => (
-                <div 
-                  key={slot.type}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <GlucoseSlotCard
-                    type={slot.type}
-                    record={dayRecords.get(slot.type)}
-                    iconName={slot.icon}
-                    onClick={() => handleLegacySlotClick(slot.type, dayRecords.get(slot.type))}
-                  />
-                </div>
-              ))
-            )}
+          {/* Alerts Section */}
+          <section className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-hig-base font-semibold text-foreground flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                Mis alertas
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreateAlertDialog(true)}
+                className="gap-1"
+              >
+                <Plus className="w-4 h-4" />
+                Agregar
+              </Button>
+            </div>
 
-            {dayRecords.size === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center mb-4">
-                  <Activity className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <p className="text-foreground font-medium">Sin registros este día</p>
-                <p className="text-hig-sm text-muted-foreground mt-1">
+            {alertsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : alerts.length === 0 ? (
+              <div className="text-center py-6 glass-card">
+                <Bell className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  No tienes alertas configuradas
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="glass-card p-3 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-hig bg-primary/20 flex items-center justify-center">
+                        <Bell className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {alert.scheduled_time.substring(0, 5)}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {alert.channel === 'whatsapp' ? (
+                            <>
+                              <MessageCircle className="w-3 h-3" />
+                              WhatsApp
+                            </>
+                          ) : (
+                            <>
+                              <Phone className="w-3 h-3" />
+                              Llamada
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDeleteAlert(alert.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Glucometries of the day */}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-hig-base font-semibold text-foreground flex items-center gap-2">
+                <Droplets className="w-4 h-4" />
+                Registros del día
+              </h2>
+              {isToday && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCreateGlucometry(true)}
+                  className="gap-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  Agregar
+                </Button>
+              )}
+            </div>
+            
+            {todayGlucometries.length === 0 ? (
+              <div className="text-center py-8 glass-card">
+                <Droplets className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">
                   {isToday 
-                    ? 'Toca cualquier momento para agregar un registro'
-                    : 'No hay registros para esta fecha'
+                    ? 'Aún no hay registros hoy'
+                    : 'Sin registros este día'
                   }
                 </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {todayGlucometries.map((glucometry) => {
+                  const value = glucometry.value;
+                  const isLow = value < 70;
+                  const isHigh = value > 180;
+                  const isNormal = !isLow && !isHigh;
+                  
+                  return (
+                    <div
+                      key={glucometry.id}
+                      className="glass-card p-3 flex items-center justify-between"
+                    >
+                      <button
+                        onClick={() => setEditingGlucometry(glucometry)}
+                        className="flex items-center gap-3 flex-1 text-left hover:opacity-80 transition-opacity"
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-hig flex items-center justify-center",
+                          isNormal && "bg-success/20",
+                          isLow && "bg-warning/20",
+                          isHigh && "bg-destructive/20"
+                        )}>
+                          <Droplets className={cn(
+                            "w-5 h-5",
+                            isNormal && "text-success",
+                            isLow && "text-warning",
+                            isHigh && "text-destructive"
+                          )} />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            {format(parseISO(glucometry.timestamp), 'HH:mm', { locale: es })}
+                          </p>
+                        </div>
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <span className={cn(
+                            "text-lg font-bold",
+                            isNormal && "text-success",
+                            isLow && "text-warning",
+                            isHigh && "text-destructive"
+                          )}>
+                            {value}
+                          </span>
+                          <span className="text-xs text-muted-foreground">mg/dL</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteGlucometry(glucometry.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>
@@ -418,6 +703,35 @@ export default function GlucometriasPage() {
           onSave={handleSaveRecord}
         />
       )}
+
+      {/* Create Alert Dialog */}
+      <CreateAlertDialog
+        open={showCreateAlertDialog}
+        onOpenChange={setShowCreateAlertDialog}
+        alertType="glucometry"
+        onSubmit={handleCreateAlert}
+      />
+
+      {/* Edit Glucometry Dialog */}
+      {editingGlucometry && (
+        <DailyLogInputDialog
+          open={!!editingGlucometry}
+          onOpenChange={(open) => !open && setEditingGlucometry(null)}
+          type="glucose"
+          glucometryType={editingGlucometry.type}
+          initialValue={editingGlucometry.value}
+          onSave={handleEditGlucometry}
+        />
+      )}
+
+      {/* Create Glucometry Dialog */}
+      <DailyLogInputDialog
+        open={showCreateGlucometry}
+        onOpenChange={setShowCreateGlucometry}
+        type="glucose"
+        glucometryType="random"
+        onSave={handleCreateGlucometry}
+      />
     </DashboardLayout>
   );
 }
