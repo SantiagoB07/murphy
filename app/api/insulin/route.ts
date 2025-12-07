@@ -4,6 +4,8 @@ import { supabase } from '@/app/lib/supabase'
 interface CreateInsulinRequest {
   patientId: string
   dose: number
+  time?: string // Optional time in HH:mm format
+  type?: 'rapid' | 'basal'
 }
 
 /**
@@ -13,7 +15,7 @@ interface CreateInsulinRequest {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as CreateInsulinRequest
-    const { patientId, dose } = body
+    const { patientId, dose, time, type } = body
 
     if (!patientId) {
       return NextResponse.json(
@@ -29,15 +31,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Use provided time or current time
     const now = new Date()
+    let administeredAt: Date
+    
+    if (time) {
+      // Parse HH:mm and set it on today's date
+      const [hours, minutes] = time.split(':').map(Number)
+      administeredAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+    } else {
+      administeredAt = now
+    }
+
     const { data, error } = await supabase
       .from('insulin_doses')
       .insert({
         patient_id: patientId,
         dose,
         unit: 'units',
-        scheduled_time: now.toTimeString().split(' ')[0],
-        administered_at: now.toISOString(),
+        scheduled_time: administeredAt.toTimeString().split(' ')[0],
+        administered_at: administeredAt.toISOString(),
         source: 'app',
       })
       .select('id, dose, administered_at')

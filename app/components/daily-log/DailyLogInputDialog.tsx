@@ -20,7 +20,8 @@ import {
   Syringe, 
   Moon, 
   Brain,
-  Sparkles
+  Sparkles,
+  Clock
 } from 'lucide-react';
 import { 
   GlucometryType, 
@@ -43,14 +44,15 @@ interface GlucoseDialogProps extends BaseDialogProps {
   type: 'glucose';
   glucometryType: GlucometryType;
   initialValue?: number;
-  onSave: (value: number, notes?: string) => void;
+  initialTime?: string;
+  onSave: (value: number, time: string) => void;
 }
 
 interface InsulinDialogProps extends BaseDialogProps {
   type: 'insulin';
-  variant: InsulinVariant;
   initialValue?: number;
-  onSave: (units: number, notes?: string) => void;
+  initialTime?: string;
+  onSave: (units: number, time: string, variant: InsulinVariant) => void;
 }
 
 interface SleepDialogProps extends BaseDialogProps {
@@ -113,20 +115,25 @@ export function DailyLogInputDialog(props: DailyLogInputDialogProps) {
 
 // ==================== GLUCOSE VARIANT ====================
 
-function GlucoseContent({ open, onOpenChange, glucometryType, initialValue, onSave }: GlucoseDialogProps) {
+function getCurrentTime(): string {
+  const now = new Date();
+  return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+}
+
+function GlucoseContent({ open, onOpenChange, glucometryType, initialValue, initialTime, onSave }: GlucoseDialogProps) {
   const [value, setValue] = useState<string>(initialValue?.toString() || '');
-  const [notes, setNotes] = useState('');
+  const [time, setTime] = useState<string>(initialTime || getCurrentTime());
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setValue(initialValue?.toString() || '');
-      setNotes('');
+      setTime(initialTime || getCurrentTime());
       setError(null);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [open, initialValue]);
+  }, [open, initialValue, initialTime]);
 
   const numericValue = parseInt(value, 10);
   const isValid = !isNaN(numericValue) && numericValue >= 20 && numericValue <= 600;
@@ -141,7 +148,7 @@ function GlucoseContent({ open, onOpenChange, glucometryType, initialValue, onSa
       setError('El valor debe estar entre 20 y 600 mg/dL');
       return;
     }
-    onSave(numericValue, notes.trim() || undefined);
+    onSave(numericValue, time);
     onOpenChange(false);
   };
 
@@ -228,17 +235,27 @@ function GlucoseContent({ open, onOpenChange, glucometryType, initialValue, onSa
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="glucose-notes" className="text-muted-foreground">
-              Notas (opcional)
+            <Label htmlFor="glucose-time" className="text-muted-foreground">
+              Hora del registro
             </Label>
-            <Textarea
-              id="glucose-notes"
-              placeholder="Ej: Después de ejercicio..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="resize-none h-20"
-              maxLength={200}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="glucose-time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="flex-1 h-12 text-center"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setTime(getCurrentTime())}
+                className="h-12 px-3 gap-1"
+              >
+                <Clock className="w-4 h-4" />
+                Ahora
+              </Button>
+            </div>
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/30">
@@ -271,20 +288,24 @@ function GlucoseContent({ open, onOpenChange, glucometryType, initialValue, onSa
 
 // ==================== INSULIN VARIANT ====================
 
-function InsulinContent({ open, onOpenChange, variant, initialValue, onSave }: InsulinDialogProps) {
+function InsulinContent({ open, onOpenChange, initialValue, initialTime, onSave }: InsulinDialogProps) {
   const [value, setValue] = useState<string>(initialValue?.toString() || '');
-  const [notes, setNotes] = useState('');
+  const [time, setTime] = useState<string>(initialTime || getCurrentTime());
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Calculate variant based on time (>= 21:00 = basal, else rapid)
+  const hour = parseInt(time.split(':')[0], 10);
+  const variant: InsulinVariant = hour >= 21 ? 'basal' : 'rapid';
 
   useEffect(() => {
     if (open) {
       setValue(initialValue?.toString() || '');
-      setNotes('');
+      setTime(initialTime || getCurrentTime());
       setError(null);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [open, initialValue]);
+  }, [open, initialValue, initialTime]);
 
   const numericValue = parseFloat(value);
   const isValid = !isNaN(numericValue) && numericValue > 0 && numericValue <= 100;
@@ -298,7 +319,7 @@ function InsulinContent({ open, onOpenChange, variant, initialValue, onSave }: I
       setError('El valor debe estar entre 0.5 y 100 unidades');
       return;
     }
-    onSave(numericValue, notes.trim() || undefined);
+    onSave(numericValue, time, variant);
     onOpenChange(false);
   };
 
@@ -350,17 +371,27 @@ function InsulinContent({ open, onOpenChange, variant, initialValue, onSave }: I
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="insulin-notes" className="text-muted-foreground">
-              Notas (opcional)
+            <Label htmlFor="insulin-time" className="text-muted-foreground">
+              Hora del registro
             </Label>
-            <Textarea
-              id="insulin-notes"
-              placeholder="Ej: Dosis ajustada por médico..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="resize-none h-20"
-              maxLength={200}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="insulin-time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="flex-1 h-12 text-center"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setTime(getCurrentTime())}
+                className="h-12 px-3 gap-1"
+              >
+                <Clock className="w-4 h-4" />
+                Ahora
+              </Button>
+            </div>
           </div>
 
           <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">

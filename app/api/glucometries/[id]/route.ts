@@ -7,6 +7,7 @@ interface RouteParams {
 
 interface UpdateGlucometryRequest {
   value: number
+  time?: string // Optional time in HH:mm format
 }
 
 /**
@@ -20,7 +21,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json() as UpdateGlucometryRequest
-    const { value } = body
+    const { value, time } = body
 
     if (!id) {
       return NextResponse.json(
@@ -36,11 +37,23 @@ export async function PUT(
       )
     }
 
+    // Build update object
+    const updateData: { value: number; measured_at?: string; scheduled_time?: string } = { value }
+
+    if (time) {
+      // Parse HH:mm and set it on today's date
+      const now = new Date()
+      const [hours, minutes] = time.split(':').map(Number)
+      const measuredAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+      updateData.measured_at = measuredAt.toISOString()
+      updateData.scheduled_time = measuredAt.toTimeString().split(' ')[0]
+    }
+
     const { data, error } = await supabase
       .from('glucometries')
-      .update({ value })
+      .update(updateData)
       .eq('id', id)
-      .select('id, value, measured_at, type')
+      .select('id, value, measured_at')
       .single()
 
     if (error) {

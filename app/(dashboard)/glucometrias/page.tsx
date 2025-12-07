@@ -41,6 +41,16 @@ function recordMatchesSlot(record: Glucometry, slot: TreatmentSlot): boolean {
   return recordHour >= Math.max(0, slotHour - 1) && recordHour <= Math.min(23, slotHour + 2);
 }
 
+// Helper to get meal time label based on hour (Colombian schedule)
+function getMealTimeLabel(hour: number): string {
+  if (hour < 7) return 'Antes del desayuno';
+  if (hour < 12) return 'Después del desayuno';
+  if (hour < 14) return 'Antes del almuerzo';
+  if (hour < 19) return 'Después del almuerzo';
+  if (hour < 21) return 'Antes de la cena';
+  return 'Después de la cena';
+}
+
 export default function GlucometriasPage() {
   const [userRole, setUserRole] = useState<UserRole>('patient');
   const [patientId, setPatientId] = useState<string | null>(null);
@@ -302,14 +312,14 @@ export default function GlucometriasPage() {
   };
 
   // Handle editing a glucometry record
-  const handleEditGlucometry = async (value: number) => {
+  const handleEditGlucometry = async (value: number, time: string) => {
     if (!editingGlucometry) return;
 
     try {
       const res = await fetch(`/api/glucometries/${editingGlucometry.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value }),
+        body: JSON.stringify({ value, time }),
       });
 
       if (!res.ok) {
@@ -346,7 +356,7 @@ export default function GlucometriasPage() {
   };
 
   // Handle creating a new glucometry record
-  const handleCreateGlucometry = async (value: number) => {
+  const handleCreateGlucometry = async (value: number, time: string) => {
     if (!patientId) return;
 
     try {
@@ -356,6 +366,7 @@ export default function GlucometriasPage() {
         body: JSON.stringify({
           patientId,
           value,
+          time,
         }),
       });
 
@@ -606,6 +617,8 @@ export default function GlucometriasPage() {
                   const isLow = value < 70;
                   const isHigh = value > 180;
                   const isNormal = !isLow && !isHigh;
+                  const hour = parseISO(glucometry.timestamp).getHours();
+                  const mealLabel = getMealTimeLabel(hour);
                   
                   return (
                     <div
@@ -631,7 +644,7 @@ export default function GlucometriasPage() {
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">
-                            {format(parseISO(glucometry.timestamp), 'HH:mm', { locale: es })}
+                            {format(parseISO(glucometry.timestamp), 'HH:mm', { locale: es })} - {mealLabel}
                           </p>
                         </div>
                       </button>
@@ -720,6 +733,7 @@ export default function GlucometriasPage() {
           type="glucose"
           glucometryType={editingGlucometry.type}
           initialValue={editingGlucometry.value}
+          initialTime={format(parseISO(editingGlucometry.timestamp), 'HH:mm')}
           onSave={handleEditGlucometry}
         />
       )}

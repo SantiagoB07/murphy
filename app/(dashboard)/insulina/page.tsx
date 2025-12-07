@@ -17,6 +17,12 @@ import { isSameDay, parseISO, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/app/lib/utils';
 
+// Helper to get insulin type label based on hour
+function getInsulinTypeLabel(hour: number): string {
+  if (hour >= 21) return 'Basal';
+  return 'Rápida';
+}
+
 export default function InsulinaPage() {
   const [userRole, setUserRole] = useState<UserRole>('patient');
   const [patientId, setPatientId] = useState<string | null>(null);
@@ -33,11 +39,11 @@ export default function InsulinaPage() {
   }, []);
 
   // Fetch patient data from Supabase
-  const { data: currentPatient, isLoading, isFetching } = usePatient(patientId);
+  const { data: currentPatient, isLoading, isPending } = usePatient(patientId);
   const userName = currentPatient?.name ?? 'Cargando...';
 
-  // Determine if we're in a loading state (either fetching or waiting for patientId)
-  const isPageLoading = isFetching || (patientId !== null && isLoading);
+  // Determine if we're in a loading state
+  const isPageLoading = patientId !== null && (isLoading || isPending);
 
   // Get insulin slots from treatment schedule
   const insulinSlots = useMemo(() => {
@@ -195,21 +201,18 @@ export default function InsulinaPage() {
     setSelectedSlot({ slot, record });
   };
 
-  const handleSaveRecord = (dose: number, notes?: string) => {
+  const handleSaveRecord = (dose: number, time: string, variant: 'rapid' | 'basal') => {
     if (!selectedSlot) return;
-
-    const insulinType = selectedSlot.slot.insulinType as InsulinType || 'rapid';
-    
     if (selectedSlot.record) {
-      updateRecord(selectedSlot.record.id, dose, notes);
+      updateRecord(selectedSlot.record.id, dose);
     } else {
-      addRecord(dose, insulinType, notes);
+      addRecord(dose, variant);
     }
     setSelectedSlot(null);
   };
 
   // Handle creating a new insulin record
-  const handleCreateInsulin = useCallback(async (dose: number) => {
+  const handleCreateInsulin = useCallback(async (dose: number, time: string, variant: 'rapid' | 'basal') => {
     if (!patientId) return;
 
     try {
@@ -219,6 +222,7 @@ export default function InsulinaPage() {
         body: JSON.stringify({
           patientId,
           dose,
+          time,
         }),
       });
 
@@ -237,14 +241,14 @@ export default function InsulinaPage() {
   }, [patientId, queryClient]);
 
   // Handle editing an insulin record
-  const handleEditInsulin = useCallback(async (dose: number) => {
+  const handleEditInsulin = useCallback(async (dose: number, time: string, variant: 'rapid' | 'basal') => {
     if (!editingInsulin) return;
 
     try {
       const res = await fetch(`/api/insulin/${editingInsulin.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dose }),
+        body: JSON.stringify({ dose, time }),
       });
 
       if (!res.ok) {
@@ -432,10 +436,7 @@ export default function InsulinaPage() {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          {format(parseISO(insulin.timestamp), 'HH:mm', { locale: es })}
-                        </p>
-                        <p className="text-xs text-muted-foreground capitalize">
-                          {insulin.type === 'basal' ? 'Basal' : 'Rápida'}
+                          {format(parseISO(insulin.timestamp), 'HH:mm', { locale: es })} - {getInsulinTypeLabel(parseISO(insulin.timestamp).getHours())}
                         </p>
                       </div>
                     </button>
@@ -468,8 +469,8 @@ export default function InsulinaPage() {
             open={!!editingInsulin}
             onOpenChange={(open) => !open && setEditingInsulin(null)}
             type="insulin"
-            variant={editingInsulin.type === 'basal' ? 'basal' : 'rapid'}
             initialValue={editingInsulin.dose}
+            initialTime={format(parseISO(editingInsulin.timestamp), 'HH:mm')}
             onSave={handleEditInsulin}
           />
         )}
@@ -479,7 +480,6 @@ export default function InsulinaPage() {
           open={showCreateInsulin}
           onOpenChange={setShowCreateInsulin}
           type="insulin"
-          variant="rapid"
           onSave={handleCreateInsulin}
         />
 
@@ -711,8 +711,8 @@ export default function InsulinaPage() {
           open={!!selectedSlot}
           onOpenChange={(open) => !open && setSelectedSlot(null)}
           type="insulin"
-          variant={selectedSlot.slot.insulinType === 'basal' ? 'basal' : 'rapid'}
           initialValue={selectedSlot.record?.dose ?? selectedSlot.slot.expectedDose ?? undefined}
+          initialTime={selectedSlot.record ? format(parseISO(selectedSlot.record.timestamp), 'HH:mm') : undefined}
           onSave={handleSaveRecord}
         />
       )}
@@ -723,8 +723,8 @@ export default function InsulinaPage() {
           open={!!editingInsulin}
           onOpenChange={(open) => !open && setEditingInsulin(null)}
           type="insulin"
-          variant={editingInsulin.type === 'basal' ? 'basal' : 'rapid'}
           initialValue={editingInsulin.dose}
+          initialTime={format(parseISO(editingInsulin.timestamp), 'HH:mm')}
           onSave={handleEditInsulin}
         />
       )}
@@ -734,7 +734,6 @@ export default function InsulinaPage() {
         open={showCreateInsulin}
         onOpenChange={setShowCreateInsulin}
         type="insulin"
-        variant="rapid"
         onSave={handleCreateInsulin}
       />
 

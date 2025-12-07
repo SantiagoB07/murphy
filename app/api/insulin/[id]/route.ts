@@ -7,6 +7,8 @@ interface RouteParams {
 
 interface UpdateInsulinRequest {
   dose: number
+  time?: string // Optional time in HH:mm format
+  type?: 'rapid' | 'basal'
 }
 
 /**
@@ -20,7 +22,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json() as UpdateInsulinRequest
-    const { dose } = body
+    const { dose, time, type } = body
 
     if (!id) {
       return NextResponse.json(
@@ -36,9 +38,21 @@ export async function PUT(
       )
     }
 
+    // Build update object
+    const updateData: { dose: number; administered_at?: string; scheduled_time?: string } = { dose }
+
+    if (time) {
+      // Parse HH:mm and set it on today's date
+      const now = new Date()
+      const [hours, minutes] = time.split(':').map(Number)
+      const administeredAt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes)
+      updateData.administered_at = administeredAt.toISOString()
+      updateData.scheduled_time = administeredAt.toTimeString().split(' ')[0]
+    }
+
     const { data, error } = await supabase
       .from('insulin_doses')
-      .update({ dose })
+      .update(updateData)
       .eq('id', id)
       .select('id, dose, administered_at')
       .single()
