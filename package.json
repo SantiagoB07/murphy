@@ -9,11 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.77",
     "@supabase/supabase-js": "^2.86.2",
+    "ai": "^5.0.108",
     "dotenv": "^17.2.3",
     "next": "16.0.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
