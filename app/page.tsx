@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Loader2, Plus } from 'lucide-react';
+import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Plus } from 'lucide-react';
 import { cn } from '@/app/lib/utils';
-import { UserRole, Patient } from '@/app/types/diabetes';
+import { UserRole } from '@/app/types/diabetes';
 import { getHomeRoute } from '@/app/lib/navigation';
-import { usePatients } from '@/app/hooks/usePatients';
+
 import { PatientRegistrationForm } from '@/app/components/forms/PatientRegistrationForm';
 
 interface RoleOption {
@@ -20,11 +20,7 @@ interface RoleOption {
 export default function HomePage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
-  
-  // Fetch patients from Supabase
-  const { data: patients, isLoading: patientsLoading } = usePatients();
 
   const roles: RoleOption[] = [
     {
@@ -53,11 +49,8 @@ export default function HomePage() {
   const handleContinue = () => {
     if (selectedRole) {
       const targetPath = getHomeRoute(selectedRole);
-      // Store role and patientId in localStorage
+      // Store role in localStorage
       localStorage.setItem('userRole', selectedRole);
-      if (selectedPatientId) {
-        localStorage.setItem('murphy-patient-id', selectedPatientId);
-      }
       router.push(targetPath);
     }
   };
@@ -175,47 +168,24 @@ export default function HomePage() {
                 ))}
               </div>
 
-              {/* Patient Selection - only show for patient/coadmin roles */}
-              {selectedRole && selectedRole !== 'doctor' && (
+              {/* Patient Registration - only show for patient role */}
+              {selectedRole === 'patient' && (
                 <div className="mb-8 animate-fade-up">
                   <p className="text-center text-muted-foreground mb-4 text-hig-base">
-                    Selecciona tu perfil de paciente o regístrate
+                    Regístrate como nuevo paciente
                   </p>
-                  {patientsLoading ? (
-                    <div className="flex justify-center">
-                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap justify-center gap-3">
-                      {patients?.map((patient) => (
-                        <button
-                          key={patient.id}
-                          onClick={() => setSelectedPatientId(patient.id)}
-                          className={cn(
-                            "px-4 py-2 rounded-hig border transition-all",
-                            selectedPatientId === patient.id
-                              ? "border-primary bg-primary/20 text-foreground"
-                              : "border-border/50 bg-secondary/30 text-muted-foreground hover:bg-secondary/50"
-                          )}
-                        >
-                          {patient.name}
-                        </button>
-                      ))}
-                      {/* New Patient Button */}
-                      {selectedRole === 'patient' && (
-                        <button
-                          onClick={() => setShowRegistrationForm(true)}
-                          className={cn(
-                            "px-4 py-2 rounded-hig border transition-all flex items-center gap-2",
-                            "border-dashed border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
-                          )}
-                        >
-                          <Plus className="w-4 h-4" />
-                          Nuevo paciente
-                        </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowRegistrationForm(true)}
+                      className={cn(
+                        "px-4 py-2 rounded-hig border transition-all flex items-center gap-2",
+                        "border-dashed border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
                       )}
-                    </div>
-                  )}
+                    >
+                      <Plus className="w-4 h-4" />
+                      Nuevo paciente
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -223,11 +193,11 @@ export default function HomePage() {
               <div className="flex justify-center">
                 <button
                   onClick={handleContinue}
-                  disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
-                  aria-disabled={!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)}
+                  disabled={!selectedRole || selectedRole === 'patient'}
+                  aria-disabled={!selectedRole || selectedRole === 'patient'}
                   className={cn(
                     "btn-neon flex items-center gap-2 px-8 py-4 text-hig-lg focus-ring",
-                    (!selectedRole || (selectedRole !== 'doctor' && !selectedPatientId)) && "opacity-50 cursor-not-allowed pointer-events-none"
+                    (!selectedRole || selectedRole === 'patient') && "opacity-50 cursor-not-allowed pointer-events-none"
                   )}
                 >
                   Continuar
