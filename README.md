@@ -1,85 +1,66 @@
-# Welcome to your Convex + TanStack Start + WorkOS AuthKit app
+# murphy
 
-This is a [Convex](https://convex.dev/) project using WorkOS AuthKit for authentication.
+This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Convex, and more.
 
-After the initial setup (<2 minutes) you'll have a working full-stack app using:
+## Features
 
-- Convex as your backend (database, server logic)
-- [React](https://react.dev/) as your frontend (web page interactivity)
-- [TanStack Start](https://tanstack.com/start) for modern full-stack React with file-based routing
-- [Tailwind](https://tailwindcss.com/) for building great looking accessible UI
-- [WorkOS AuthKit](https://authkit.com/) for authentication
+- **TypeScript** - For type safety and improved developer experience
+- **Next.js** - Full-stack React framework
+- **TailwindCSS** - Utility-first CSS for rapid UI development
+- **shadcn/ui** - Reusable UI components
+- **Convex** - Reactive backend-as-a-service platform
+- **Authentication** - Clerk
+- **Turborepo** - Optimized monorepo build system
 
-## Get started
+## Getting Started
 
-1. Clone this repository and install dependencies:
+First, install the dependencies:
 
-   ```bash
-   npm install
-   ```
+```bash
+pnpm install
+```
 
-2. Set up your environment variables:
+## Convex Setup
 
-   ```bash
-   cp .env.local.example .env.local
-   ```
+This project uses Convex as a backend. You'll need to set up Convex before running the app:
 
-3. Configure WorkOS AuthKit:
-   - Create a [WorkOS account](https://workos.com/)
-   - Get your Client ID and API Key from the WorkOS dashboard
-   - In the WorkOS dashboard, add `http://localhost:3000/callback` as a redirect URI
-   - Generate a secure password for cookie encryption (minimum 32 characters)
-   - Update your `.env.local` file with these values
+```bash
+pnpm run dev:setup
+```
 
-4. Configure Convex:
+Follow the prompts to create a new Convex project and connect it to your application. See [Convex + Clerk guide](https://docs.convex.dev/auth/clerk) for auth setup.
 
-   ```bash
-   npx convex dev
-   ```
+Then, run the development server:
 
-   This will:
-   - Set up your Convex deployment
-   - Add your Convex URL to `.env.local`
-   - Open the Convex dashboard
+```bash
+pnpm run dev
+```
 
-   Then set your WorkOS Client ID in Convex:
+Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
+Your app will connect to the Convex cloud backend automatically.
 
-   ```bash
-   npx convex env set WORKOS_CLIENT_ID <your_client_id>
-   ```
 
-   This allows Convex to validate JWT tokens from WorkOS
 
-5. Run the development server:
 
-   ```bash
-   npm run dev
-   ```
 
-   This starts both the Vite dev server (TanStack Start frontend) and Convex backend in parallel
 
-6. Open [http://localhost:3000](http://localhost:3000) to see your app
 
-## WorkOS AuthKit Setup
+## Project Structure
 
-This app uses WorkOS AuthKit for authentication. Key features:
+```
+murphy/
+├── apps/
+│   ├── web/         # Frontend application (Next.js)
+├── packages/
+│   ├── backend/     # Convex backend functions and schema
+│   │   ├── convex/    # Convex functions and schema
+│   │   └── .env.local # Convex environment variables
+```
 
-- **Redirect-based authentication**: Users are redirected to WorkOS for sign-in/sign-up
-- **Session management**: Automatic token refresh and session handling
-- **Route loader protection**: Protected routes use loaders to check authentication
-- **Client and server functions**: `useAuth()` for client components, `getAuth()` for server loaders
+## Available Scripts
 
-## Learn more
-
-To learn more about developing your project with Convex, check out:
-
-- The [Tour of Convex](https://docs.convex.dev/get-started) for a thorough introduction to Convex principles.
-- The rest of [Convex docs](https://docs.convex.dev/) to learn about all Convex features.
-- [Stack](https://stack.convex.dev/) for in-depth articles on advanced topics.
-
-## Join the community
-
-Join thousands of developers building full-stack apps with Convex:
-
-- Join the [Convex Discord community](https://convex.dev/community) to get help in real-time.
-- Follow [Convex on GitHub](https://github.com/get-convex/), star and contribute to the open-source implementation of Convex.
+- `pnpm run dev`: Start all applications in development mode
+- `pnpm run build`: Build all applications
+- `pnpm run dev:web`: Start only the web application
+- `pnpm run dev:setup`: Setup and configure your Convex project
+- `pnpm run check-types`: Check TypeScript types across all apps
