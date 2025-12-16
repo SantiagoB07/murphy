@@ -14,39 +14,20 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
+import { Syringe, Moon, Brain, Sparkles } from "lucide-react"
 import {
-  AlertTriangle,
-  CheckCircle2,
-  Droplets,
-  Syringe,
-  Moon,
-  Brain,
-  Sparkles,
-} from "lucide-react"
-import type { GlucometryType } from "@/types/diabetes"
-import {
-  GLUCOMETRY_LABELS,
-  getGlucoseStatus,
-  GLUCOSE_RANGES,
   STRESS_LEVEL_LABELS,
   DIZZINESS_SEVERITY_LABELS,
 } from "@/types/diabetes"
 
 // ==================== TYPES ====================
 
-export type DailyLogType = "glucose" | "insulin" | "sleep" | "stress" | "dizziness"
+export type DailyLogType = "insulin" | "sleep" | "stress" | "dizziness"
 export type InsulinVariant = "rapid" | "basal"
 
 interface BaseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-}
-
-interface GlucoseDialogProps extends BaseDialogProps {
-  type: "glucose"
-  glucometryType: GlucometryType
-  initialValue?: number
-  onSave: (value: number, notes?: string) => void
 }
 
 interface InsulinDialogProps extends BaseDialogProps {
@@ -79,7 +60,6 @@ interface DizzinessDialogProps extends BaseDialogProps {
 }
 
 export type DailyLogInputDialogProps =
-  | GlucoseDialogProps
   | InsulinDialogProps
   | SleepDialogProps
   | StressDialogProps
@@ -93,7 +73,6 @@ const INSULIN_LABELS: Record<InsulinVariant, string> = {
 }
 
 const DIALOG_CONFIG = {
-  glucose: { icon: Droplets, color: "text-primary" },
   insulin: { icon: Syringe, color: "text-blue-400" },
   sleep: { icon: Moon, color: "text-indigo-400" },
   stress: { icon: Brain, color: "text-rose-400" },
@@ -104,8 +83,6 @@ const DIALOG_CONFIG = {
 
 export function DailyLogInputDialog(props: DailyLogInputDialogProps) {
   switch (props.type) {
-    case "glucose":
-      return <GlucoseContent {...props} />
     case "insulin":
       return <InsulinContent {...props} />
     case "sleep":
@@ -115,186 +92,6 @@ export function DailyLogInputDialog(props: DailyLogInputDialogProps) {
     case "dizziness":
       return <DizzinessContent {...props} />
   }
-}
-
-// ==================== GLUCOSE VARIANT ====================
-
-function GlucoseContent({
-  open,
-  onOpenChange,
-  glucometryType,
-  initialValue,
-  onSave,
-}: GlucoseDialogProps) {
-  const [value, setValue] = useState<string>(initialValue?.toString() || "")
-  const [notes, setNotes] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (open) {
-      setValue(initialValue?.toString() || "")
-      setNotes("")
-      setError(null)
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [open, initialValue])
-
-  const numericValue = parseInt(value, 10)
-  const isValid = !isNaN(numericValue) && numericValue >= 20 && numericValue <= 600
-  const status = isValid ? getGlucoseStatus(numericValue) : null
-
-  const handleSubmit = () => {
-    if (!value.trim()) {
-      setError("Ingresa un valor")
-      return
-    }
-    if (!isValid) {
-      setError("El valor debe estar entre 20 y 600 mg/dL")
-      return
-    }
-    onSave(numericValue, notes.trim() || undefined)
-    onOpenChange(false)
-  }
-
-  const statusColors = {
-    critical_low: "text-destructive border-destructive/50",
-    low: "text-warning border-warning/50",
-    normal: "text-success border-success/50",
-    high: "text-warning border-warning/50",
-    critical_high: "text-destructive border-destructive/50",
-  }
-
-  const statusMessages = {
-    critical_low: "Hipoglucemia severa - Busca atencion",
-    low: "Glucosa baja",
-    normal: "En rango normal",
-    high: "Glucosa elevada",
-    critical_high: "Hiperglucemia severa",
-  }
-
-  const Icon = DIALOG_CONFIG.glucose.icon
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[360px] bg-card border-border/50">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Icon className={cn("w-5 h-5", DIALOG_CONFIG.glucose.color)} />
-            {GLUCOMETRY_LABELS[glucometryType]}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="glucose-value" className="text-muted-foreground">
-              Valor de glucosa
-            </Label>
-            <div className="relative">
-              <Input
-                ref={inputRef}
-                id="glucose-value"
-                type="number"
-                inputMode="numeric"
-                placeholder="120"
-                value={value}
-                onChange={(e) => {
-                  setValue(e.target.value)
-                  setError(null)
-                }}
-                className={cn(
-                  "text-2xl font-bold text-center h-16 pr-16",
-                  isValid && status ? statusColors[status] : "",
-                  error ? "border-destructive" : ""
-                )}
-                min={20}
-                max={600}
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                mg/dL
-              </span>
-            </div>
-
-            {isValid && status && (
-              <div
-                className={cn(
-                  "flex items-center gap-2 p-2 rounded-lg",
-                  status === "normal" ? "bg-success/10" : "bg-warning/10"
-                )}
-              >
-                {status === "normal" ? (
-                  <CheckCircle2 className="w-4 h-4 text-success" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-warning" />
-                )}
-                <span
-                  className={cn(
-                    "text-xs",
-                    status === "normal" ? "text-success" : "text-warning"
-                  )}
-                >
-                  {statusMessages[status]}
-                </span>
-              </div>
-            )}
-
-            {error && (
-              <p className="text-xs text-destructive" role="alert">
-                {error}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="glucose-notes" className="text-muted-foreground">
-              Notas (opcional)
-            </Label>
-            <Textarea
-              id="glucose-notes"
-              placeholder="Ej: Despues de ejercicio..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="resize-none h-20"
-              maxLength={200}
-            />
-          </div>
-
-          <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/30">
-            <p>Rangos de referencia:</p>
-            <ul className="grid grid-cols-2 gap-1">
-              <li className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-warning" />
-                <span>&lt;{GLUCOSE_RANGES.low} Bajo</span>
-              </li>
-              <li className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-success" />
-                <span>
-                  {GLUCOSE_RANGES.low}-{GLUCOSE_RANGES.high} Normal
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="flex-1 sm:flex-none"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!value.trim()}
-            className="flex-1 sm:flex-none"
-          >
-            Guardar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
 }
 
 // ==================== INSULIN VARIANT ====================

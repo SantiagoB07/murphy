@@ -1,14 +1,14 @@
 import { GLUCOSE_RANGES } from "@/types/diabetes"
 
-// Slot configuration
-export const TOTAL_SLOTS = 6
-export const MIN_REQUIRED_SLOTS = 3
+// Record configuration - minimum 2 records for full XP
+export const MIN_REQUIRED_RECORDS = 2
 
 // XP weights for the formula
 export const XP_WEIGHTS = {
   IN_RANGE_BONUS: 30, // Max 30 XP for % in range (70-180 mg/dL)
-  REQUIRED_SLOT: 15, // 15 XP for each of the first 3 slots
-  EXTRA_SLOT: 5, // 5 XP for each additional slot (4th, 5th, 6th)
+  FIRST_RECORD: 20, // 20 XP for first record
+  SECOND_RECORD: 20, // 20 XP for second record (completing minimum)
+  EXTRA_RECORD: 5, // 5 XP for each additional record beyond minimum
   SLEEP_LOG: 5, // 5 XP for logging sleep
   STRESS_LOG: 5, // 5 XP for logging stress
 } as const
@@ -24,22 +24,38 @@ export const XP_LEVELS = [
   { min: 1200, max: Infinity, title: "Maestro del Control", level: 5 },
 ] as const
 
-// Calculate XP earned from completed slots
-export function calculateSlotsXP(completedCount: number): {
-  requiredXP: number
+// Calculate XP earned from completed records
+export function calculateRecordsXP(completedCount: number): {
+  baseXP: number
   extraXP: number
   total: number
 } {
-  const requiredSlots = Math.min(completedCount, MIN_REQUIRED_SLOTS)
-  const extraSlots = Math.max(0, completedCount - MIN_REQUIRED_SLOTS)
+  if (completedCount === 0) {
+    return { baseXP: 0, extraXP: 0, total: 0 }
+  }
 
-  const requiredXP = requiredSlots * XP_WEIGHTS.REQUIRED_SLOT
-  const extraXP = extraSlots * XP_WEIGHTS.EXTRA_SLOT
+  let baseXP = 0
+  let extraXP = 0
+
+  // First record
+  if (completedCount >= 1) {
+    baseXP += XP_WEIGHTS.FIRST_RECORD
+  }
+
+  // Second record (completing minimum)
+  if (completedCount >= 2) {
+    baseXP += XP_WEIGHTS.SECOND_RECORD
+  }
+
+  // Extra records beyond minimum
+  if (completedCount > MIN_REQUIRED_RECORDS) {
+    extraXP = (completedCount - MIN_REQUIRED_RECORDS) * XP_WEIGHTS.EXTRA_RECORD
+  }
 
   return {
-    requiredXP,
+    baseXP,
     extraXP,
-    total: requiredXP + extraXP,
+    total: baseXP + extraXP,
   }
 }
 
@@ -117,10 +133,12 @@ export function getCurrentLevel(totalXP: number): {
 }
 
 // Calculate max possible daily XP (for reference)
+// 2 required records (40 XP) + in range bonus (30 XP) + wellness (10 XP) = 80 XP base max
+// Extra records can add more but 80 is the "complete day" target
 export const MAX_DAILY_XP =
-  MIN_REQUIRED_SLOTS * XP_WEIGHTS.REQUIRED_SLOT +
-  (TOTAL_SLOTS - MIN_REQUIRED_SLOTS) * XP_WEIGHTS.EXTRA_SLOT +
+  XP_WEIGHTS.FIRST_RECORD +
+  XP_WEIGHTS.SECOND_RECORD +
   XP_WEIGHTS.IN_RANGE_BONUS +
   XP_WEIGHTS.SLEEP_LOG +
   XP_WEIGHTS.STRESS_LOG
-// = 45 + 15 + 30 + 5 + 5 = 100 XP base max
+// = 20 + 20 + 30 + 5 + 5 = 80 XP base max

@@ -3,13 +3,12 @@
 import { useMemo } from "react"
 import type { Glucometry } from "@/types/diabetes"
 import {
-  calculateSlotsXP,
+  calculateRecordsXP,
   calculateInRangeXP,
   calculateWellnessXP,
   getStreakMultiplier,
   getCurrentLevel,
-  TOTAL_SLOTS,
-  MIN_REQUIRED_SLOTS,
+  MIN_REQUIRED_RECORDS,
   MAX_DAILY_XP,
 } from "@/lib/xpSystem"
 
@@ -18,19 +17,19 @@ export interface DailyXPResult {
   baseXP: number
   finalXP: number
   breakdown: {
-    slotsXP: number
-    requiredSlotsXP: number
-    extraSlotsXP: number
+    recordsXP: number
+    baseRecordsXP: number
+    extraRecordsXP: number
     inRangeXP: number
     wellnessXP: number
   }
   // Streak info
   streakDays: number
   streakMultiplier: number
-  // Slots info
-  slotsCompleted: number
-  totalSlots: number
-  minRequiredSlots: number
+  // Records info
+  recordsCompleted: number
+  minRequiredRecords: number
+  hasMinRecords: boolean
   // Glucose info
   inRangePercent: number
   // Wellness info
@@ -64,9 +63,9 @@ export function useXPCalculation({
   totalAccumulatedXP,
 }: UseXPCalculationParams): DailyXPResult {
   return useMemo(() => {
-    // Calculate slots XP
-    const slotsCompleted = todayGlucoseRecords.length
-    const slotsXPResult = calculateSlotsXP(slotsCompleted)
+    // Calculate records XP
+    const recordsCompleted = todayGlucoseRecords.length
+    const recordsXPResult = calculateRecordsXP(recordsCompleted)
 
     // Calculate in-range XP
     const glucoseValues = todayGlucoseRecords.map((r) => r.value)
@@ -76,7 +75,7 @@ export function useXPCalculation({
     const wellnessXP = calculateWellnessXP(hasSleepLogged, hasStressLogged)
 
     // Calculate base XP
-    const baseXP = slotsXPResult.total + inRangeResult.inRangeXP + wellnessXP
+    const baseXP = recordsXPResult.total + inRangeResult.inRangeXP + wellnessXP
 
     // Apply streak multiplier
     const streakMultiplier = getStreakMultiplier(streakDays)
@@ -90,17 +89,17 @@ export function useXPCalculation({
       baseXP,
       finalXP,
       breakdown: {
-        slotsXP: slotsXPResult.total,
-        requiredSlotsXP: slotsXPResult.requiredXP,
-        extraSlotsXP: slotsXPResult.extraXP,
+        recordsXP: recordsXPResult.total,
+        baseRecordsXP: recordsXPResult.baseXP,
+        extraRecordsXP: recordsXPResult.extraXP,
         inRangeXP: inRangeResult.inRangeXP,
         wellnessXP,
       },
       streakDays,
       streakMultiplier,
-      slotsCompleted,
-      totalSlots: TOTAL_SLOTS,
-      minRequiredSlots: MIN_REQUIRED_SLOTS,
+      recordsCompleted,
+      minRequiredRecords: MIN_REQUIRED_RECORDS,
+      hasMinRecords: recordsCompleted >= MIN_REQUIRED_RECORDS,
       inRangePercent: inRangeResult.inRangePercent,
       hasSleepLogged,
       hasStressLogged,

@@ -1,6 +1,6 @@
 "use client"
 
-import { Zap, Moon, Brain, TrendingUp, Check, X } from "lucide-react"
+import { Zap, Moon, Brain, Droplets, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DailyXPResult } from "@/hooks/useXPCalculation"
 
@@ -16,9 +16,9 @@ export function DailyXPSummary({ xpResult, className }: DailyXPSummaryProps) {
     breakdown,
     streakDays,
     streakMultiplier,
-    slotsCompleted,
-    totalSlots,
-    minRequiredSlots,
+    recordsCompleted,
+    minRequiredRecords,
+    hasMinRecords,
     inRangePercent,
     hasSleepLogged,
     hasStressLogged,
@@ -29,7 +29,6 @@ export function DailyXPSummary({ xpResult, className }: DailyXPSummaryProps) {
     100,
     (finalXP / (maxDailyXP * streakMultiplier)) * 100
   )
-  const hasMinSlots = slotsCompleted >= minRequiredSlots
 
   return (
     <section className={cn("glass-card p-4 space-y-4", className)}>
@@ -77,39 +76,39 @@ export function DailyXPSummary({ xpResult, className }: DailyXPSummaryProps) {
 
       {/* Breakdown grid */}
       <div className="grid grid-cols-2 gap-2">
-        {/* Slots */}
+        {/* Records */}
         <div
           className={cn(
             "p-3 rounded-xl",
-            hasMinSlots
+            hasMinRecords
               ? "bg-success/10 border border-success/20"
               : "bg-muted/30"
           )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp
+            <Droplets
               className={cn(
                 "w-4 h-4",
-                hasMinSlots ? "text-success" : "text-muted-foreground"
+                hasMinRecords ? "text-success" : "text-muted-foreground"
               )}
             />
-            <span className="text-xs text-muted-foreground">Slots</span>
+            <span className="text-xs text-muted-foreground">Registros</span>
           </div>
           <div className="flex items-baseline gap-1">
             <span
               className={cn(
                 "text-lg font-semibold",
-                hasMinSlots ? "text-success" : "text-foreground"
+                hasMinRecords ? "text-success" : "text-foreground"
               )}
             >
-              {slotsCompleted}/{totalSlots}
+              {recordsCompleted}
             </span>
             <span className="text-xs text-muted-foreground">
-              +{breakdown.slotsXP} XP
+              +{breakdown.recordsXP} XP
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Min. {minRequiredSlots} {hasMinSlots && "OK"}
+            Min. {minRequiredRecords} {hasMinRecords && "OK"}
           </p>
         </div>
 
@@ -140,7 +139,7 @@ export function DailyXPSummary({ xpResult, className }: DailyXPSummaryProps) {
                 inRangePercent >= 70 ? "text-success" : "text-foreground"
               )}
             >
-              {Math.round(inRangePercent)}%
+              {recordsCompleted > 0 ? Math.round(inRangePercent) : 0}%
             </span>
             <span className="text-xs text-muted-foreground">
               +{breakdown.inRangeXP} XP

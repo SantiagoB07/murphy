@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area, ComposedChart } from 'recharts';
-import { Glucometry, GLUCOMETRY_LABELS } from '@/types/diabetes';
+import type { Glucometry } from '@/types/diabetes';
 import { cn } from '@/lib/utils';
 import { Activity } from 'lucide-react';
 
@@ -72,7 +72,7 @@ export function GlucoseChart({ data, showTargetRange = true, className }: Glucos
           )}>
             {data.value} mg/dL
           </p>
-          <p className="text-hig-xs text-muted-foreground">{GLUCOMETRY_LABELS[data.type as keyof typeof GLUCOMETRY_LABELS] || data.type}</p>
+          {data.notes && <p className="text-hig-xs text-muted-foreground">{data.notes}</p>}
         </div>
       );
     }

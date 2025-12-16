@@ -68,10 +68,9 @@ export default defineSchema({
   glucoseRecords: defineTable({
     patientId: v.id("patientProfiles"),
     value: v.number(),
-    type: v.optional(v.string()), // "before_breakfast", "after_lunch", etc.
-    date: v.string(),
-    recordedAt: v.number(),
-    notes: v.optional(v.string()),
+    date: v.string(), // "YYYY-MM-DD"
+    recordedAt: v.number(), // Unix timestamp - used for ordering and displaying time
+    notes: v.optional(v.string()), // Optional note (e.g., "antes del desayuno")
     updatedAt: v.number(),
   }).index("by_patient_date", ["patientId", "date"]),
 

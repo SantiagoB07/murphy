@@ -13,21 +13,6 @@ export const VIEW_MODE_LABELS: Record<ViewMode, string> = {
 
 export type DiabetesType = "Tipo 1" | "Tipo 2" | "Gestacional" | "LADA" | "MODY"
 
-// Expanded GlucometryType with mealtime-specific types + legacy support
-export type GlucometryType =
-  | "before_breakfast"
-  | "after_breakfast"
-  | "before_lunch"
-  | "after_lunch"
-  | "before_dinner"
-  | "after_dinner"
-  // Legacy types for backward compatibility
-  | "fasting"
-  | "preprandial"
-  | "postprandial"
-  | "random"
-  | "nocturnal"
-
 export type InsulinType = "rapid" | "short" | "intermediate" | "basal" | "mixed"
 
 export type AlertSeverity = "info" | "warning" | "critical"
@@ -40,22 +25,6 @@ export type AlertType =
   | "streak"
   | "reminder"
 
-// Labels in Spanish for each glucometry type
-export const GLUCOMETRY_LABELS: Record<GlucometryType, string> = {
-  before_breakfast: "Antes del desayuno",
-  after_breakfast: "Despues del desayuno",
-  before_lunch: "Antes del almuerzo",
-  after_lunch: "Despues del almuerzo",
-  before_dinner: "Antes de la cena",
-  after_dinner: "Despues de la cena",
-  // Legacy labels
-  fasting: "En ayunas",
-  preprandial: "Preprandial",
-  postprandial: "Postprandial",
-  random: "Aleatorio",
-  nocturnal: "Nocturno",
-}
-
 // Glucose ranges for color coding
 export const GLUCOSE_RANGES = {
   critical_low: 54,
@@ -66,46 +35,6 @@ export const GLUCOSE_RANGES = {
   high: 180,
   critical_high: 250,
 } as const
-
-// The 6 meal time slots for daily tracking
-export const MEAL_TIME_SLOTS = [
-  {
-    type: "before_breakfast" as GlucometryType,
-    label: "Antes del desayuno",
-    icon: "Sunrise",
-    period: "breakfast",
-  },
-  {
-    type: "after_breakfast" as GlucometryType,
-    label: "Despues del desayuno",
-    icon: "Coffee",
-    period: "breakfast",
-  },
-  {
-    type: "before_lunch" as GlucometryType,
-    label: "Antes del almuerzo",
-    icon: "Sun",
-    period: "lunch",
-  },
-  {
-    type: "after_lunch" as GlucometryType,
-    label: "Despues del almuerzo",
-    icon: "Utensils",
-    period: "lunch",
-  },
-  {
-    type: "before_dinner" as GlucometryType,
-    label: "Antes de la cena",
-    icon: "Sunset",
-    period: "dinner",
-  },
-  {
-    type: "after_dinner" as GlucometryType,
-    label: "Despues de la cena",
-    icon: "Moon",
-    period: "dinner",
-  },
-] as const
 
 // Helper to get glucose status
 export function getGlucoseStatus(
@@ -118,12 +47,12 @@ export function getGlucoseStatus(
   return "critical_high"
 }
 
+// Simplified Glucometry interface - no more type/slot
 export interface Glucometry {
   id: string
   value: number
-  timestamp: string
-  type: GlucometryType
-  notes?: string
+  timestamp: string // ISO string - used for ordering and displaying time
+  notes?: string // Optional context (e.g., "antes del desayuno", "despues de ejercicio")
 }
 
 export interface InsulinDose {
@@ -266,7 +195,7 @@ export interface DailyXPLog {
   date: string
   baseXP: number
   finalXP: number
-  slotsCompleted: number
+  recordsCompleted: number // Changed from slotsCompleted
   inRangePercent: number
   streakDays: number
   streakMultiplier: number

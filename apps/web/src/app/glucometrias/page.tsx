@@ -4,8 +4,8 @@ import { useState, useMemo } from "react"
 import { useUser, SignInButton } from "@clerk/nextjs"
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
-import { GlucoseSlotCard } from "./-components/GlucoseSlotCard"
-import { DailyLogInputDialog } from "@/components/daily-log/DailyLogInputDialog"
+import { GlucoseRecordCard } from "./-components/GlucoseRecordCard"
+import { AddGlucoseDialog } from "./-components/AddGlucoseDialog"
 import { DailyXPSummary } from "./-components/DailyXPSummary"
 import { ViewModeSelector } from "./-components/ViewModeSelector"
 import { WeeklyView } from "./-components/WeeklyView"
@@ -15,8 +15,7 @@ import { Button } from "@/components/ui/button"
 import { useGlucoseLog } from "@/hooks/useGlucoseLog"
 import { useXPCalculation } from "@/hooks/useXPCalculation"
 import { useWellnessLog } from "@/hooks/useWellnessLog"
-import type { Glucometry, GlucometryType, ViewMode } from "@/types/diabetes"
-import { MEAL_TIME_SLOTS } from "@/types/diabetes"
+import type { Glucometry, ViewMode } from "@/types/diabetes"
 import { cn } from "@/lib/utils"
 import {
   format,
@@ -38,6 +37,8 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Plus,
+  Droplets,
 } from "lucide-react"
 
 export default function GlucometriasPage() {
@@ -73,13 +74,13 @@ export default function GlucometriasPage() {
 function GlucometriasContent() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
-  
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>("daily")
-  const [selectedSlot, setSelectedSlot] = useState<{
-    type: GlucometryType
-    record?: Glucometry
-  } | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedRecord, setSelectedRecord] = useState<Glucometry | undefined>(
+    undefined
+  )
 
   // Get wellness state from Convex
   const { todaySleep, todayStress } = useWellnessLog()
@@ -87,8 +88,13 @@ function GlucometriasContent() {
   const hasStressLogged = !!todayStress
 
   // Initialize hook
-  const { records, addRecord, updateRecord, getRecordsByDate, getRecordsInRange } =
-    useGlucoseLog()
+  const {
+    addRecord,
+    updateRecord,
+    deleteRecord,
+    getRecordsByDate,
+    getRecordsInRange,
+  } = useGlucoseLog()
 
   // Calculate date range based on view mode
   const { startDate, endDate } = useMemo(() => {
@@ -116,12 +122,12 @@ function GlucometriasContent() {
   // Get records for the selected period
   const periodRecords = useMemo(() => {
     if (viewMode === "daily") {
-      return Array.from(getRecordsByDate(selectedDate).values())
+      return getRecordsByDate(selectedDate)
     }
     return getRecordsInRange(startDate, endDate)
   }, [viewMode, selectedDate, startDate, endDate, getRecordsByDate, getRecordsInRange])
 
-  // Get records for selected date (for daily view)
+  // Get records for selected date (for daily view) - sorted descending
   const dayRecords = useMemo(() => {
     return getRecordsByDate(selectedDate)
   }, [selectedDate, getRecordsByDate])
@@ -130,9 +136,9 @@ function GlucometriasContent() {
   const todayRecords = useMemo(() => {
     const today = new Date()
     if (isSameDay(selectedDate, today)) {
-      return Array.from(dayRecords.values())
+      return dayRecords
     }
-    return Array.from(getRecordsByDate(today).values())
+    return getRecordsByDate(today)
   }, [selectedDate, dayRecords, getRecordsByDate])
 
   // Calculate XP for today
@@ -146,26 +152,38 @@ function GlucometriasContent() {
 
   const isToday = isSameDay(selectedDate, new Date())
 
-  const handleSlotClick = (type: GlucometryType, record?: Glucometry) => {
-    setSelectedSlot({ type, record })
+  // Dialog handlers
+  const handleOpenAddDialog = () => {
+    setSelectedRecord(undefined)
+    setDialogOpen(true)
+  }
+
+  const handleEditRecord = (record: Glucometry) => {
+    setSelectedRecord(record)
+    setDialogOpen(true)
+  }
+
+  const handleDeleteRecord = (record: Glucometry) => {
+    deleteRecord(record.id)
   }
 
   const handleSaveRecord = (value: number, notes?: string) => {
-    if (!selectedSlot) return
-
-    if (selectedSlot.record) {
-      updateRecord(selectedSlot.record.id, value, notes)
+    if (selectedRecord) {
+      updateRecord(selectedRecord.id, value, notes)
     } else {
-      addRecord(selectedSlot.type, value, notes)
+      addRecord(value, notes)
     }
-    setSelectedSlot(null)
+  }
+
+  const handleDeleteFromDialog = (id: string) => {
+    deleteRecord(id)
   }
 
   // Calculate daily stats (for daily view)
   const stats = useMemo(() => {
-    const values = Array.from(dayRecords.values()).map((r) => r.value)
-    if (values.length === 0) return null
+    if (dayRecords.length === 0) return null
 
+    const values = dayRecords.map((r) => r.value)
     return {
       count: values.length,
       avg: Math.round(values.reduce((a, b) => a + b, 0) / values.length),
@@ -273,9 +291,7 @@ function GlucometriasContent() {
                   <Activity className="w-4 h-4 text-primary" />
                   <span className="text-xs text-muted-foreground">Registros</span>
                 </div>
-                <p className="text-xl font-bold text-foreground">
-                  {stats.count}/6
-                </p>
+                <p className="text-xl font-bold text-foreground">{stats.count}</p>
               </article>
               <article className="glass-card p-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -310,44 +326,53 @@ function GlucometriasContent() {
             </div>
           )}
 
-          <section className="space-y-3">
+          <section className="space-y-3 pb-24">
             <h2 className="text-base font-semibold text-foreground mb-4">
               Registros del dia
             </h2>
 
-            {MEAL_TIME_SLOTS.map((slot, index) => (
+            {dayRecords.map((record, index) => (
               <div
-                key={slot.type}
+                key={record.id}
                 className="animate-fade-up"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <GlucoseSlotCard
-                  type={slot.type}
-                  record={dayRecords.get(slot.type)}
-                  iconName={slot.icon}
-                  onClick={() =>
-                    handleSlotClick(slot.type, dayRecords.get(slot.type))
-                  }
+                <GlucoseRecordCard
+                  record={record}
+                  onEdit={handleEditRecord}
+                  onDelete={handleDeleteRecord}
                 />
               </div>
             ))}
 
-            {dayRecords.size === 0 && (
+            {dayRecords.length === 0 && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center mb-4">
-                  <Activity className="w-8 h-8 text-muted-foreground" />
+                  <Droplets className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <p className="text-foreground font-medium">
                   Sin registros este dia
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isToday
-                    ? "Toca cualquier momento para agregar un registro"
+                    ? "Toca el boton + para agregar tu primer registro"
                     : "No hay registros para esta fecha"}
                 </p>
               </div>
             )}
           </section>
+
+          {/* Floating Action Button */}
+          {isToday && (
+            <Button
+              onClick={handleOpenAddDialog}
+              className="fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-lg btn-neon z-50"
+              size="icon"
+              aria-label="Agregar registro de glucosa"
+            >
+              <Plus className="w-6 h-6" />
+            </Button>
+          )}
         </>
       )}
 
@@ -378,17 +403,14 @@ function GlucometriasContent() {
         />
       )}
 
-      {/* Input Dialog - only for daily view */}
-      {selectedSlot && (
-        <DailyLogInputDialog
-          open={!!selectedSlot}
-          onOpenChange={(open) => !open && setSelectedSlot(null)}
-          type="glucose"
-          glucometryType={selectedSlot.type}
-          initialValue={selectedSlot.record?.value}
-          onSave={handleSaveRecord}
-        />
-      )}
+      {/* Add/Edit Dialog */}
+      <AddGlucoseDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initialRecord={selectedRecord}
+        onSave={handleSaveRecord}
+        onDelete={handleDeleteFromDialog}
+      />
     </DashboardLayout>
   )
 }

@@ -47,13 +47,8 @@ function DashboardContent() {
   // Get user name from Clerk
   const userName = user?.firstName || "Usuario"
 
-  // Get today's glucose records
-  const todayGlucoseRecords = useMemo(() => {
-    if (todayRecords.size > 0) {
-      return Array.from(todayRecords.values())
-    }
-    return []
-  }, [todayRecords])
+  // Get today's glucose records (already an array)
+  const todayGlucoseRecords = todayRecords
 
   // Calculate streak from glucose records (simplified - count consecutive days with records)
   const streakDays = useMemo(() => {
@@ -228,7 +223,7 @@ function DashboardContent() {
             streak={xpResult.streakDays}
             levelTitle={xpResult.levelInfo.title}
             streakMultiplier={xpResult.streakMultiplier}
-            slotsToday={xpResult.slotsCompleted}
+            slotsToday={xpResult.recordsCompleted}
             progressPercent={xpResult.levelInfo.progressPercent}
           />
         </div>

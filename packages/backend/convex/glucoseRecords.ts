@@ -169,10 +169,9 @@ export const getStats = query({
 export const create = mutation({
   args: {
     value: v.number(),
-    type: v.optional(v.string()), // "before_breakfast", "after_lunch", etc.
     date: v.string(), // "YYYY-MM-DD"
     recordedAt: v.optional(v.number()), // timestamp, defaults to now
-    notes: v.optional(v.string()),
+    notes: v.optional(v.string()), // Optional context (e.g., "antes del desayuno")
   },
   handler: async (ctx, args) => {
     const patient = await getCurrentPatient(ctx)
@@ -180,7 +179,6 @@ export const create = mutation({
     const recordId = await ctx.db.insert("glucoseRecords", {
       patientId: patient._id,
       value: args.value,
-      type: args.type,
       date: args.date,
       recordedAt: args.recordedAt ?? Date.now(),
       notes: args.notes,
@@ -198,7 +196,6 @@ export const update = mutation({
   args: {
     id: v.id("glucoseRecords"),
     value: v.optional(v.number()),
-    type: v.optional(v.string()),
     date: v.optional(v.string()),
     recordedAt: v.optional(v.number()),
     notes: v.optional(v.string()),
