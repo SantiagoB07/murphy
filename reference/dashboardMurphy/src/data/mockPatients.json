@@ -1,0 +1,239 @@
+{
+  "patients": [
+    {
+      "id": "p001",
+      "name": "María García López",
+      "age": 45,
+      "diabetesType": "Tipo 2",
+      "estrato": 4,
+      "avatar": null,
+      "telegramConnected": true,
+      "coadminId": "ca001",
+      "xpLevel": 78,
+      "streak": 12,
+      "glucometrias": [
+        { "id": "g001", "value": 142, "timestamp": "2024-12-06T07:30:00Z", "type": "before_breakfast" },
+        { "id": "g002", "value": 168, "timestamp": "2024-12-06T09:15:00Z", "type": "after_breakfast" },
+        { "id": "g003", "value": 125, "timestamp": "2024-12-06T12:00:00Z", "type": "before_lunch" },
+        { "id": "g004", "value": 155, "timestamp": "2024-12-06T14:30:00Z", "type": "after_lunch" },
+        { "id": "g005", "value": 138, "timestamp": "2024-12-05T07:45:00Z", "type": "before_breakfast" },
+        { "id": "g006", "value": 185, "timestamp": "2024-12-05T09:30:00Z", "type": "after_breakfast" }
+      ],
+      "insulina": [
+        { "id": "i001", "units": 12, "type": "rapid", "timestamp": "2024-12-06T07:35:00Z" },
+        { "id": "i002", "units": 10, "type": "rapid", "timestamp": "2024-12-06T12:55:00Z" },
+        { "id": "i003", "units": 24, "type": "basal", "timestamp": "2024-12-06T22:00:00Z" }
+      ],
+      "sueno": [
+        { "id": "s001", "hours": 6.5, "quality": 7, "date": "2024-12-06" },
+        { "id": "s002", "hours": 7.2, "quality": 8, "date": "2024-12-05" },
+        { "id": "s003", "hours": 5.8, "quality": 5, "date": "2024-12-04" }
+      ],
+      "estres": [
+        { "id": "e001", "level": 6, "timestamp": "2024-12-06T09:00:00Z" },
+        { "id": "e002", "level": 4, "timestamp": "2024-12-06T18:00:00Z" },
+        { "id": "e003", "level": 7, "timestamp": "2024-12-05T15:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": [
+        { "id": "a001", "type": "hyperglycemia", "severity": "warning", "message": "Glucosa después del desayuno elevada: 185 mg/dL", "timestamp": "2024-12-05T09:30:00Z", "resolved": false }
+      ]
+    },
+    {
+      "id": "p002",
+      "name": "Carlos Rodríguez Sánchez",
+      "age": 62,
+      "diabetesType": "Tipo 2",
+      "estrato": 3,
+      "avatar": null,
+      "telegramConnected": true,
+      "coadminId": "ca002",
+      "xpLevel": 45,
+      "streak": 5,
+      "glucometrias": [
+        { "id": "g007", "value": 198, "timestamp": "2024-12-06T07:00:00Z", "type": "before_breakfast" },
+        { "id": "g008", "value": 245, "timestamp": "2024-12-06T14:00:00Z", "type": "after_lunch" },
+        { "id": "g009", "value": 178, "timestamp": "2024-12-05T07:15:00Z", "type": "before_breakfast" }
+      ],
+      "insulina": [
+        { "id": "i004", "units": 16, "type": "rapid", "timestamp": "2024-12-06T08:05:00Z" },
+        { "id": "i005", "units": 32, "type": "basal", "timestamp": "2024-12-06T22:00:00Z" }
+      ],
+      "sueno": [
+        { "id": "s004", "hours": 5.0, "quality": 4, "date": "2024-12-06" },
+        { "id": "s005", "hours": 5.5, "quality": 5, "date": "2024-12-05" }
+      ],
+      "estres": [
+        { "id": "e004", "level": 8, "timestamp": "2024-12-06T10:00:00Z" },
+        { "id": "e005", "level": 7, "timestamp": "2024-12-05T16:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": [
+        { "id": "a002", "type": "hyperglycemia", "severity": "critical", "message": "Glucosa antes del desayuno muy elevada: 198 mg/dL", "timestamp": "2024-12-06T07:00:00Z", "resolved": false },
+        { "id": "a003", "type": "hyperglycemia", "severity": "critical", "message": "Pico después del almuerzo peligroso: 245 mg/dL", "timestamp": "2024-12-06T14:00:00Z", "resolved": false }
+      ]
+    },
+    {
+      "id": "p003",
+      "name": "Ana Martínez Ruiz",
+      "age": 34,
+      "diabetesType": "Tipo 1",
+      "estrato": 5,
+      "avatar": null,
+      "telegramConnected": false,
+      "coadminId": null,
+      "xpLevel": 92,
+      "streak": 28,
+      "glucometrias": [
+        { "id": "g010", "value": 98, "timestamp": "2024-12-06T07:00:00Z", "type": "before_breakfast" },
+        { "id": "g011", "value": 132, "timestamp": "2024-12-06T09:30:00Z", "type": "after_breakfast" },
+        { "id": "g012", "value": 115, "timestamp": "2024-12-06T12:00:00Z", "type": "before_lunch" },
+        { "id": "g013", "value": 145, "timestamp": "2024-12-06T14:15:00Z", "type": "after_lunch" },
+        { "id": "g014", "value": 108, "timestamp": "2024-12-06T19:00:00Z", "type": "before_dinner" },
+        { "id": "g015", "value": 125, "timestamp": "2024-12-06T21:00:00Z", "type": "after_dinner" },
+        { "id": "g016", "value": 105, "timestamp": "2024-12-05T07:15:00Z", "type": "before_breakfast" }
+      ],
+      "insulina": [
+        { "id": "i006", "units": 8, "type": "rapid", "timestamp": "2024-12-06T07:05:00Z" },
+        { "id": "i007", "units": 6, "type": "rapid", "timestamp": "2024-12-06T13:25:00Z" },
+        { "id": "i008", "units": 7, "type": "rapid", "timestamp": "2024-12-06T18:55:00Z" },
+        { "id": "i009", "units": 18, "type": "basal", "timestamp": "2024-12-06T22:00:00Z" }
+      ],
+      "sueno": [
+        { "id": "s006", "hours": 8.0, "quality": 9, "date": "2024-12-06" },
+        { "id": "s007", "hours": 7.5, "quality": 8, "date": "2024-12-05" }
+      ],
+      "estres": [
+        { "id": "e006", "level": 3, "timestamp": "2024-12-06T12:00:00Z" },
+        { "id": "e007", "level": 2, "timestamp": "2024-12-05T18:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": []
+    },
+    {
+      "id": "p004",
+      "name": "Roberto Fernández Díaz",
+      "age": 55,
+      "diabetesType": "Tipo 2",
+      "estrato": 2,
+      "avatar": null,
+      "telegramConnected": true,
+      "coadminId": "ca003",
+      "xpLevel": 34,
+      "streak": 2,
+      "glucometrias": [
+        { "id": "g017", "value": 68, "timestamp": "2024-12-06T07:30:00Z", "type": "before_breakfast" },
+        { "id": "g018", "value": 145, "timestamp": "2024-12-06T09:45:00Z", "type": "after_breakfast" },
+        { "id": "g019", "value": 72, "timestamp": "2024-12-05T03:00:00Z", "type": "nocturnal" }
+      ],
+      "insulina": [
+        { "id": "i010", "units": 14, "type": "rapid", "timestamp": "2024-12-06T06:35:00Z" },
+        { "id": "i011", "units": 28, "type": "basal", "timestamp": "2024-12-05T22:00:00Z" }
+      ],
+      "sueno": [
+        { "id": "s008", "hours": 4.5, "quality": 3, "date": "2024-12-06" },
+        { "id": "s009", "hours": 5.0, "quality": 4, "date": "2024-12-05" }
+      ],
+      "estres": [
+        { "id": "e008", "level": 9, "timestamp": "2024-12-06T08:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": [
+        { "id": "a004", "type": "hypoglycemia", "severity": "critical", "message": "Episodio hipoglucémico antes del desayuno: 68 mg/dL", "timestamp": "2024-12-06T07:30:00Z", "resolved": false },
+        { "id": "a005", "type": "hypoglycemia", "severity": "warning", "message": "Glucosa baja nocturna: 72 mg/dL", "timestamp": "2024-12-05T03:00:00Z", "resolved": true }
+      ]
+    },
+    {
+      "id": "p005",
+      "name": "Elena Gómez Torres",
+      "age": 28,
+      "diabetesType": "Gestacional",
+      "estrato": 4,
+      "avatar": null,
+      "telegramConnected": true,
+      "coadminId": "ca004",
+      "xpLevel": 67,
+      "streak": 15,
+      "glucometrias": [
+        { "id": "g020", "value": 88, "timestamp": "2024-12-06T07:15:00Z", "type": "before_breakfast" },
+        { "id": "g021", "value": 128, "timestamp": "2024-12-06T09:15:00Z", "type": "after_breakfast" },
+        { "id": "g022", "value": 95, "timestamp": "2024-12-06T12:15:00Z", "type": "before_lunch" },
+        { "id": "g023", "value": 135, "timestamp": "2024-12-06T14:15:00Z", "type": "after_lunch" },
+        { "id": "g024", "value": 92, "timestamp": "2024-12-06T19:00:00Z", "type": "before_dinner" },
+        { "id": "g025", "value": 118, "timestamp": "2024-12-06T21:15:00Z", "type": "after_dinner" }
+      ],
+      "insulina": [],
+      "sueno": [
+        { "id": "s010", "hours": 7.0, "quality": 6, "date": "2024-12-06" },
+        { "id": "s011", "hours": 6.5, "quality": 6, "date": "2024-12-05" }
+      ],
+      "estres": [
+        { "id": "e009", "level": 5, "timestamp": "2024-12-06T11:00:00Z" },
+        { "id": "e010", "level": 4, "timestamp": "2024-12-05T14:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": []
+    }
+  ],
+  "coadmins": [
+    { "id": "ca001", "name": "Juan García", "patientId": "p001", "telegramConnected": true },
+    { "id": "ca002", "name": "Laura Rodríguez", "patientId": "p002", "telegramConnected": true },
+    { "id": "ca003", "name": "Miguel Fernández", "patientId": "p004", "telegramConnected": false },
+    { "id": "ca004", "name": "Pedro Gómez", "patientId": "p005", "telegramConnected": true }
+  ],
+  "doctors": [
+    {
+      "id": "d001",
+      "name": "Dr. Alejandro Méndez",
+      "specialty": "Endocrinología",
+      "licenseNumber": "MED-12345",
+      "avatar": null,
+      "patientIds": ["p001", "p002", "p003"]
+    },
+    {
+      "id": "d002",
+      "name": "Dra. Carmen Vega",
+      "specialty": "Medicina Interna",
+      "licenseNumber": "MED-67890",
+      "avatar": null,
+      "patientIds": ["p004", "p005"]
+    }
+  ],
+  "aiReports": [
+    {
+      "id": "r001",
+      "patientId": "p002",
+      "generatedAt": "2024-12-06T06:00:00Z",
+      "summary": {
+        "avgGlucose": 207,
+        "stdDev": 34,
+        "hypoCount": 0,
+        "hyperCount": 8,
+        "timeInRange": 22,
+        "trend": "deteriorating"
+      },
+      "recommendations": [
+        "Ajustar dosis basal nocturna",
+        "Revisar carbohidratos en almuerzo",
+        "Evaluar adherencia a medicación"
+      ]
+    },
+    {
+      "id": "r002",
+      "patientId": "p003",
+      "generatedAt": "2024-12-06T06:00:00Z",
+      "summary": {
+        "avgGlucose": 112,
+        "stdDev": 15,
+        "hypoCount": 0,
+        "hyperCount": 1,
+        "timeInRange": 94,
+        "trend": "stable"
+      },
+      "recommendations": [
+        "Mantener régimen actual",
+        "Excelente control glucémico"
+      ]
+    }
+  ]
+}
