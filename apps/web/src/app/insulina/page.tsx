@@ -5,7 +5,7 @@ import { useUser, SignInButton } from "@clerk/nextjs"
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { InsulinConfigCard } from "./-components/InsulinConfigCard"
-import { InsulinUpdateSheet } from "./-components/InsulinUpdateSheet"
+import { InsulinUpdateDialog } from "./-components/InsulinUpdateDialog"
 import { InsulinTodoList } from "./-components/InsulinTodoList"
 import { Card, CardContent } from "@/components/ui/card"
 import { Activity } from "lucide-react"
@@ -34,12 +34,12 @@ function InsulinaContent() {
     isCreating,
   } = useInsulinDoseRecords()
 
-  const [updateSheetOpen, setUpdateSheetOpen] = useState(false)
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
   const [selectedType, setSelectedType] = useState<"rapid" | "basal">("rapid")
 
   const handleOpenUpdate = (type: "rapid" | "basal") => {
     setSelectedType(type)
-    setUpdateSheetOpen(true)
+    setUpdateDialogOpen(true)
   }
 
   const handleSaveUpdate = (data: UpdateInsulinData) => {
@@ -50,7 +50,7 @@ function InsulinaContent() {
           toast.success(
             `${selectedType === "rapid" ? "Insulina rapida" : "Insulina basal"} actualizada`
           )
-          setUpdateSheetOpen(false)
+          setUpdateDialogOpen(false)
         },
         onError: (error) => {
           toast.error("Error al guardar: " + error.message)
@@ -144,10 +144,10 @@ function InsulinaContent() {
           />
         )}
 
-        {/* Update sheet */}
-        <InsulinUpdateSheet
-          open={updateSheetOpen}
-          onOpenChange={setUpdateSheetOpen}
+        {/* Update dialog */}
+        <InsulinUpdateDialog
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
           type={selectedType}
           currentSchedule={selectedType === "rapid" ? rapidSchedule : basalSchedule}
           onSave={handleSaveUpdate}

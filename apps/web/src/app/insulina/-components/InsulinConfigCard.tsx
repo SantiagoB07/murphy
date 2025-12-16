@@ -1,7 +1,5 @@
 "use client"
 
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
 import {
   Card,
   CardContent,
@@ -9,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Syringe, Calendar, Pill } from "lucide-react"
+import { Syringe } from "lucide-react"
 import type { InsulinSchedule } from "@/types/diabetes"
 
 interface InsulinConfigCardProps {
@@ -39,14 +37,6 @@ export function InsulinConfigCard({
           <>
             {/* Current schedule info */}
             <div className="space-y-3">
-              {/* Brand if available */}
-              {schedule.brand && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Pill className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">{schedule.brand}</span>
-                </div>
-              )}
-
               {/* Dose info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -66,17 +56,6 @@ export function InsulinConfigCard({
                   {dailyTotal}{" "}
                   <span className="text-base font-normal">unidades</span>
                 </p>
-              </div>
-
-              {/* Effective from */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  Desde{" "}
-                  {format(new Date(schedule.effectiveFrom), "dd MMM yyyy", {
-                    locale: es,
-                  })}
-                </span>
               </div>
             </div>
           </>

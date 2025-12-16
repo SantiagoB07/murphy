@@ -8,11 +8,6 @@ import type { InsulinSchedule } from "@/types/diabetes"
 export interface UpdateInsulinData {
   unitsPerDose: number
   timesPerDay: number
-  brand?: string
-  effectiveFrom: Date
-  changeReason?: string
-  orderedBy?: string
-  notes?: string
 }
 
 // Helper function to calculate percentage change
@@ -107,7 +102,6 @@ export function useInsulinSchedule(
         insulinType,
         unitsPerDose: data.unitsPerDose,
         timesPerDay: data.timesPerDay,
-        notes: data.notes || data.brand,
       },
       {
         onSuccess: () => {
