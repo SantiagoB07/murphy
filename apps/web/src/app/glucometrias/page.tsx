@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useUser, SignInButton } from "@clerk/nextjs"
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { GlucoseSlotCard } from "./-components/GlucoseSlotCard"
 import { DailyLogInputDialog } from "@/components/daily-log/DailyLogInputDialog"
@@ -12,6 +14,7 @@ import { QuarterlyView } from "./-components/QuarterlyView"
 import { Button } from "@/components/ui/button"
 import { useGlucoseLog } from "@/hooks/useGlucoseLog"
 import { useXPCalculation } from "@/hooks/useXPCalculation"
+import { useWellnessLog } from "@/hooks/useWellnessLog"
 import type { Glucometry, GlucometryType, ViewMode } from "@/types/diabetes"
 import { MEAL_TIME_SLOTS } from "@/types/diabetes"
 import { cn } from "@/lib/utils"
@@ -36,11 +39,41 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
-import mockData from "@/data/mockPatients.json"
 
 export default function GlucometriasPage() {
-  // Get user name from mock data
-  const userName = mockData.patients[0]?.name || "Usuario"
+  return (
+    <>
+      <Authenticated>
+        <GlucometriasContent />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
+            <p className="text-muted-foreground">
+              Inicia sesion para acceder a tus glucometrias
+            </p>
+            <SignInButton mode="modal">
+              <button className="btn-neon px-6 py-2 rounded-xl">
+                Iniciar Sesion
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="animate-pulse text-muted-foreground">Cargando...</div>
+        </div>
+      </AuthLoading>
+    </>
+  )
+}
+
+function GlucometriasContent() {
+  const { user } = useUser()
+  const userName = user?.firstName || "Usuario"
+  
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>("daily")
   const [selectedSlot, setSelectedSlot] = useState<{
@@ -48,9 +81,10 @@ export default function GlucometriasPage() {
     record?: Glucometry
   } | null>(null)
 
-  // Mock wellness state (in real app, this would come from a shared context/store)
-  const [hasSleepLogged] = useState(false)
-  const [hasStressLogged] = useState(false)
+  // Get wellness state from Convex
+  const { todaySleep, todayStress } = useWellnessLog()
+  const hasSleepLogged = !!todaySleep
+  const hasStressLogged = !!todayStress
 
   // Initialize hook
   const { records, addRecord, updateRecord, getRecordsByDate, getRecordsInRange } =
@@ -154,7 +188,7 @@ export default function GlucometriasPage() {
   }
 
   return (
-    <DashboardLayout userName={userName}>
+    <DashboardLayout userName={userName} userRole="patient">
       {/* Page Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between">

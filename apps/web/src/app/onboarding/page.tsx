@@ -1,10 +1,42 @@
 "use client"
 
+import { SignInButton } from "@clerk/nextjs"
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { OnboardingHeader } from "./-components/OnboardingHeader"
 import { OnboardingForm } from "./-components/OnboardingForm"
 import { OnboardingFooter } from "./-components/OnboardingFooter"
 
 export default function OnboardingPage() {
+  return (
+    <>
+      <Authenticated>
+        <OnboardingContent />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
+            <p className="text-muted-foreground">
+              Inicia sesion para completar tu registro
+            </p>
+            <SignInButton mode="modal">
+              <button className="btn-neon px-6 py-2 rounded-xl">
+                Iniciar Sesion
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="animate-pulse text-muted-foreground">Cargando...</div>
+        </div>
+      </AuthLoading>
+    </>
+  )
+}
+
+function OnboardingContent() {
   return (
     <div className="min-h-screen flex flex-col safe-area-inset">
       {/* Hero Background */}

@@ -1,8 +1,12 @@
 "use client"
 
 import { useMemo, useCallback } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
+import { api } from "@murphy/backend/convex/_generated/api"
 import type { Glucometry, GlucometryType } from "@/types/diabetes"
 import { GLUCOSE_RANGES } from "@/types/diabetes"
+import { toast } from "sonner"
 import {
   format,
   parseISO,
@@ -12,7 +16,6 @@ import {
   endOfDay,
   differenceInDays,
 } from "date-fns"
-import mockData from "@/data/mockPatients.json"
 
 // Statistics interface for period calculations
 export interface PeriodStats {
@@ -86,20 +89,51 @@ interface GlucoseLogReturn {
   isLoading: boolean
 }
 
-export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
-  // Get mock data from the JSON file
-  const patient = mockData.patients[0]
-  const records = patient.glucometrias as Glucometry[]
+// Helper: Convert Convex record to Glucometry
+function convexToGlucometry(record: any): Glucometry {
+  return {
+    id: record._id,
+    value: record.value,
+    type: record.type as GlucometryType,
+    timestamp: new Date(record.recordedAt).toISOString(),
+    notes: record.notes,
+  }
+}
 
+export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
+  const queryClient = useQueryClient()
+
+  // Fetch all glucose records from Convex
+  const { data: convexRecords = [], isPending } = useQuery(
+    convexQuery(api.glucoseRecords.list, {})
+  )
+
+  // Convert Convex records to Glucometry format
+  const records = useMemo(
+    () => convexRecords.map(convexToGlucometry),
+    [convexRecords]
+  )
+
+  // Get today's records
   const todayRecords = useMemo(() => {
     const map = new Map<GlucometryType, Glucometry>()
-    // Just return first few records as "today's" records for demo
-    records.slice(0, 4).forEach((record) => {
-      map.set(record.type, record)
+    const today = new Date()
+
+    records.forEach((record) => {
+      const recordDate = parseISO(record.timestamp)
+      if (isSameDay(recordDate, today)) {
+        // Only keep the latest record for each type
+        const existing = map.get(record.type)
+        if (!existing || parseISO(existing.timestamp) < recordDate) {
+          map.set(record.type, record)
+        }
+      }
     })
+
     return map
   }, [records])
 
+  // Get records by date
   const getRecordsByDate = useCallback(
     (date: Date): Map<GlucometryType, Glucometry> => {
       const dayRecords = new Map<GlucometryType, Glucometry>()
@@ -115,18 +149,12 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
         }
       })
 
-      // Fallback: if no records for date, show some mock data for demo
-      if (dayRecords.size === 0 && isSameDay(date, new Date())) {
-        records.slice(0, 4).forEach((record) => {
-          dayRecords.set(record.type, record)
-        })
-      }
-
       return dayRecords
     },
     [records]
   )
 
+  // Get records in range
   const getRecordsInRange = useCallback(
     (start: Date, end: Date): Glucometry[] => {
       const startInterval = startOfDay(start)
@@ -140,11 +168,6 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
         })
       })
 
-      // Fallback: if no records in range, return all mock data for demo
-      if (filtered.length === 0) {
-        return records
-      }
-
       return filtered.sort(
         (a, b) => parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime()
       )
@@ -152,6 +175,7 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
     [records]
   )
 
+  // Get slot record
   const getSlotRecord = useCallback(
     (type: GlucometryType, date: Date = new Date()): Glucometry | undefined => {
       const dayRecords = getRecordsByDate(date)
@@ -160,18 +184,63 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
     [getRecordsByDate]
   )
 
+  // Mutation to create a record
+  const createMutation = useMutation({
+    mutationFn: useConvexMutation(api.glucoseRecords.create),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["glucoseRecords"] })
+      toast.success("Glucosa registrada")
+    },
+    onError: () => toast.error("Error al guardar glucosa"),
+  })
+
+  // Mutation to update a record
+  const updateMutation = useMutation({
+    mutationFn: useConvexMutation(api.glucoseRecords.update),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["glucoseRecords"] })
+      toast.success("Glucosa actualizada")
+    },
+    onError: () => toast.error("Error al actualizar glucosa"),
+  })
+
+  // Add a new record
+  const addRecord = useCallback(
+    (type: GlucometryType, value: number, notes?: string) => {
+      const now = new Date()
+      const date = format(now, "yyyy-MM-dd")
+
+      createMutation.mutate({
+        value,
+        type,
+        date,
+        recordedAt: now.getTime(),
+        notes,
+      })
+    },
+    [createMutation]
+  )
+
+  // Update an existing record
+  const updateRecord = useCallback(
+    (id: string, value: number, notes?: string) => {
+      updateMutation.mutate({
+        id: id as any, // Type assertion needed for Convex ID
+        value,
+        notes,
+      })
+    },
+    [updateMutation]
+  )
+
   return {
     records,
     todayRecords,
-    addRecord: (type, value, notes) => {
-      console.log("[Mock] addRecord called", { type, value, notes })
-    },
-    updateRecord: (id, value, notes) => {
-      console.log("[Mock] updateRecord called", { id, value, notes })
-    },
+    addRecord,
+    updateRecord,
     getRecordsByDate,
     getRecordsInRange,
     getSlotRecord,
-    isLoading: false,
+    isLoading: isPending,
   }
 }

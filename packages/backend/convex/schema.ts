@@ -68,6 +68,7 @@ export default defineSchema({
   glucoseRecords: defineTable({
     patientId: v.id("patientProfiles"),
     value: v.number(),
+    type: v.optional(v.string()), // "before_breakfast", "after_lunch", etc.
     date: v.string(),
     recordedAt: v.number(),
     notes: v.optional(v.string()),
@@ -138,4 +139,28 @@ export default defineSchema({
     isActive: v.boolean(),
     updatedAt: v.number(),
   }).index("by_patient_active", ["patientId", "isActive"]),
+
+  // Registros de dosis de insulina administradas
+  insulinDoseRecords: defineTable({
+    patientId: v.id("patientProfiles"),
+    dose: v.number(),
+    insulinType: insulinTypes,
+    scheduledTime: v.optional(v.string()), // "HH:MM" if linked to a schedule
+    administeredAt: v.number(), // timestamp
+    notes: v.optional(v.string()),
+  }).index("by_patient_date", ["patientId", "administeredAt"]),
+
+  // Slots de tratamiento configurados (horarios de glucosa/insulina)
+  treatmentSlots: defineTable({
+    patientId: v.id("patientProfiles"),
+    type: v.union(v.literal("glucose"), v.literal("insulin")),
+    scheduledTime: v.string(), // "HH:MM"
+    label: v.optional(v.string()), // "Desayuno", "Almuerzo", etc.
+    expectedDose: v.optional(v.number()), // for insulin slots
+    insulinType: v.optional(insulinTypes),
+    isEnabled: v.boolean(),
+    updatedAt: v.number(),
+  })
+    .index("by_patient_type", ["patientId", "type"])
+    .index("by_patient_enabled", ["patientId", "isEnabled"]),
 });

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useUser, SignInButton } from "@clerk/nextjs"
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { Bell, AlertTriangle, CheckCircle, Clock, Info } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { Button } from "@/components/ui/button"
@@ -89,6 +91,38 @@ const getAlertBgColor = (type: AlertType) => {
 }
 
 export default function AlertasPage() {
+  return (
+    <>
+      <Authenticated>
+        <AlertasContent />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
+            <p className="text-muted-foreground">
+              Inicia sesion para ver tus alertas
+            </p>
+            <SignInButton mode="modal">
+              <button className="btn-neon px-6 py-2 rounded-xl">
+                Iniciar Sesion
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="animate-pulse text-muted-foreground">Cargando...</div>
+        </div>
+      </AuthLoading>
+    </>
+  )
+}
+
+function AlertasContent() {
+  const { user } = useUser()
+  const userName = user?.firstName || "Usuario"
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)
 
   const unreadCount = alerts.filter((a) => !a.read).length
@@ -105,7 +139,7 @@ export default function AlertasPage() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout userName={userName} userRole="patient">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>

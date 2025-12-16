@@ -1,5 +1,11 @@
 "use client"
 
+import { useMemo } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
+import { api } from "@murphy/backend/convex/_generated/api"
+import { toast } from "sonner"
+
 interface SleepData {
   hours: number
   quality: number
@@ -33,32 +39,142 @@ interface WellnessLogReturn {
   dizzinessHistory: DizzinessData[]
 }
 
-// Mock wellness data for UI development
-const MOCK_SLEEP: SleepData = { hours: 7, quality: 8 }
-const MOCK_STRESS: StressData = { level: 4 }
+// Helper: Get start/end of today in Unix timestamp
+function getTodayRange() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const start = today.getTime()
+  today.setHours(23, 59, 59, 999)
+  const end = today.getTime()
+  return { start, end }
+}
+
+// Helper: Convert recordedAt timestamp to YYYY-MM-DD
+function timestampToDate(timestamp: number): string {
+  return new Date(timestamp).toISOString().split("T")[0]
+}
 
 export function useWellnessLog(_patientId?: string): WellnessLogReturn {
-  // Return mock data - no actual backend calls
+  const queryClient = useQueryClient()
+  const today = useMemo(() => new Date().toISOString().split("T")[0], [])
+  const { start: todayStart, end: todayEnd } = useMemo(() => getTodayRange(), [])
+
+  // Fetch sleep records (has date field)
+  const { data: sleepRecords = [], isPending: sleepLoading } = useQuery(
+    convexQuery(api.sleepRecords.list, {})
+  )
+
+  // Fetch stress records (uses recordedAt timestamp)
+  const { data: stressRecords = [], isPending: stressLoading } = useQuery(
+    convexQuery(api.stressRecords.list, {})
+  )
+
+  // Fetch dizziness records (uses recordedAt timestamp + severity instead of experienced boolean)
+  const { data: dizzinessRecords = [], isPending: dizzinessLoading } = useQuery(
+    convexQuery(api.dizzinessRecords.list, {})
+  )
+
+  // Get today's records
+  const todaySleep = useMemo(() => {
+    const record = sleepRecords.find((r) => r.date === today)
+    return record ? { hours: record.hours, quality: record.quality } : null
+  }, [sleepRecords, today])
+
+  const todayStress = useMemo(() => {
+    const record = stressRecords.find(
+      (r) => r.recordedAt >= todayStart && r.recordedAt <= todayEnd
+    )
+    return record ? { level: record.level, notes: record.notes } : null
+  }, [stressRecords, todayStart, todayEnd])
+
+  const todayDizziness = useMemo(() => {
+    const record = dizzinessRecords.find(
+      (r) => r.recordedAt >= todayStart && r.recordedAt <= todayEnd
+    )
+    if (!record) return null
+    return {
+      experienced: record.severity > 0,
+      severity: record.severity,
+      notes: record.notes,
+    }
+  }, [dizzinessRecords, todayStart, todayEnd])
+
+  // Mutations
+  const sleepMutation = useMutation({
+    mutationFn: useConvexMutation(api.sleepRecords.create),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sleepRecords"] })
+      toast.success("Sueño registrado")
+    },
+    onError: () => toast.error("Error al guardar sueño"),
+  })
+
+  const stressMutation = useMutation({
+    mutationFn: useConvexMutation(api.stressRecords.create),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stressRecords"] })
+      toast.success("Estrés registrado")
+    },
+    onError: () => toast.error("Error al guardar estrés"),
+  })
+
+  const dizzinessMutation = useMutation({
+    mutationFn: useConvexMutation(api.dizzinessRecords.create),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dizzinessRecords"] })
+      toast.success("Mareo registrado")
+    },
+    onError: () => toast.error("Error al guardar mareo"),
+  })
+
+  // History data (simple transformation)
+  const sleepHistory = useMemo(
+    () => sleepRecords.map((r) => ({ hours: r.hours, quality: r.quality })),
+    [sleepRecords]
+  )
+
+  const stressHistory = useMemo(
+    () => stressRecords.map((r) => ({ level: r.level, notes: r.notes })),
+    [stressRecords]
+  )
+
+  const dizzinessHistory = useMemo(
+    () =>
+      dizzinessRecords.map((r) => ({
+        experienced: r.severity > 0,
+        severity: r.severity,
+        notes: r.notes,
+      })),
+    [dizzinessRecords]
+  )
+
   return {
-    todaySleep: MOCK_SLEEP,
-    todayStress: MOCK_STRESS,
-    todayDizziness: null,
+    todaySleep,
+    todayStress,
+    todayDizziness,
     saveSleep: (data) => {
-      console.log("[Mock] saveSleep called", data)
+      sleepMutation.mutate({
+        date: today,
+        hours: data.hours,
+        quality: data.quality,
+      })
     },
     saveStress: (data) => {
-      console.log("[Mock] saveStress called", data)
+      stressMutation.mutate({
+        level: data.level,
+        notes: data.notes,
+      })
     },
     saveDizziness: (data) => {
-      console.log("[Mock] saveDizziness called", data)
+      dizzinessMutation.mutate({
+        severity: data.experienced ? (data.severity ?? 5) : 0,
+        symptoms: [], // Empty for now, could be extended later
+        notes: data.notes,
+      })
     },
-    isLoading: false,
-    sleepHistory: [
-      { hours: 7, quality: 8 },
-      { hours: 6.5, quality: 7 },
-      { hours: 8, quality: 9 },
-    ],
-    stressHistory: [{ level: 4 }, { level: 5 }, { level: 3 }],
-    dizzinessHistory: [{ experienced: false }],
+    isLoading: sleepLoading || stressLoading || dizzinessLoading,
+    sleepHistory,
+    stressHistory,
+    dizzinessHistory,
   }
 }

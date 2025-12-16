@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { InsulinConfigCard } from "./-components/InsulinConfigCard"
 import { InsulinUpdateSheet } from "./-components/InsulinUpdateSheet"
@@ -12,10 +13,19 @@ import {
   type UpdateInsulinData,
 } from "@/hooks/useInsulinSchedule"
 import { toast } from "sonner"
-import mockData from "@/data/mockPatients.json"
+import { AuthenticatedContent } from "@/components/authenticated-content"
 
 export default function InsulinaPage() {
-  const userName = mockData.patients[0]?.name || "Usuario"
+  return (
+    <AuthenticatedContent>
+      <InsulinaContent />
+    </AuthenticatedContent>
+  )
+}
+
+function InsulinaContent() {
+  const { user } = useUser()
+  const userName = user?.firstName || "Usuario"
 
   const {
     rapidSchedule,
@@ -59,7 +69,7 @@ export default function InsulinaPage() {
     (rapidSchedule?.timesPerDay ?? 0) + (basalSchedule?.timesPerDay ?? 0)
 
   return (
-    <DashboardLayout userName={userName}>
+    <DashboardLayout userName={userName} userRole="patient">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Insulina</h1>

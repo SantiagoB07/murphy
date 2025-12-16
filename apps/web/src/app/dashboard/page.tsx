@@ -13,8 +13,6 @@ import { WellnessHistorySheet } from "./-components/WellnessHistorySheet"
 import { useXPCalculation } from "@/hooks/useXPCalculation"
 import { useWellnessLog } from "@/hooks/useWellnessLog"
 import { useGlucoseLog } from "@/hooks/useGlucoseLog"
-import type { Patient, Glucometry } from "@/types/diabetes"
-import mockData from "@/data/mockPatients.json"
 import { Activity, TrendingUp, Flame, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -29,7 +27,7 @@ function DashboardContent() {
     "sleep" | "stress" | "dizziness" | null
   >(null)
 
-  // Wellness data from mock hook
+  // Wellness data from Convex hooks
   const {
     todaySleep,
     todayStress,
@@ -40,16 +38,14 @@ function DashboardContent() {
     sleepHistory,
     stressHistory,
     dizzinessHistory,
+    isLoading: wellnessLoading,
   } = useWellnessLog()
 
-  // Glucose data from mock hook
-  const { records, todayRecords } = useGlucoseLog()
+  // Glucose data from Convex hook
+  const { records, todayRecords, isLoading: glucoseLoading } = useGlucoseLog()
 
-  // Get mock patient data
-  const currentPatient = mockData.patients[0] as Patient
-
-  // Get user name from Clerk or mock data
-  const userName = user?.firstName || currentPatient.name.split(" ")[0]
+  // Get user name from Clerk
+  const userName = user?.firstName || "Usuario"
 
   // Get today's glucose records
   const todayGlucoseRecords = useMemo(() => {
@@ -59,20 +55,54 @@ function DashboardContent() {
     return []
   }, [todayRecords])
 
+  // Calculate streak from glucose records (simplified - count consecutive days with records)
+  const streakDays = useMemo(() => {
+    const dates = new Set(
+      records.map((r) => r.timestamp.split("T")[0])
+    )
+    let streak = 0
+    const today = new Date()
+    
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split("T")[0]
+      
+      if (dates.has(dateStr)) {
+        streak++
+      } else if (i > 0) {
+        break
+      }
+    }
+    
+    return streak
+  }, [records])
+
   // Calculate XP using the hook
   const xpResult = useXPCalculation({
     todayGlucoseRecords,
     hasSleepLogged: !!todaySleep,
     hasStressLogged: !!todayStress,
-    streakDays: currentPatient.streak,
-    totalAccumulatedXP: currentPatient.xpLevel * 10,
+    streakDays,
+    totalAccumulatedXP: 0, // Will be calculated from historical data later
   })
+
+  // Get last glucose value
+  const lastGlucoseValue = useMemo(() => {
+    if (todayGlucoseRecords.length > 0) {
+      return todayGlucoseRecords[0].value
+    }
+    if (records.length > 0) {
+      return records[0].value
+    }
+    return null
+  }, [todayGlucoseRecords, records])
 
   // Stats cards data
   const stats = [
     {
       label: "Última glucosa",
-      value: `${(currentPatient.glucometrias as Glucometry[])[0]?.value || "-"} mg/dL`,
+      value: lastGlucoseValue ? `${lastGlucoseValue} mg/dL` : "-",
       icon: Activity,
       color: "text-purple-400",
       bgColor: "bg-purple-500/20",
@@ -86,22 +116,33 @@ function DashboardContent() {
     },
     {
       label: "Días en racha",
-      value: `${currentPatient.streak}`,
+      value: `${streakDays}`,
       icon: Flame,
       color: "text-warning",
       bgColor: "bg-warning/20",
     },
     {
       label: "Alertas activas",
-      value: currentPatient.alertas.filter((a) => !a.resolved).length.toString(),
+      value: "0",
       icon: AlertTriangle,
       color: "text-destructive",
       bgColor: "bg-destructive/20",
     },
   ]
 
+  // Show loading state
+  if (wellnessLoading || glucoseLoading) {
+    return (
+      <DashboardLayout userName={userName} userRole="patient">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-pulse text-muted-foreground">Cargando...</div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
-    <DashboardLayout userName={userName}>
+    <DashboardLayout userName={userName} userRole="patient">
       {/* Page Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between">
