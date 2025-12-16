@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useMutation } from "@tanstack/react-query"
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
 import { api } from "@murphy/backend/convex/_generated/api"
 import type { InsulinSchedule } from "@/types/diabetes"
@@ -69,8 +69,6 @@ function convexToInsulinSchedule(record: any): InsulinSchedule {
 export function useInsulinSchedule(
   _patientId?: string | null
 ): UseInsulinScheduleReturn {
-  const queryClient = useQueryClient()
-
   // Fetch active rapid insulin schedule
   const { data: rapidData, isPending: rapidLoading } = useQuery(
     convexQuery(api.insulinSchedules.getByType, { insulinType: "rapid" })
@@ -90,12 +88,9 @@ export function useInsulinSchedule(
   if (rapidSchedule) history.push(rapidSchedule)
   if (basalSchedule) history.push(basalSchedule)
 
-  // Mutation to create a new schedule
-  const createMutation = useMutation({
-    mutationFn: useConvexMutation(api.insulinSchedules.create),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["insulinSchedules"] })
-    },
+  // Mutation to create or update a schedule
+  const upsertMutation = useMutation({
+    mutationFn: useConvexMutation(api.insulinSchedules.upsert),
   })
 
   const updateSchedule = (
@@ -107,12 +102,12 @@ export function useInsulinSchedule(
   ) => {
     const { insulinType, data } = params
 
-    createMutation.mutate(
+    upsertMutation.mutate(
       {
         insulinType,
         unitsPerDose: data.unitsPerDose,
         timesPerDay: data.timesPerDay,
-        notes: data.notes || data.brand, // Store brand in notes for now
+        notes: data.notes || data.brand,
       },
       {
         onSuccess: () => {
@@ -132,6 +127,6 @@ export function useInsulinSchedule(
     isLoading: rapidLoading || basalLoading,
     isError: false,
     updateSchedule,
-    isUpdating: createMutation.isPending,
+    isUpdating: upsertMutation.isPending,
   }
 }

@@ -1,27 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { useUser } from "@clerk/nextjs"
+import { useUser, SignInButton } from "@clerk/nextjs"
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { InsulinConfigCard } from "./-components/InsulinConfigCard"
 import { InsulinUpdateSheet } from "./-components/InsulinUpdateSheet"
-import { InsulinHistoryTable } from "./-components/InsulinHistoryTable"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, History } from "lucide-react"
+import { InsulinTodoList } from "./-components/InsulinTodoList"
+import { Card, CardContent } from "@/components/ui/card"
+import { Activity } from "lucide-react"
 import {
   useInsulinSchedule,
   type UpdateInsulinData,
 } from "@/hooks/useInsulinSchedule"
+import { useInsulinDoseRecords } from "@/hooks/useInsulinDoseRecords"
 import { toast } from "sonner"
-import { AuthenticatedContent } from "@/components/authenticated-content"
-
-export default function InsulinaPage() {
-  return (
-    <AuthenticatedContent>
-      <InsulinaContent />
-    </AuthenticatedContent>
-  )
-}
 
 function InsulinaContent() {
   const { user } = useUser()
@@ -30,11 +23,16 @@ function InsulinaContent() {
   const {
     rapidSchedule,
     basalSchedule,
-    history,
     isLoading,
     updateSchedule,
     isUpdating,
   } = useInsulinSchedule()
+
+  const {
+    todayRecords,
+    createDoseRecord,
+    isCreating,
+  } = useInsulinDoseRecords()
 
   const [updateSheetOpen, setUpdateSheetOpen] = useState(false)
   const [selectedType, setSelectedType] = useState<"rapid" | "basal">("rapid")
@@ -119,26 +117,32 @@ function InsulinaContent() {
           </Card>
         )}
 
-        {/* History table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <History className="h-5 w-5" />
-              Historial de ajustes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                <div className="h-12 w-full bg-muted/20 rounded animate-pulse" />
-                <div className="h-12 w-full bg-muted/20 rounded animate-pulse" />
-                <div className="h-12 w-full bg-muted/20 rounded animate-pulse" />
-              </div>
-            ) : (
-              <InsulinHistoryTable history={history} />
-            )}
-          </CardContent>
-        </Card>
+        {/* Todo list - daily applications */}
+        {!isLoading && (rapidSchedule || basalSchedule) && (
+          <InsulinTodoList
+            rapidSchedule={rapidSchedule}
+            basalSchedule={basalSchedule}
+            todayRecords={todayRecords}
+            onLogDose={(data) => {
+              createDoseRecord(
+                {
+                  insulinType: data.insulinType,
+                  dose: data.dose,
+                  administeredAt: data.administeredAt.getTime(),
+                },
+                {
+                  onSuccess: () => {
+                    toast.success("Dosis registrada correctamente")
+                  },
+                  onError: (error) => {
+                    toast.error("Error al registrar: " + error.message)
+                  },
+                }
+              )
+            }}
+            isLogging={isCreating}
+          />
+        )}
 
         {/* Update sheet */}
         <InsulinUpdateSheet
@@ -151,5 +155,35 @@ function InsulinaContent() {
         />
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function InsulinaPage() {
+  return (
+    <>
+      <Authenticated>
+        <InsulinaContent />
+      </Authenticated>
+      <Unauthenticated>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
+            <p className="text-muted-foreground">
+              Inicia sesion para acceder a tu configuracion de insulina
+            </p>
+            <SignInButton mode="modal">
+              <button className="btn-neon px-6 py-2 rounded-xl">
+                Iniciar Sesion
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </Unauthenticated>
+      <AuthLoading>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="animate-pulse text-muted-foreground">Cargando...</div>
+        </div>
+      </AuthLoading>
+    </>
   )
 }

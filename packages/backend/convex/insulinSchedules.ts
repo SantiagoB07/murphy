@@ -131,6 +131,51 @@ export const update = mutation({
 })
 
 /**
+ * Creates or updates an insulin schedule (upsert)
+ */
+export const upsert = mutation({
+  args: {
+    insulinType: insulinTypes,
+    unitsPerDose: v.number(),
+    timesPerDay: v.number(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const patient = await getCurrentPatient(ctx)
+
+    // Check if a schedule already exists for this type
+    const existing = await ctx.db
+      .query("insulinSchedules")
+      .withIndex("by_patient_type", (q) =>
+        q.eq("patientId", patient._id).eq("insulinType", args.insulinType)
+      )
+      .first()
+
+    if (existing) {
+      // Update existing schedule
+      await ctx.db.patch(existing._id, {
+        unitsPerDose: args.unitsPerDose,
+        timesPerDay: args.timesPerDay,
+        notes: args.notes,
+        updatedAt: Date.now(),
+      })
+      return { id: existing._id, updated: true }
+    } else {
+      // Create new schedule
+      const scheduleId = await ctx.db.insert("insulinSchedules", {
+        patientId: patient._id,
+        insulinType: args.insulinType,
+        unitsPerDose: args.unitsPerDose,
+        timesPerDay: args.timesPerDay,
+        notes: args.notes,
+        updatedAt: Date.now(),
+      })
+      return { id: scheduleId, updated: false }
+    }
+  },
+})
+
+/**
  * Deletes an insulin schedule
  */
 export const remove = mutation({
