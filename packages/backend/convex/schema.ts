@@ -80,19 +80,10 @@ export default defineSchema({
     insulinType: insulinTypes,
     unitsPerDose: v.number(),
     timesPerDay: v.number(),
-    brand: v.optional(v.string()),
-    effectiveFrom: v.string(),
-    effectiveUntil: v.optional(v.string()),
-    changeReason: v.optional(v.string()),
-    orderedBy: v.optional(v.string()),
-    changedByClerkUserId: v.optional(v.string()),
-    changedByRole: v.optional(userRoles),
-    isActive: v.boolean(),
     notes: v.optional(v.string()),
     updatedAt: v.number(),
   })
-    .index("by_patient_active", ["patientId", "isActive"])
-    .index("by_patient_type_active", ["patientId", "insulinType", "isActive"]),
+    .index("by_patient_type", ["patientId", "insulinType"]),
 
   // Registros de sueño
   sleepRecords: defineTable({
