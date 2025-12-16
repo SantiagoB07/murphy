@@ -61,7 +61,7 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.7)(react@19.2.3)
       '@tanstack/react-form':
-        specifier: ^1.27.3
+        specifier: ^1.27.4
         version: 1.27.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       babel-plugin-react-compiler:
         specifier: ^1.0.0
@@ -136,6 +136,9 @@ importers:
 
   packages/backend:
     dependencies:
+      '@clerk/backend':
+        specifier: ^2.27.1
+        version: 2.27.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       convex:
         specifier: 'catalog:'
         version: 1.31.0(@clerk/clerk-react@5.59.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)

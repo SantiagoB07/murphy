@@ -45,15 +45,14 @@ export default defineSchema({
     diagnosisYear: v.optional(v.number()),
     birthDate: v.optional(v.string()),
     gender: v.optional(genderTypes),
-    idNumber: v.optional(v.string()),
     city: v.optional(v.string()),
     estrato: v.optional(v.number()),
-    xpLevel: v.number(),
-    streak: v.number(),
     coadminName: v.optional(v.string()),
     coadminPhone: v.optional(v.string()),
     coadminEmail: v.optional(v.string()),
-    updatedAt: v.number(),
+    age: v.optional(v.number()),
+    fullName: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
   }).index("by_clerk_user", ["clerkUserId"]),
 
   // Perfiles de co-administradores
