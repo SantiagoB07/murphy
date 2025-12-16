@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.31.5",
+    "@convex-dev/react-query": "^0.1.0",
     "@hookform/resolvers": "^5.2.2",
     "@murphy/backend": "workspace:*",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -23,6 +24,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.2.6",
     "@tanstack/react-form": "^1.27.4",
+    "@tanstack/react-query": "^5.90.12",
     "babel-plugin-react-compiler": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
