@@ -1,34 +1,24 @@
 import { httpAction } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
-import { parseBody, errorResponse, successResponse } from "./helpers";
-import { isValidPatientId } from "./types";
+import { parseAndValidate, errorResponse, successResponse } from "./helpers";
+import { SaveDizzinessSchema, UpdateDizzinessSchema } from "./schemas";
 
 // ============================================
 // HTTP Actions - Dizziness
 // ============================================
 
 export const httpSaveDizziness = httpAction(async (ctx, request) => {
-  const body = await parseBody(request);
-  if (!body) {
-    return errorResponse("Invalid JSON body");
-  }
+  const result = await parseAndValidate(request, SaveDizzinessSchema);
+  if (!result.success) return result.response;
 
-  console.log("[Agent] save-dizziness body:", JSON.stringify(body));
+  const { patient_id, severity, symptoms, duration_minutes, notes } = result.data;
 
-  const patientId = body.patient_id ?? body.dizziness_data?.patient_id;
-  const severity = body.severity ?? body.dizziness_data?.severity;
-  const symptoms = body.symptoms ?? body.dizziness_data?.symptoms;
-  const durationMinutes = body.duration_minutes ?? body.dizziness_data?.duration_minutes;
-  const notes = body.notes ?? body.dizziness_data?.notes;
-
-  if (!isValidPatientId(patientId) || severity === undefined) {
-    return errorResponse("patient_id y severity son requeridos");
-  }
+  console.log("[Agent] save-dizziness:", { patient_id, severity, symptoms, duration_minutes, notes });
 
   // Validate patient exists
   const patient = await ctx.runQuery(internal.agent.queries.getPatientById, {
-    patientId: patientId as Id<"patientProfiles">,
+    patientId: patient_id as Id<"patientProfiles">,
   });
 
   if (!patient) {
@@ -36,37 +26,27 @@ export const httpSaveDizziness = httpAction(async (ctx, request) => {
   }
 
   await ctx.runMutation(internal.agent.mutations.saveDizzinessRecord, {
-    patientId: patientId as Id<"patientProfiles">,
-    severity: Number(severity),
-    symptoms: Array.isArray(symptoms) ? symptoms : undefined,
-    durationMinutes: typeof durationMinutes === "number" ? durationMinutes : undefined,
-    notes: typeof notes === "string" ? notes : undefined,
+    patientId: patient_id as Id<"patientProfiles">,
+    severity,
+    symptoms,
+    durationMinutes: duration_minutes,
+    notes,
   });
 
   return successResponse(`Mareo con severidad ${severity}/10 registrado`);
 });
 
 export const httpUpdateDizziness = httpAction(async (ctx, request) => {
-  const body = await parseBody(request);
-  if (!body) {
-    return errorResponse("Invalid JSON body");
-  }
+  const result = await parseAndValidate(request, UpdateDizzinessSchema);
+  if (!result.success) return result.response;
 
-  console.log("[Agent] update-dizziness body:", JSON.stringify(body));
+  const { patient_id, severity, symptoms, duration_minutes, notes } = result.data;
 
-  const patientId = body.patient_id ?? body.dizziness_data?.patient_id;
-  const severity = body.severity ?? body.dizziness_data?.severity;
-  const symptoms = body.symptoms ?? body.dizziness_data?.symptoms;
-  const durationMinutes = body.duration_minutes ?? body.dizziness_data?.duration_minutes;
-  const notes = body.notes ?? body.dizziness_data?.notes;
-
-  if (!isValidPatientId(patientId) || severity === undefined) {
-    return errorResponse("patient_id y severity son requeridos");
-  }
+  console.log("[Agent] update-dizziness:", { patient_id, severity, symptoms, duration_minutes, notes });
 
   // Find latest record
   const latest = await ctx.runQuery(internal.agent.queries.getLatestDizzinessRecord, {
-    patientId: patientId as Id<"patientProfiles">,
+    patientId: patient_id as Id<"patientProfiles">,
   });
 
   if (!latest) {
@@ -77,10 +57,10 @@ export const httpUpdateDizziness = httpAction(async (ctx, request) => {
 
   await ctx.runMutation(internal.agent.mutations.updateDizzinessRecord, {
     recordId: latest._id,
-    severity: Number(severity),
-    symptoms: Array.isArray(symptoms) ? symptoms : undefined,
-    durationMinutes: typeof durationMinutes === "number" ? durationMinutes : undefined,
-    notes: typeof notes === "string" ? notes : undefined,
+    severity,
+    symptoms,
+    durationMinutes: duration_minutes,
+    notes,
   });
 
   return successResponse(`Mareo actualizado de severidad ${oldSeverity} a ${severity}/10`);

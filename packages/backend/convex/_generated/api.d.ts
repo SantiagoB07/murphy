@@ -17,6 +17,7 @@ import type * as agent_httpSleep from "../agent/httpSleep.js";
 import type * as agent_httpStress from "../agent/httpStress.js";
 import type * as agent_mutations from "../agent/mutations.js";
 import type * as agent_queries from "../agent/queries.js";
+import type * as agent_schemas from "../agent/schemas.js";
 import type * as agent_types from "../agent/types.js";
 import type * as aiCallSchedules from "../aiCallSchedules.js";
 import type * as dizzinessRecords from "../dizzinessRecords.js";
@@ -57,6 +58,7 @@ declare const fullApi: ApiFromModules<{
   "agent/httpStress": typeof agent_httpStress;
   "agent/mutations": typeof agent_mutations;
   "agent/queries": typeof agent_queries;
+  "agent/schemas": typeof agent_schemas;
   "agent/types": typeof agent_types;
   aiCallSchedules: typeof aiCallSchedules;
   dizzinessRecords: typeof dizzinessRecords;

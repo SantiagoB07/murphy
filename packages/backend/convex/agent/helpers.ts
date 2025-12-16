@@ -1,4 +1,5 @@
-import { AgentResponse, RequestBody } from "./types";
+import { z } from "zod";
+import { AgentResponse } from "./types";
 
 // ============================================
 // HTTP Response Helpers
@@ -20,13 +21,48 @@ export function successResponse(message: string): Response {
 }
 
 // ============================================
-// Request Parsing
+// Request Parsing & Validation
 // ============================================
 
-export async function parseBody(request: Request): Promise<RequestBody | null> {
+/**
+ * Parses and validates a request body using a Zod schema
+ * Returns either validated data or an error response
+ */
+export async function parseAndValidate<T>(
+  request: Request,
+  schema: z.ZodSchema<T>
+): Promise<
+  | { success: true; data: T }
+  | { success: false; response: Response }
+> {
+  let body: unknown;
+
+  // Parse JSON body
   try {
-    return (await request.json()) as RequestBody;
+    body = await request.json();
   } catch {
-    return null;
+    return {
+      success: false,
+      response: errorResponse("Invalid JSON body"),
+    };
   }
+
+  // Validate with Zod schema
+  const result = schema.safeParse(body);
+
+  if (!result.success) {
+    // Get first error message from Zod error
+    const firstError = result.error.issues?.[0];
+    const message = firstError?.message || "Datos de entrada inválidos";
+
+    return {
+      success: false,
+      response: errorResponse(message),
+    };
+  }
+
+  return {
+    success: true,
+    data: result.data,
+  };
 }
