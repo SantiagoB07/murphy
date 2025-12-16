@@ -2,9 +2,9 @@
 
 import { useState } from "react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
-import { InsulinConfigCard } from "@/components/insulin/InsulinConfigCard"
-import { InsulinUpdateSheet } from "@/components/insulin/InsulinUpdateSheet"
-import { InsulinHistoryTable } from "@/components/insulin/InsulinHistoryTable"
+import { InsulinConfigCard } from "./-components/InsulinConfigCard"
+import { InsulinUpdateSheet } from "./-components/InsulinUpdateSheet"
+import { InsulinHistoryTable } from "./-components/InsulinHistoryTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, History } from "lucide-react"
 import {
