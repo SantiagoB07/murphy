@@ -3,6 +3,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import { z } from "zod";
+import { useUser } from "@clerk/nextjs";
 
 import {
   useQuery,
@@ -25,6 +26,7 @@ export const patientFormSchema = z.object({
 
 export function useOnboardingForm() {
   const [isPending, setIsPending] = useState(false);
+  const { user } = useUser();
   const onboard = useAction(api.users.onboardUser);
 
   const form = useForm({
@@ -54,10 +56,11 @@ export function useOnboardingForm() {
           estrato: value.socioeconomicLevel ? parseInt(value.socioeconomicLevel) : undefined,
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Reload user to ensure publicMetadata is fresh before redirecting
+        await user?.reload();
 
-        // Full page redirect to refresh authentication state
-        window.location.href = '/dashboard';
+        // Full page redirect to dashboard
+        window.location.replace('/dashboard');
       } catch (error) {
         console.error('Error during onboarding:', error);
         // You may want to show a toast notification here
