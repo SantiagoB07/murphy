@@ -49,11 +49,6 @@ function getTodayRange() {
   return { start, end }
 }
 
-// Helper: Convert recordedAt timestamp to YYYY-MM-DD
-function timestampToDate(timestamp: number): string {
-  return new Date(timestamp).toISOString().split("T")[0]
-}
-
 export function useWellnessLog(_patientId?: string): WellnessLogReturn {
   const queryClient = useQueryClient()
   const today = useMemo(() => new Date().toISOString().split("T")[0], [])
@@ -99,30 +94,30 @@ export function useWellnessLog(_patientId?: string): WellnessLogReturn {
     }
   }, [dizzinessRecords, todayStart, todayEnd])
 
-  // Mutations
+  // Mutations - using upsert for one-record-per-day behavior
   const sleepMutation = useMutation({
-    mutationFn: useConvexMutation(api.sleepRecords.create),
-    onSuccess: () => {
+    mutationFn: useConvexMutation(api.sleepRecords.upsert),
+    onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["sleepRecords"] })
-      toast.success("Sueño registrado")
+      toast.success(result.updated ? "Sueno actualizado" : "Sueno registrado")
     },
-    onError: () => toast.error("Error al guardar sueño"),
+    onError: () => toast.error("Error al guardar sueno"),
   })
 
   const stressMutation = useMutation({
-    mutationFn: useConvexMutation(api.stressRecords.create),
-    onSuccess: () => {
+    mutationFn: useConvexMutation(api.stressRecords.upsert),
+    onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["stressRecords"] })
-      toast.success("Estrés registrado")
+      toast.success(result.updated ? "Estres actualizado" : "Estres registrado")
     },
-    onError: () => toast.error("Error al guardar estrés"),
+    onError: () => toast.error("Error al guardar estres"),
   })
 
   const dizzinessMutation = useMutation({
-    mutationFn: useConvexMutation(api.dizzinessRecords.create),
-    onSuccess: () => {
+    mutationFn: useConvexMutation(api.dizzinessRecords.upsert),
+    onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["dizzinessRecords"] })
-      toast.success("Mareo registrado")
+      toast.success(result.updated ? "Mareo actualizado" : "Mareo registrado")
     },
     onError: () => toast.error("Error al guardar mareo"),
   })
@@ -163,6 +158,7 @@ export function useWellnessLog(_patientId?: string): WellnessLogReturn {
       stressMutation.mutate({
         level: data.level,
         notes: data.notes,
+        date: today,
       })
     },
     saveDizziness: (data) => {
@@ -170,6 +166,7 @@ export function useWellnessLog(_patientId?: string): WellnessLogReturn {
         severity: data.experienced ? (data.severity ?? 5) : 0,
         symptoms: [], // Empty for now, could be extended later
         notes: data.notes,
+        date: today,
       })
     },
     isLoading: sleepLoading || stressLoading || dizzinessLoading,

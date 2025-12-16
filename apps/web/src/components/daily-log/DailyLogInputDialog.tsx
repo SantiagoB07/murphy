@@ -66,6 +66,7 @@ interface SleepDialogProps extends BaseDialogProps {
 interface StressDialogProps extends BaseDialogProps {
   type: "stress"
   initialLevel?: number
+  initialNotes?: string
   onSave: (level: number, notes?: string) => void
 }
 
@@ -73,6 +74,7 @@ interface DizzinessDialogProps extends BaseDialogProps {
   type: "dizziness"
   initialExperienced?: boolean
   initialSeverity?: number
+  initialNotes?: string
   onSave: (data: { experienced: boolean; severity?: number; notes?: string }) => void
 }
 
@@ -549,17 +551,18 @@ function StressContent({
   open,
   onOpenChange,
   initialLevel,
+  initialNotes,
   onSave,
 }: StressDialogProps) {
   const [level, setLevel] = useState<number>(initialLevel ?? 5)
-  const [notes, setNotes] = useState("")
+  const [notes, setNotes] = useState(initialNotes ?? "")
 
   useEffect(() => {
     if (open) {
       setLevel(initialLevel ?? 5)
-      setNotes("")
+      setNotes(initialNotes ?? "")
     }
-  }, [open, initialLevel])
+  }, [open, initialLevel, initialNotes])
 
   const handleSubmit = () => {
     onSave(level, notes.trim() || undefined)
@@ -667,21 +670,22 @@ function DizzinessContent({
   onOpenChange,
   initialExperienced,
   initialSeverity,
+  initialNotes,
   onSave,
 }: DizzinessDialogProps) {
   const [experienced, setExperienced] = useState<boolean | null>(
     initialExperienced ?? null
   )
   const [severity, setSeverity] = useState<number>(initialSeverity ?? 5)
-  const [notes, setNotes] = useState("")
+  const [notes, setNotes] = useState(initialNotes ?? "")
 
   useEffect(() => {
     if (open) {
       setExperienced(initialExperienced ?? null)
       setSeverity(initialSeverity ?? 5)
-      setNotes("")
+      setNotes(initialNotes ?? "")
     }
-  }, [open, initialExperienced, initialSeverity])
+  }, [open, initialExperienced, initialSeverity, initialNotes])
 
   const handleSubmit = () => {
     if (experienced === null) return

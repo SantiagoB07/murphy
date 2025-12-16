@@ -65,6 +65,35 @@ export const getById = query({
   },
 })
 
+/**
+ * Gets the dizziness record for a specific date (returns first record of the day)
+ */
+export const getByDate = query({
+  args: {
+    date: v.string(), // "YYYY-MM-DD"
+  },
+  handler: async (ctx, args) => {
+    const patient = await getCurrentPatient(ctx)
+
+    // Calculate start and end timestamps for the given date
+    const startOfDay = new Date(args.date + "T00:00:00").getTime()
+    const endOfDay = new Date(args.date + "T23:59:59.999").getTime()
+
+    const records = await ctx.db
+      .query("dizzinessRecords")
+      .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("recordedAt"), startOfDay),
+          q.lte(q.field("recordedAt"), endOfDay)
+        )
+      )
+      .first()
+
+    return records
+  },
+})
+
 // ============================================
 // Mutations
 // ============================================
@@ -93,6 +122,63 @@ export const create = mutation({
     })
 
     return { id: recordId }
+  },
+})
+
+/**
+ * Creates or updates a dizziness record for a given date (upsert)
+ * Only one record per day is allowed - if one exists, it gets updated
+ */
+export const upsert = mutation({
+  args: {
+    severity: v.number(), // 1-10 scale (0 = no dizziness)
+    symptoms: v.optional(v.array(v.string())),
+    durationMinutes: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    date: v.string(), // "YYYY-MM-DD" - date from client to avoid timezone issues
+  },
+  handler: async (ctx, args) => {
+    const patient = await getCurrentPatient(ctx)
+
+    // Calculate start and end timestamps for the given date
+    const startOfDay = new Date(args.date + "T00:00:00").getTime()
+    const endOfDay = new Date(args.date + "T23:59:59.999").getTime()
+
+    // Check if a record exists for this date
+    const existing = await ctx.db
+      .query("dizzinessRecords")
+      .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("recordedAt"), startOfDay),
+          q.lte(q.field("recordedAt"), endOfDay)
+        )
+      )
+      .first()
+
+    if (existing) {
+      // Update existing record
+      await ctx.db.patch(existing._id, {
+        severity: args.severity,
+        symptoms: args.symptoms ?? existing.symptoms,
+        durationMinutes: args.durationMinutes,
+        notes: args.notes,
+      })
+      return { id: existing._id, updated: true }
+    }
+
+    // Create new record - use midday of the given date to avoid timezone edge cases
+    const recordedAt = new Date(args.date + "T12:00:00").getTime()
+    const recordId = await ctx.db.insert("dizzinessRecords", {
+      patientId: patient._id,
+      severity: args.severity,
+      symptoms: args.symptoms ?? [],
+      durationMinutes: args.durationMinutes,
+      notes: args.notes,
+      recordedAt,
+    })
+
+    return { id: recordId, updated: false }
   },
 })
 

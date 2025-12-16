@@ -252,6 +252,7 @@ function DashboardContent() {
         open={stressDialogOpen}
         onOpenChange={setStressDialogOpen}
         initialLevel={todayStress?.level}
+        initialNotes={todayStress?.notes}
         onSave={(level, notes) => {
           saveStress({ level, notes })
         }}
@@ -264,6 +265,7 @@ function DashboardContent() {
         onOpenChange={setDizzinessDialogOpen}
         initialExperienced={todayDizziness?.experienced}
         initialSeverity={todayDizziness?.severity}
+        initialNotes={todayDizziness?.notes}
         onSave={(data) => {
           saveDizziness(data)
         }}

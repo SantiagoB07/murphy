@@ -124,6 +124,48 @@ export const create = mutation({
 })
 
 /**
+ * Creates or updates a sleep record for a given date (upsert)
+ * If a record exists for the date, it updates it; otherwise creates a new one
+ */
+export const upsert = mutation({
+  args: {
+    hours: v.number(),
+    quality: v.number(), // 1-10 scale
+    date: v.string(), // "YYYY-MM-DD"
+  },
+  handler: async (ctx, args) => {
+    const patient = await getCurrentPatient(ctx)
+
+    // Check if a record already exists for this date
+    const existing = await ctx.db
+      .query("sleepRecords")
+      .withIndex("by_patient_date", (q) =>
+        q.eq("patientId", patient._id).eq("date", args.date)
+      )
+      .unique()
+
+    if (existing) {
+      // Update existing record
+      await ctx.db.patch(existing._id, {
+        hours: args.hours,
+        quality: args.quality,
+      })
+      return { id: existing._id, updated: true }
+    }
+
+    // Create new record
+    const recordId = await ctx.db.insert("sleepRecords", {
+      patientId: patient._id,
+      hours: args.hours,
+      quality: args.quality,
+      date: args.date,
+    })
+
+    return { id: recordId, updated: false }
+  },
+})
+
+/**
  * Updates a sleep record
  */
 export const update = mutation({
