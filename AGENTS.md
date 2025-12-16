@@ -32,3 +32,6 @@ Next.js 16 App Router + React 19 + TypeScript (strict) + Convex + Clerk + TanSta
 - **Query**: Real-time data reads | **Mutation**: Database writes | **Action**: Server-side logic + external API calls
 - Use `internalMutation` for internal-only mutations, validate args with convex validation utilities `import { v } from "convex/values";`
 - Auth: `const user = await ctx.auth.getUserIdentity(); if (!user) throw new Error("Not authenticated")`
+
+## Notes
+- User is running the dev process locally, so dont run them youself
