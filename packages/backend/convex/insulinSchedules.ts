@@ -1,8 +1,8 @@
-import { query, mutation } from "./_generated/server"
-import { v } from "convex/values"
-import { getCurrentPatient } from "./lib/auth"
-
-const insulinTypes = v.union(v.literal("rapid"), v.literal("basal"))
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentPatient } from "./lib/auth";
+import { insulinTypes } from "./lib/validators";
+import * as InsulinRecords from "./model/insulinRecords";
 
 // ============================================
 // Queries
@@ -14,14 +14,10 @@ const insulinTypes = v.union(v.literal("rapid"), v.literal("basal"))
 export const getActive = query({
   args: {},
   handler: async (ctx) => {
-    const patient = await getCurrentPatient(ctx)
-
-    return await ctx.db
-      .query("insulinSchedules")
-      .withIndex("by_patient_type", (q) => q.eq("patientId", patient._id))
-      .collect()
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.listSchedulesByPatient(ctx, patient._id);
   },
-})
+});
 
 /**
  * Gets insulin schedules by type
@@ -31,16 +27,13 @@ export const getByType = query({
     insulinType: insulinTypes,
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    return await ctx.db
-      .query("insulinSchedules")
-      .withIndex("by_patient_type", (q) =>
-        q.eq("patientId", patient._id).eq("insulinType", args.insulinType)
-      )
-      .collect()
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.listSchedulesByType(ctx, {
+      patientId: patient._id,
+      insulinType: args.insulinType,
+    });
   },
-})
+});
 
 /**
  * Gets a single schedule by ID
@@ -50,21 +43,13 @@ export const getById = query({
     id: v.id("insulinSchedules"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const schedule = await ctx.db.get(args.id)
-
-    if (!schedule) {
-      throw new Error("Schedule not found")
-    }
-
-    // Verify ownership
-    if (schedule.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    return schedule
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.loadScheduleById(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});
 
 // ============================================
 // Mutations
@@ -81,20 +66,13 @@ export const create = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    const scheduleId = await ctx.db.insert("insulinSchedules", {
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.createSchedule(ctx, {
       patientId: patient._id,
-      insulinType: args.insulinType,
-      unitsPerDose: args.unitsPerDose,
-      timesPerDay: args.timesPerDay,
-      notes: args.notes,
-      updatedAt: Date.now(),
-    })
-
-    return { id: scheduleId }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Updates an insulin schedule
@@ -107,28 +85,15 @@ export const update = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const schedule = await ctx.db.get(args.id)
-
-    if (!schedule) {
-      throw new Error("Schedule not found")
-    }
-
-    // Verify ownership
-    if (schedule.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    const { id, ...updates } = args
-
-    await ctx.db.patch(args.id, {
+    const patient = await getCurrentPatient(ctx);
+    const { id, ...updates } = args;
+    return InsulinRecords.updateSchedule(ctx, {
+      id,
+      patientId: patient._id,
       ...updates,
-      updatedAt: Date.now(),
-    })
-
-    return { success: true }
+    });
   },
-})
+});
 
 /**
  * Creates or updates an insulin schedule (upsert)
@@ -141,39 +106,13 @@ export const upsert = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Check if a schedule already exists for this type
-    const existing = await ctx.db
-      .query("insulinSchedules")
-      .withIndex("by_patient_type", (q) =>
-        q.eq("patientId", patient._id).eq("insulinType", args.insulinType)
-      )
-      .first()
-
-    if (existing) {
-      // Update existing schedule
-      await ctx.db.patch(existing._id, {
-        unitsPerDose: args.unitsPerDose,
-        timesPerDay: args.timesPerDay,
-        notes: args.notes,
-        updatedAt: Date.now(),
-      })
-      return { id: existing._id, updated: true }
-    } else {
-      // Create new schedule
-      const scheduleId = await ctx.db.insert("insulinSchedules", {
-        patientId: patient._id,
-        insulinType: args.insulinType,
-        unitsPerDose: args.unitsPerDose,
-        timesPerDay: args.timesPerDay,
-        notes: args.notes,
-        updatedAt: Date.now(),
-      })
-      return { id: scheduleId, updated: false }
-    }
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.upsertSchedule(ctx, {
+      patientId: patient._id,
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Deletes an insulin schedule
@@ -183,20 +122,10 @@ export const remove = mutation({
     id: v.id("insulinSchedules"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const schedule = await ctx.db.get(args.id)
-
-    if (!schedule) {
-      throw new Error("Schedule not found")
-    }
-
-    // Verify ownership
-    if (schedule.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    await ctx.db.delete(args.id)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.deleteSchedule(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});

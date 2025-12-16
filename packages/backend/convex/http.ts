@@ -1,16 +1,9 @@
 import { httpRouter } from "convex/server";
-import {
-  httpSaveGlucometry,
-  httpUpdateGlucometry,
-  httpSaveInsulin,
-  httpUpdateInsulin,
-  httpSaveSleep,
-  httpUpdateSleep,
-  httpSaveStress,
-  httpUpdateStress,
-  httpSaveDizziness,
-  httpUpdateDizziness,
-} from "./agentTools";
+import { httpSaveGlucometry, httpUpdateGlucometry } from "./agent/httpGlucometry";
+import { httpSaveInsulin, httpUpdateInsulin } from "./agent/httpInsulin";
+import { httpSaveSleep, httpUpdateSleep } from "./agent/httpSleep";
+import { httpSaveStress, httpUpdateStress } from "./agent/httpStress";
+import { httpSaveDizziness, httpUpdateDizziness } from "./agent/httpDizziness";
 
 const http = httpRouter();
 

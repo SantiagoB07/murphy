@@ -1,25 +1,8 @@
-import { query, mutation } from "./_generated/server"
-import { v } from "convex/values"
-import { getCurrentPatient } from "./lib/auth"
-
-// ============================================
-// Type Definitions
-// ============================================
-
-const diabetesTypes = v.union(
-  v.literal("Tipo 1"),
-  v.literal("Tipo 2"),
-  v.literal("Gestacional"),
-  v.literal("LADA"),
-  v.literal("MODY")
-)
-
-const genderTypes = v.union(
-  v.literal("masculino"),
-  v.literal("femenino"),
-  v.literal("otro"),
-  v.literal("prefiero_no_decir")
-)
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentPatient } from "./lib/auth";
+import { diabetesTypes, genderTypes } from "./lib/validators";
+import * as Patients from "./model/patients";
 
 // ============================================
 // Queries
@@ -31,11 +14,10 @@ const genderTypes = v.union(
 export const getCurrentProfile = query({
   args: {},
   handler: async (ctx) => {
-    const patient = await getCurrentPatient(ctx)
-    
-    return await ctx.db.get(patient._id)
+    const patient = await getCurrentPatient(ctx);
+    return ctx.db.get(patient._id);
   },
-})
+});
 
 /**
  * Gets full patient profile with recent records for dashboard
@@ -46,14 +28,14 @@ export const getFullProfile = query({
     daysBack: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const daysBack = args.daysBack ?? 30
-    
+    const patient = await getCurrentPatient(ctx);
+    const daysBack = args.daysBack ?? 30;
+
     // Calculate date range
-    const now = Date.now()
-    const startDate = new Date(now - daysBack * 24 * 60 * 60 * 1000)
-    const startDateStr = startDate.toISOString().split("T")[0]
-    
+    const now = Date.now();
+    const startDate = new Date(now - daysBack * 24 * 60 * 60 * 1000);
+    const startDateStr = startDate.toISOString().split("T")[0];
+
     // Fetch all related data in parallel
     const [
       profile,
@@ -107,7 +89,7 @@ export const getFullProfile = query({
           q.eq("patientId", patient._id).eq("isEnabled", true)
         )
         .collect(),
-    ])
+    ]);
 
     return {
       profile,
@@ -117,9 +99,9 @@ export const getFullProfile = query({
       dizzinessRecords,
       insulinSchedules,
       treatmentSlots,
-    }
+    };
   },
-})
+});
 
 /**
  * Gets patient context for AI agent
@@ -128,87 +110,25 @@ export const getFullProfile = query({
 export const getPatientContext = query({
   args: {},
   handler: async (ctx) => {
-    const patient = await getCurrentPatient(ctx)
-    const profile = await ctx.db.get(patient._id)
+    const patient = await getCurrentPatient(ctx);
+    const context = await Patients.getPatientContext(ctx, patient._id, { limit: 5 });
 
-    if (!profile) {
-      throw new Error("Profile not found")
+    if (!context) {
+      throw new Error("Profile not found");
     }
 
-    // Get last 5 records of each type
-    const limit = 5
-    const [recentGlucose, recentSleep, recentInsulinDoses] = await Promise.all([
-      ctx.db
-        .query("glucoseRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .order("desc")
-        .take(limit),
-      ctx.db
-        .query("sleepRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .order("desc")
-        .take(limit),
-      ctx.db
-        .query("insulinDoseRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .order("desc")
-        .take(limit),
-    ])
-
-    // Format relative time helper
-    const formatRelativeTime = (timestamp: number): string => {
-      const now = Date.now()
-      const diffMs = now - timestamp
-      const diffMins = Math.floor(diffMs / (1000 * 60))
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-      if (diffMins < 60) {
-        return `hace ${diffMins} min`
-      } else if (diffHours < 24) {
-        return `hace ${diffHours}h`
-      } else if (diffDays === 1) {
-        return "ayer"
-      } else if (diffDays < 7) {
-        return `hace ${diffDays} días`
-      } else {
-        const date = new Date(timestamp)
-        return date.toLocaleDateString("es-CO", { day: "numeric", month: "short" })
-      }
-    }
-
-    // Format glucose readings
-    const formattedGlucose = recentGlucose.length > 0
-      ? recentGlucose
-          .map((g) => `${g.value} mg/dL (${formatRelativeTime(g.recordedAt)})`)
-          .join(", ")
-      : "Sin registros"
-
-    // Format sleep logs
-    const formattedSleep = recentSleep.length > 0
-      ? recentSleep
-          .map((s) => `${s.hours} horas, calidad ${s.quality}/10 (${s.date})`)
-          .join(", ")
-      : "Sin registros"
-
-    // Format insulin doses
-    const formattedInsulin = recentInsulinDoses.length > 0
-      ? recentInsulinDoses
-          .map((i) => `${i.dose} unidades ${i.insulinType} (${formatRelativeTime(i.administeredAt)})`)
-          .join(", ")
-      : "Sin registros"
-
+    // Format for the public API (without patientId and phoneNumber)
     return {
-      name: profile.fullName || "Paciente",
-      age: profile.age ? `${profile.age} años` : "desconocida",
-      diabetesType: profile.diabetesType || "no especificado",
-      diagnosisYear: profile.diagnosisYear ? `${profile.diagnosisYear}` : "no especificado",
-      recentGlucometries: formattedGlucose,
-      recentSleep: formattedSleep,
-      recentInsulin: formattedInsulin,
-    }
+      name: context.name,
+      age: context.age === "desconocida" ? context.age : `${context.age} años`,
+      diabetesType: context.diabetesType,
+      diagnosisYear: context.diagnosisYear,
+      recentGlucometries: context.recentGlucometries,
+      recentSleep: context.recentSleep,
+      recentInsulin: context.recentInsulin,
+    };
   },
-})
+});
 
 // ============================================
 // Mutations
@@ -233,13 +153,11 @@ export const updateProfile = mutation({
     coadminEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    await ctx.db.patch(patient._id, args)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    await Patients.updateProfile(ctx, patient._id, args);
+    return { success: true };
   },
-})
+});
 
 /**
  * Deletes patient account and all related data
@@ -248,79 +166,8 @@ export const updateProfile = mutation({
 export const deleteAccount = mutation({
   args: {},
   handler: async (ctx) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Delete all related records
-    // Note: In production, consider soft deletes or archiving instead
-    const [
-      glucoseRecords,
-      sleepRecords,
-      stressRecords,
-      dizzinessRecords,
-      insulinSchedules,
-      insulinDoseRecords,
-      treatmentSlots,
-      aiCallSchedules,
-    ] = await Promise.all([
-      ctx.db
-        .query("glucoseRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("sleepRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("stressRecords")
-        .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("dizzinessRecords")
-        .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("insulinSchedules")
-        .withIndex("by_patient_type", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("insulinDoseRecords")
-        .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("treatmentSlots")
-        .withIndex("by_patient_type", (q) => q.eq("patientId", patient._id))
-        .collect(),
-      ctx.db
-        .query("aiCallSchedules")
-        .withIndex("by_patient_active", (q) => q.eq("patientId", patient._id))
-        .collect(),
-    ])
-
-    // Delete all records
-    await Promise.all([
-      ...glucoseRecords.map((r) => ctx.db.delete(r._id)),
-      ...sleepRecords.map((r) => ctx.db.delete(r._id)),
-      ...stressRecords.map((r) => ctx.db.delete(r._id)),
-      ...dizzinessRecords.map((r) => ctx.db.delete(r._id)),
-      ...insulinSchedules.map((r) => ctx.db.delete(r._id)),
-      ...insulinDoseRecords.map((r) => ctx.db.delete(r._id)),
-      ...treatmentSlots.map((r) => ctx.db.delete(r._id)),
-      ...aiCallSchedules.map((r) => ctx.db.delete(r._id)),
-    ])
-
-    // Delete notification preferences
-    const notifPrefs = await ctx.db
-      .query("notificationPreferences")
-      .withIndex("by_clerk_user", (q) => q.eq("clerkUserId", patient.clerkUserId))
-      .unique()
-
-    if (notifPrefs) {
-      await ctx.db.delete(notifPrefs._id)
-    }
-
-    // Finally, delete the patient profile
-    await ctx.db.delete(patient._id)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    await Patients.deleteAllPatientData(ctx, patient);
+    return { success: true };
   },
-})
+});

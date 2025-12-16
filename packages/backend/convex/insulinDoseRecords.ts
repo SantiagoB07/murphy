@@ -1,8 +1,8 @@
-import { query, mutation } from "./_generated/server"
-import { v } from "convex/values"
-import { getCurrentPatient } from "./lib/auth"
-
-const insulinTypes = v.union(v.literal("rapid"), v.literal("basal"))
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentPatient } from "./lib/auth";
+import { insulinTypes } from "./lib/validators";
+import * as InsulinRecords from "./model/insulinRecords";
 
 // ============================================
 // Queries
@@ -18,30 +18,13 @@ export const list = query({
     endTimestamp: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    let records = await ctx.db
-      .query("insulinDoseRecords")
-      .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-      .order("desc")
-      .collect()
-
-    // Apply timestamp filters in memory
-    if (args.startTimestamp) {
-      records = records.filter((r) => r.administeredAt >= args.startTimestamp!)
-    }
-    if (args.endTimestamp) {
-      records = records.filter((r) => r.administeredAt <= args.endTimestamp!)
-    }
-
-    // Apply limit
-    if (args.limit) {
-      records = records.slice(0, args.limit)
-    }
-
-    return records
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.listDosesByPatient(ctx, {
+      patientId: patient._id,
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Gets recent insulin doses
@@ -51,16 +34,13 @@ export const getRecent = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const limit = args.limit ?? 10
-
-    return await ctx.db
-      .query("insulinDoseRecords")
-      .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-      .order("desc")
-      .take(limit)
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.getRecentDoses(ctx, {
+      patientId: patient._id,
+      limit: args.limit,
+    });
   },
-})
+});
 
 /**
  * Gets a single dose record by ID
@@ -70,21 +50,13 @@ export const getById = query({
     id: v.id("insulinDoseRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    return record
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.loadDoseById(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});
 
 // ============================================
 // Mutations
@@ -97,25 +69,18 @@ export const create = mutation({
   args: {
     dose: v.number(),
     insulinType: insulinTypes,
-    scheduledTime: v.optional(v.string()), // "HH:MM"
-    administeredAt: v.optional(v.number()), // timestamp, defaults to now
+    scheduledTime: v.optional(v.string()),
+    administeredAt: v.optional(v.number()),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    const recordId = await ctx.db.insert("insulinDoseRecords", {
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.createDoseRecord(ctx, {
       patientId: patient._id,
-      dose: args.dose,
-      insulinType: args.insulinType,
-      scheduledTime: args.scheduledTime,
-      administeredAt: args.administeredAt ?? Date.now(),
-      notes: args.notes,
-    })
-
-    return { id: recordId }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Updates an insulin dose record
@@ -130,25 +95,15 @@ export const update = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    const { id, ...updates } = args
-
-    await ctx.db.patch(args.id, updates)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    const { id, ...updates } = args;
+    return InsulinRecords.updateDoseRecord(ctx, {
+      id,
+      patientId: patient._id,
+      ...updates,
+    });
   },
-})
+});
 
 /**
  * Deletes an insulin dose record
@@ -158,20 +113,10 @@ export const remove = mutation({
     id: v.id("insulinDoseRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    await ctx.db.delete(args.id)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    return InsulinRecords.deleteDoseRecord(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});

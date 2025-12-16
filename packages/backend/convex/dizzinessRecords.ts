@@ -1,6 +1,7 @@
-import { query, mutation } from "./_generated/server"
-import { v } from "convex/values"
-import { getCurrentPatient } from "./lib/auth"
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentPatient } from "./lib/auth";
+import * as WellnessRecords from "./model/wellnessRecords";
 
 // ============================================
 // Queries
@@ -16,30 +17,13 @@ export const list = query({
     endTimestamp: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    let records = await ctx.db
-      .query("dizzinessRecords")
-      .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
-      .order("desc")
-      .collect()
-
-    // Apply timestamp filters
-    if (args.startTimestamp) {
-      records = records.filter((r) => r.recordedAt >= args.startTimestamp!)
-    }
-    if (args.endTimestamp) {
-      records = records.filter((r) => r.recordedAt <= args.endTimestamp!)
-    }
-
-    // Apply limit
-    if (args.limit) {
-      records = records.slice(0, args.limit)
-    }
-
-    return records
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.listDizzinessByPatient(ctx, {
+      patientId: patient._id,
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Gets a single dizziness record by ID
@@ -49,50 +33,29 @@ export const getById = query({
     id: v.id("dizzinessRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    return record
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.loadDizzinessById(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});
 
 /**
- * Gets the dizziness record for a specific date (returns first record of the day)
+ * Gets the dizziness record for a specific date
  */
 export const getByDate = query({
   args: {
-    date: v.string(), // "YYYY-MM-DD"
+    date: v.string(),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Calculate start and end timestamps for the given date
-    const startOfDay = new Date(args.date + "T00:00:00").getTime()
-    const endOfDay = new Date(args.date + "T23:59:59.999").getTime()
-
-    const records = await ctx.db
-      .query("dizzinessRecords")
-      .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
-      .filter((q) =>
-        q.and(
-          q.gte(q.field("recordedAt"), startOfDay),
-          q.lte(q.field("recordedAt"), endOfDay)
-        )
-      )
-      .first()
-
-    return records
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.getDizzinessByDate(ctx, {
+      patientId: patient._id,
+      date: args.date,
+    });
   },
-})
+});
 
 // ============================================
 // Mutations
@@ -103,84 +66,40 @@ export const getByDate = query({
  */
 export const create = mutation({
   args: {
-    severity: v.number(), // 1-10 scale
+    severity: v.number(),
     symptoms: v.array(v.string()),
     durationMinutes: v.optional(v.number()),
     notes: v.optional(v.string()),
-    recordedAt: v.optional(v.number()), // timestamp, defaults to now
+    recordedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    const recordId = await ctx.db.insert("dizzinessRecords", {
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.createDizzinessRecord(ctx, {
       patientId: patient._id,
-      severity: args.severity,
-      symptoms: args.symptoms,
-      durationMinutes: args.durationMinutes,
-      notes: args.notes,
-      recordedAt: args.recordedAt ?? Date.now(),
-    })
-
-    return { id: recordId }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Creates or updates a dizziness record for a given date (upsert)
- * Only one record per day is allowed - if one exists, it gets updated
  */
 export const upsert = mutation({
   args: {
-    severity: v.number(), // 1-10 scale (0 = no dizziness)
+    severity: v.number(),
     symptoms: v.optional(v.array(v.string())),
     durationMinutes: v.optional(v.number()),
     notes: v.optional(v.string()),
-    date: v.string(), // "YYYY-MM-DD" - date from client to avoid timezone issues
+    date: v.string(),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Calculate start and end timestamps for the given date
-    const startOfDay = new Date(args.date + "T00:00:00").getTime()
-    const endOfDay = new Date(args.date + "T23:59:59.999").getTime()
-
-    // Check if a record exists for this date
-    const existing = await ctx.db
-      .query("dizzinessRecords")
-      .withIndex("by_patient", (q) => q.eq("patientId", patient._id))
-      .filter((q) =>
-        q.and(
-          q.gte(q.field("recordedAt"), startOfDay),
-          q.lte(q.field("recordedAt"), endOfDay)
-        )
-      )
-      .first()
-
-    if (existing) {
-      // Update existing record
-      await ctx.db.patch(existing._id, {
-        severity: args.severity,
-        symptoms: args.symptoms ?? existing.symptoms,
-        durationMinutes: args.durationMinutes,
-        notes: args.notes,
-      })
-      return { id: existing._id, updated: true }
-    }
-
-    // Create new record - use midday of the given date to avoid timezone edge cases
-    const recordedAt = new Date(args.date + "T12:00:00").getTime()
-    const recordId = await ctx.db.insert("dizzinessRecords", {
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.upsertDizzinessRecord(ctx, {
       patientId: patient._id,
-      severity: args.severity,
-      symptoms: args.symptoms ?? [],
-      durationMinutes: args.durationMinutes,
-      notes: args.notes,
-      recordedAt,
-    })
-
-    return { id: recordId, updated: false }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Updates a dizziness record
@@ -194,25 +113,15 @@ export const update = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    const { id, ...updates } = args
-
-    await ctx.db.patch(args.id, updates)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    const { id, ...updates } = args;
+    return WellnessRecords.updateDizzinessRecord(ctx, {
+      id,
+      patientId: patient._id,
+      ...updates,
+    });
   },
-})
+});
 
 /**
  * Deletes a dizziness record
@@ -222,20 +131,10 @@ export const remove = mutation({
     id: v.id("dizzinessRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    await ctx.db.delete(args.id)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.deleteDizzinessRecord(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});

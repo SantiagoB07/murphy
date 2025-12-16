@@ -1,6 +1,7 @@
-import { query, mutation } from "./_generated/server"
-import { v } from "convex/values"
-import { getCurrentPatient } from "./lib/auth"
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentPatient } from "./lib/auth";
+import * as WellnessRecords from "./model/wellnessRecords";
 
 // ============================================
 // Queries
@@ -11,54 +12,34 @@ import { getCurrentPatient } from "./lib/auth"
  */
 export const list = query({
   args: {
-    startDate: v.optional(v.string()), // "YYYY-MM-DD"
+    startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    let records = await ctx.db
-      .query("sleepRecords")
-      .withIndex("by_patient_date", (q) => q.eq("patientId", patient._id))
-      .order("desc")
-      .collect()
-
-    // Apply date filters in memory
-    if (args.startDate) {
-      records = records.filter((r) => r.date >= args.startDate!)
-    }
-    if (args.endDate) {
-      records = records.filter((r) => r.date <= args.endDate!)
-    }
-
-    // Apply limit
-    if (args.limit) {
-      records = records.slice(0, args.limit)
-    }
-
-    return records
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.listSleepByPatient(ctx, {
+      patientId: patient._id,
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Gets sleep record for a specific date
  */
 export const getByDate = query({
   args: {
-    date: v.string(), // "YYYY-MM-DD"
+    date: v.string(),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    return await ctx.db
-      .query("sleepRecords")
-      .withIndex("by_patient_date", (q) =>
-        q.eq("patientId", patient._id).eq("date", args.date)
-      )
-      .unique()
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.getSleepByDate(ctx, {
+      patientId: patient._id,
+      date: args.date,
+    });
   },
-})
+});
 
 /**
  * Gets a single sleep record by ID
@@ -68,21 +49,13 @@ export const getById = query({
     id: v.id("sleepRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    return record
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.loadSleepById(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});
 
 // ============================================
 // Mutations
@@ -94,76 +67,35 @@ export const getById = query({
 export const create = mutation({
   args: {
     hours: v.number(),
-    quality: v.number(), // 1-10 scale
-    date: v.string(), // "YYYY-MM-DD"
+    quality: v.number(),
+    date: v.string(),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Check if a record already exists for this date
-    const existing = await ctx.db
-      .query("sleepRecords")
-      .withIndex("by_patient_date", (q) =>
-        q.eq("patientId", patient._id).eq("date", args.date)
-      )
-      .unique()
-
-    if (existing) {
-      throw new Error("A sleep record already exists for this date")
-    }
-
-    const recordId = await ctx.db.insert("sleepRecords", {
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.createSleepRecord(ctx, {
       patientId: patient._id,
-      hours: args.hours,
-      quality: args.quality,
-      date: args.date,
-    })
-
-    return { id: recordId }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Creates or updates a sleep record for a given date (upsert)
- * If a record exists for the date, it updates it; otherwise creates a new one
  */
 export const upsert = mutation({
   args: {
     hours: v.number(),
-    quality: v.number(), // 1-10 scale
-    date: v.string(), // "YYYY-MM-DD"
+    quality: v.number(),
+    date: v.string(),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-
-    // Check if a record already exists for this date
-    const existing = await ctx.db
-      .query("sleepRecords")
-      .withIndex("by_patient_date", (q) =>
-        q.eq("patientId", patient._id).eq("date", args.date)
-      )
-      .unique()
-
-    if (existing) {
-      // Update existing record
-      await ctx.db.patch(existing._id, {
-        hours: args.hours,
-        quality: args.quality,
-      })
-      return { id: existing._id, updated: true }
-    }
-
-    // Create new record
-    const recordId = await ctx.db.insert("sleepRecords", {
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.upsertSleepRecord(ctx, {
       patientId: patient._id,
-      hours: args.hours,
-      quality: args.quality,
-      date: args.date,
-    })
-
-    return { id: recordId, updated: false }
+      ...args,
+    });
   },
-})
+});
 
 /**
  * Updates a sleep record
@@ -175,25 +107,15 @@ export const update = mutation({
     quality: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    const { id, ...updates } = args
-
-    await ctx.db.patch(args.id, updates)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    const { id, ...updates } = args;
+    return WellnessRecords.updateSleepRecord(ctx, {
+      id,
+      patientId: patient._id,
+      ...updates,
+    });
   },
-})
+});
 
 /**
  * Deletes a sleep record
@@ -203,20 +125,10 @@ export const remove = mutation({
     id: v.id("sleepRecords"),
   },
   handler: async (ctx, args) => {
-    const patient = await getCurrentPatient(ctx)
-    const record = await ctx.db.get(args.id)
-
-    if (!record) {
-      throw new Error("Record not found")
-    }
-
-    // Verify ownership
-    if (record.patientId !== patient._id) {
-      throw new Error("Unauthorized")
-    }
-
-    await ctx.db.delete(args.id)
-
-    return { success: true }
+    const patient = await getCurrentPatient(ctx);
+    return WellnessRecords.deleteSleepRecord(ctx, {
+      id: args.id,
+      patientId: patient._id,
+    });
   },
-})
+});
