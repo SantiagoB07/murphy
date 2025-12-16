@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Plus, LogIn, UserPlus } from 'lucide-react';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -117,21 +118,25 @@ export default function HomePage() {
 
             {/* CTA Section */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
-              <Button 
-                size="lg" 
-                className="w-full sm:w-auto"
-              >
-                <LogIn className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
-                Iniciar Sesión
-              </Button>
-              <Button 
-                variant="secondary" 
-                size="lg" 
-                className="w-full sm:w-auto"
-              >
-                <UserPlus className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
-                Registrarte
-              </Button>
+              <SignInButton mode="modal">
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto"
+                >
+                  <LogIn className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
+                  Iniciar Sesión
+                </Button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="w-full sm:w-auto"
+                >
+                  <UserPlus className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
+                  Registrarte
+                </Button>
+              </SignUpButton>
             </div>
           </>
       </main>
