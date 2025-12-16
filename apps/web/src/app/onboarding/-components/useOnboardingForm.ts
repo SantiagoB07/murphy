@@ -1,3 +1,5 @@
+"use client";
+
 import { useForm } from "@tanstack/react-form";
 import { useState } from "react";
 import { z } from "zod";
@@ -37,22 +39,32 @@ export function useOnboardingForm() {
       socioeconomicLevel: '',
     },
     onSubmit: async ({ value }) => {
-      setIsPending(true);
-      
-      // Map form values to backend API format
-      await onboard({
-        fullName: value.name,
-        phoneNumber: value.phone,
-        age: parseInt(value.age) || 0,
-        gender: value.sex as 'masculino' | 'femenino' | 'otro' | 'prefiero_no_decir',
-        diabetesType: value.diabetesType as 'Tipo 1' | 'Tipo 2' | 'Gestacional' | 'LADA' | 'MODY',
-        diagnosisYear: value.diagnosisYear ? parseInt(value.diagnosisYear) : undefined,
-        city: value.residence || undefined,
-        estrato: value.socioeconomicLevel ? parseInt(value.socioeconomicLevel) : undefined,
-      });
+      try {
+        setIsPending(true);
+        
+        // Map form values to backend API format
+        await onboard({
+          fullName: value.name,
+          phoneNumber: value.phone,
+          age: parseInt(value.age) || 0,
+          gender: value.sex as 'masculino' | 'femenino' | 'otro' | 'prefiero_no_decir',
+          diabetesType: value.diabetesType as 'Tipo 1' | 'Tipo 2' | 'Gestacional' | 'LADA' | 'MODY',
+          diagnosisYear: value.diagnosisYear ? parseInt(value.diagnosisYear) : undefined,
+          city: value.residence || undefined,
+          estrato: value.socioeconomicLevel ? parseInt(value.socioeconomicLevel) : undefined,
+        });
 
-      setIsPending(false);
-      window.location.replace('/dashboard');
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Full page redirect to refresh authentication state
+        window.location.href = '/dashboard';
+      } catch (error) {
+        console.error('Error during onboarding:', error);
+        // You may want to show a toast notification here
+        throw error;
+      } finally {
+        setIsPending(false);
+      }
     },
   });
 
