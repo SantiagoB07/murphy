@@ -644,10 +644,12 @@ export const httpSaveInsulin = httpAction(async (ctx, request) => {
   const insulinType = body.insulin_type ?? body.insulin_data?.insulin_type;
 
   if (!isValidPatientId(patientId) || dose === undefined) {
+    console.error("[Agent] Missing patient_id or dose");
     return errorResponse("patient_id y dose son requeridos");
   }
 
   if (!isValidInsulinType(insulinType)) {
+    console.error("[Agent] Invalid insulin type:", insulinType);
     return errorResponse("insulin_type debe ser 'rapid' o 'basal'");
   }
 
