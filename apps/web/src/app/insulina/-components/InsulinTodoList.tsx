@@ -3,9 +3,19 @@
 import { useState } from "react"
 import { Check, Circle, Syringe } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import type { InsulinSchedule } from "@/types/diabetes"
-import type { InsulinDoseRecord } from "@/hooks/useInsulinDoseRecords"
+import type { InsulinDoseRecord, InsulinDoseRecordId } from "@/hooks/useInsulinDoseRecords"
 import { InsulinLogDialog } from "./InsulinLogDialog"
 
 interface TodoItem {
@@ -14,6 +24,8 @@ interface TodoItem {
   label: string
   dose: number
   completed: boolean
+  recordId?: InsulinDoseRecordId // ID of the actual record if completed
+  administeredAt?: number // Timestamp when administered
 }
 
 interface InsulinTodoListProps {
@@ -25,7 +37,9 @@ interface InsulinTodoListProps {
     dose: number
     administeredAt: Date
   }) => void
+  onUndoDose: (recordId: InsulinDoseRecordId) => void
   isLogging?: boolean
+  isDeleting?: boolean
 }
 
 // Generate todo items based on schedules and today's completed records
@@ -36,19 +50,26 @@ function generateTodoItems(
 ): TodoItem[] {
   const items: TodoItem[] = []
 
-  // Count completed doses by type
-  const rapidCompleted = todayRecords.filter((r) => r.insulinType === "rapid").length
-  const basalCompleted = todayRecords.filter((r) => r.insulinType === "basal").length
+  // Get records by type, sorted by time (oldest first)
+  const rapidRecords = todayRecords
+    .filter((r) => r.insulinType === "rapid")
+    .sort((a, b) => a.administeredAt - b.administeredAt)
+  const basalRecords = todayRecords
+    .filter((r) => r.insulinType === "basal")
+    .sort((a, b) => a.administeredAt - b.administeredAt)
 
   // Generate rapid insulin todos
   if (rapidSchedule) {
     for (let i = 0; i < rapidSchedule.timesPerDay; i++) {
+      const record = rapidRecords[i]
       items.push({
         id: `rapid-${i}`,
         insulinType: "rapid",
         label: `Insulina Rapida #${i + 1}`,
-        dose: rapidSchedule.unitsPerDose,
-        completed: i < rapidCompleted,
+        dose: record?.dose ?? rapidSchedule.unitsPerDose,
+        completed: !!record,
+        recordId: record?._id,
+        administeredAt: record?.administeredAt,
       })
     }
   }
@@ -56,12 +77,15 @@ function generateTodoItems(
   // Generate basal insulin todos
   if (basalSchedule) {
     for (let i = 0; i < basalSchedule.timesPerDay; i++) {
+      const record = basalRecords[i]
       items.push({
         id: `basal-${i}`,
         insulinType: "basal",
         label: `Insulina Basal #${i + 1}`,
-        dose: basalSchedule.unitsPerDose,
-        completed: i < basalCompleted,
+        dose: record?.dose ?? basalSchedule.unitsPerDose,
+        completed: !!record,
+        recordId: record?._id,
+        administeredAt: record?.administeredAt,
       })
     }
   }
@@ -69,24 +93,45 @@ function generateTodoItems(
   return items
 }
 
+// Format time from timestamp
+function formatTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 export function InsulinTodoList({
   rapidSchedule,
   basalSchedule,
   todayRecords,
   onLogDose,
+  onUndoDose,
   isLogging = false,
+  isDeleting = false,
 }: InsulinTodoListProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [undoDialogOpen, setUndoDialogOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null)
 
   const todoItems = generateTodoItems(rapidSchedule, basalSchedule, todayRecords)
   const completedCount = todoItems.filter((t) => t.completed).length
   const totalCount = todoItems.length
 
+  const isProcessing = isLogging || isDeleting
+
   const handleItemClick = (item: TodoItem) => {
-    if (item.completed) return // Already completed
-    setSelectedItem(item)
-    setDialogOpen(true)
+    if (isProcessing) return
+
+    if (item.completed && item.recordId) {
+      // Open undo confirmation dialog
+      setSelectedItem(item)
+      setUndoDialogOpen(true)
+    } else if (!item.completed) {
+      // Open log dialog
+      setSelectedItem(item)
+      setDialogOpen(true)
+    }
   }
 
   const handleConfirm = (data: { dose: number; administeredAt: Date }) => {
@@ -97,6 +142,13 @@ export function InsulinTodoList({
       administeredAt: data.administeredAt,
     })
     setDialogOpen(false)
+    setSelectedItem(null)
+  }
+
+  const handleUndoConfirm = () => {
+    if (!selectedItem?.recordId) return
+    onUndoDose(selectedItem.recordId)
+    setUndoDialogOpen(false)
     setSelectedItem(null)
   }
 
@@ -131,13 +183,13 @@ export function InsulinTodoList({
             <button
               key={item.id}
               onClick={() => handleItemClick(item)}
-              disabled={item.completed || isLogging}
+              disabled={isProcessing}
               className={cn(
                 "w-full flex items-center gap-3 p-3 rounded-lg border transition-all text-left",
                 item.completed
-                  ? "bg-primary/10 border-primary/20 cursor-default"
+                  ? "bg-primary/10 border-primary/20 hover:bg-primary/15 hover:border-primary/30 cursor-pointer"
                   : "bg-muted/30 border-border/50 hover:bg-muted/50 hover:border-primary/30 cursor-pointer",
-                isLogging && !item.completed && "opacity-50"
+                isProcessing && "opacity-50 cursor-not-allowed"
               )}
             >
               {/* Checkbox icon */}
@@ -168,6 +220,11 @@ export function InsulinTodoList({
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {item.dose} unidades
+                  {item.completed && item.administeredAt && (
+                    <span className="ml-2">
+                      · {formatTime(item.administeredAt)}
+                    </span>
+                  )}
                 </p>
               </div>
 
@@ -198,7 +255,7 @@ export function InsulinTodoList({
       </Card>
 
       {/* Log dialog */}
-      {selectedItem && (
+      {selectedItem && !selectedItem.completed && (
         <InsulinLogDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
@@ -208,6 +265,38 @@ export function InsulinTodoList({
           isLoading={isLogging}
         />
       )}
+
+      {/* Undo confirmation dialog */}
+      <AlertDialog open={undoDialogOpen} onOpenChange={setUndoDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deshacer registro</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedItem && (
+                <>
+                  ¿Quieres eliminar el registro de{" "}
+                  <strong>{selectedItem.dose} unidades</strong> de insulina{" "}
+                  {selectedItem.insulinType === "rapid" ? "rapida" : "basal"}
+                  {selectedItem.administeredAt && (
+                    <> registrado a las {formatTime(selectedItem.administeredAt)}</>
+                  )}
+                  ?
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUndoConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

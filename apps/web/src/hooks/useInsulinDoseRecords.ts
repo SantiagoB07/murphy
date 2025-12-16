@@ -23,6 +23,8 @@ export interface InsulinDoseRecord {
   notes?: string
 }
 
+export type InsulinDoseRecordId = InsulinDoseRecord["_id"]
+
 interface UseInsulinDoseRecordsReturn {
   todayRecords: InsulinDoseRecord[]
   isLoading: boolean
@@ -35,6 +37,14 @@ interface UseInsulinDoseRecordsReturn {
     }
   ) => void
   isCreating: boolean
+  deleteDoseRecord: (
+    id: InsulinDoseRecordId,
+    options?: {
+      onSuccess?: () => void
+      onError?: (error: Error) => void
+    }
+  ) => void
+  isDeleting: boolean
 }
 
 // Get start and end of today in timestamps
@@ -63,6 +73,11 @@ export function useInsulinDoseRecords(): UseInsulinDoseRecordsReturn {
   // Mutation to create a new dose record
   const createMutation = useMutation({
     mutationFn: useConvexMutation(api.insulinDoseRecords.create),
+  })
+
+  // Mutation to delete a dose record
+  const deleteMutation = useMutation({
+    mutationFn: useConvexMutation(api.insulinDoseRecords.remove),
   })
 
   const createDoseRecord = (
@@ -97,5 +112,26 @@ export function useInsulinDoseRecords(): UseInsulinDoseRecordsReturn {
     isError,
     createDoseRecord,
     isCreating: createMutation.isPending,
+    deleteDoseRecord: (
+      id: InsulinDoseRecordId,
+      options?: {
+        onSuccess?: () => void
+        onError?: (error: Error) => void
+      }
+    ) => {
+      deleteMutation.mutate(
+        // @ts-expect-error - Convex ID type mismatch with string
+        { id },
+        {
+          onSuccess: () => {
+            options?.onSuccess?.()
+          },
+          onError: (error: any) => {
+            options?.onError?.(error)
+          },
+        }
+      )
+    },
+    isDeleting: deleteMutation.isPending,
   }
 }

@@ -32,6 +32,8 @@ function InsulinaContent() {
     todayRecords,
     createDoseRecord,
     isCreating,
+    deleteDoseRecord,
+    isDeleting,
   } = useInsulinDoseRecords()
 
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
@@ -140,7 +142,18 @@ function InsulinaContent() {
                 }
               )
             }}
+            onUndoDose={(recordId) => {
+              deleteDoseRecord(recordId, {
+                onSuccess: () => {
+                  toast.success("Registro eliminado")
+                },
+                onError: (error) => {
+                  toast.error("Error al eliminar: " + error.message)
+                },
+              })
+            }}
             isLogging={isCreating}
+            isDeleting={isDeleting}
           />
         )}
 
