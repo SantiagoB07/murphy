@@ -51,6 +51,12 @@ export async function parseAndValidate<T>(
   const result = schema.safeParse(body);
 
   if (!result.success) {
+    // Log validation error for debugging
+    console.error("[Validation Error]", {
+      body,
+      error: result.error.issues,
+    });
+
     // Get first error message from Zod error
     const firstError = result.error.issues?.[0];
     const message = firstError?.message || "Datos de entrada inválidos";
