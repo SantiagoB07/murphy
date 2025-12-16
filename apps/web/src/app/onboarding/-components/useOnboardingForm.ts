@@ -52,6 +52,7 @@ export function useOnboardingForm() {
       });
 
       setIsPending(false);
+      window.location.replace('/dashboard');
     },
   });
 
