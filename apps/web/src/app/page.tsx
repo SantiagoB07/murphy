@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Plus } from 'lucide-react';
+import { Activity, Users, ArrowRight, Zap, Shield, Stethoscope, type LucideIcon, Plus, LogIn, UserPlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export type UserRole = 'patient' | 'coadmin' | 'doctor';
@@ -114,80 +115,23 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Role Selection */}
-            <div className="w-full max-w-4xl mx-auto animate-fade-up stagger-3">
-              <p className="text-center text-muted-foreground mb-6 text-hig-base" id="role-selection-label">
-                Selecciona tu rol para continuar
-              </p>
-              
-              <div 
-                className="grid md:grid-cols-3 gap-4 mb-8"
-                role="radiogroup"
-                aria-labelledby="role-selection-label"
+            {/* CTA Section */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
+              <Button 
+                size="lg" 
+                className="w-full sm:w-auto"
               >
-                {roles.map(({ role, label, description, icon: Icon, color }) => (
-                  <button
-                    key={role}
-                    role="radio"
-                    aria-checked={selectedRole === role}
-                    tabIndex={0}
-                    onClick={() => setSelectedRole(role)}
-                    onKeyDown={(e) => handleKeyDown(e, role)}
-                    className={cn(
-                      "glass-card p-6 text-left",
-                      "transition-all duration-hig-fast ease-hig-out",
-                      "hover:shadow-elevation-2 focus-ring press-feedback",
-                      selectedRole === role && "ring-2 ring-primary elevation-2"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-14 h-14 rounded-hig-lg flex items-center justify-center mb-4",
-                      "bg-gradient-to-br elevation-1",
-                      color
-                    )}>
-                      <Icon className="w-7 h-7 text-foreground" aria-hidden="true" />
-                    </div>
-                    <h3 className="font-semibold text-hig-lg text-foreground mb-2 leading-hig-tight">{label}</h3>
-                    <p className="text-hig-sm text-muted-foreground leading-hig-normal">{description}</p>
-                  </button>
-                ))}
-              </div>
-
-              {/* Patient Registration - only show for patient role */}
-              {selectedRole === 'patient' && (
-                <div className="mb-8 animate-fade-up">
-                  <p className="text-center text-muted-foreground mb-4 text-hig-base">
-                    Regístrate como nuevo paciente
-                  </p>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setShowRegistrationForm(true)}
-                      className={cn(
-                        "px-4 py-2 rounded-hig border transition-all flex items-center gap-2",
-                        "border-dashed border-primary/50 bg-primary/10 text-primary hover:bg-primary/20"
-                      )}
-                    >
-                      <Plus className="w-4 h-4" />
-                      Nuevo paciente
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Continue Button */}
-              <div className="flex justify-center">
-                <button
-                  disabled={!selectedRole || selectedRole === 'patient'}
-                  aria-disabled={!selectedRole || selectedRole === 'patient'}
-                  className={cn(
-                    "btn-neon flex items-center gap-2 px-8 py-4 text-hig-lg focus-ring",
-                    (!selectedRole || selectedRole === 'patient') && "opacity-50 cursor-not-allowed pointer-events-none"
-                  )}
-                >
-                  Continuar
-                  <ArrowRight className="w-[var(--icon-md)] h-[var(--icon-md)]" aria-hidden="true" />
-                </button>
-              </div>
+                <LogIn className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
+                Iniciar Sesión
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="w-full sm:w-auto"
+              >
+                <UserPlus className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
+                Registrarte
+              </Button>
             </div>
           </>
       </main>
