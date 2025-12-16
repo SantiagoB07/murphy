@@ -8,10 +8,12 @@
  * @module
  */
 
+import type * as agentTools from "../agentTools.js";
 import type * as aiCallSchedules from "../aiCallSchedules.js";
 import type * as dizzinessRecords from "../dizzinessRecords.js";
 import type * as glucoseRecords from "../glucoseRecords.js";
 import type * as healthCheck from "../healthCheck.js";
+import type * as http from "../http.js";
 import type * as insulinDoseRecords from "../insulinDoseRecords.js";
 import type * as insulinSchedules from "../insulinSchedules.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -30,10 +32,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agentTools: typeof agentTools;
   aiCallSchedules: typeof aiCallSchedules;
   dizzinessRecords: typeof dizzinessRecords;
   glucoseRecords: typeof glucoseRecords;
   healthCheck: typeof healthCheck;
+  http: typeof http;
   insulinDoseRecords: typeof insulinDoseRecords;
   insulinSchedules: typeof insulinSchedules;
   "lib/auth": typeof lib_auth;
