@@ -57,19 +57,19 @@ function DashboardContent() {
     )
     let streak = 0
     const today = new Date()
-    
+
     for (let i = 0; i < 365; i++) {
       const date = new Date(today)
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split("T")[0]
-      
+
       if (dates.has(dateStr)) {
         streak++
       } else if (i > 0) {
         break
       }
     }
-    
+
     return streak
   }, [records])
 
