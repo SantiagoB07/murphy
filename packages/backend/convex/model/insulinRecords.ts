@@ -3,6 +3,29 @@ import { Id, Doc } from "../_generated/dataModel";
 import { InsulinType, getCurrentTime } from "../lib/validators";
 
 // ============================================
+// Helper Functions
+// ============================================
+
+/**
+ * Helper: Get start of day timestamp for a given timestamp
+ * Uses the timestamp as-is assuming the client sends it in their local timezone
+ */
+function getStartOfDay(timestamp: number): number {
+  const date = new Date(timestamp);
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+}
+
+/**
+ * Helper: Get end of day timestamp for a given timestamp
+ */
+function getEndOfDay(timestamp: number): number {
+  const date = new Date(timestamp);
+  date.setHours(23, 59, 59, 999);
+  return date.getTime();
+}
+
+// ============================================
 // Types - Dose Records
 // ============================================
 
@@ -139,18 +162,56 @@ export async function getRecentDoses(
 
 /**
  * Creates a new insulin dose record
+ * Validates that the daily limit from the schedule is not exceeded
  */
 export async function createDoseRecord(
   ctx: MutationCtx,
   input: InsulinDoseInput
 ): Promise<{ id: Id<"insulinDoseRecords"> }> {
   const now = Date.now();
+  const administeredAt = input.administeredAt ?? now;
+
+  // 1. Get the insulin schedule for this type
+  const schedules = await listSchedulesByType(ctx, {
+    patientId: input.patientId,
+    insulinType: input.insulinType,
+  });
+
+  const schedule = schedules[0];
+  if (!schedule) {
+    throw new Error(
+      `No hay configuración de insulina ${input.insulinType}. Por favor configura tu régimen primero.`
+    );
+  }
+
+  // 2. Count today's records for this insulin type
+  const dayStart = getStartOfDay(administeredAt);
+  const dayEnd = getEndOfDay(administeredAt);
+
+  const todayRecords = await listDosesByPatient(ctx, {
+    patientId: input.patientId,
+    startTimestamp: dayStart,
+    endTimestamp: dayEnd,
+  });
+
+  const recordsOfType = todayRecords.filter(
+    (r) => r.insulinType === input.insulinType
+  );
+
+  // 3. Validate daily limit
+  if (recordsOfType.length >= schedule.timesPerDay) {
+    throw new Error(
+      `Ya registraste las ${schedule.timesPerDay} dosis de insulina ${input.insulinType === "rapid" ? "rápida" : "basal"} permitidas para hoy.`
+    );
+  }
+
+  // 4. Proceed with creation
   const id = await ctx.db.insert("insulinDoseRecords", {
     patientId: input.patientId,
     dose: input.dose,
     insulinType: input.insulinType,
     scheduledTime: input.scheduledTime ?? getCurrentTime(),
-    administeredAt: input.administeredAt ?? now,
+    administeredAt,
     notes: input.notes,
   });
   return { id };
@@ -330,6 +391,75 @@ export async function upsertSchedule(
     const result = await createSchedule(ctx, input);
     return { id: result.id, updated: false };
   }
+}
+
+// ============================================
+// Schedules - Status & Helper Operations
+// ============================================
+
+export type InsulinDayStatus = {
+  insulinType: InsulinType;
+  configured: boolean;
+  configuredDosesPerDay: number;
+  unitsPerDose: number;
+  dosesTakenToday: number;
+  dosesRemaining: number;
+  scheduleText: string; // e.g., "10 unidades, 4 veces al día (2 de 4 completadas hoy, quedan 2)"
+};
+
+/**
+ * Gets the insulin status for today for a specific insulin type
+ * Returns configuration + how many doses taken today
+ */
+export async function getInsulinDayStatus(
+  ctx: QueryCtx | MutationCtx,
+  { patientId, insulinType }: { patientId: Id<"patientProfiles">; insulinType: InsulinType }
+): Promise<InsulinDayStatus> {
+  // Get schedule
+  const schedules = await listSchedulesByType(ctx, { patientId, insulinType });
+  const schedule = schedules[0];
+
+  if (!schedule) {
+    return {
+      insulinType,
+      configured: false,
+      configuredDosesPerDay: 0,
+      unitsPerDose: 0,
+      dosesTakenToday: 0,
+      dosesRemaining: 0,
+      scheduleText: "No configurada",
+    };
+  }
+
+  // Count today's doses
+  const now = Date.now();
+  const dayStart = getStartOfDay(now);
+  const dayEnd = getEndOfDay(now);
+
+  const todayRecords = await listDosesByPatient(ctx, {
+    patientId,
+    startTimestamp: dayStart,
+    endTimestamp: dayEnd,
+  });
+
+  const dosesTakenToday = todayRecords.filter(
+    (r) => r.insulinType === insulinType
+  ).length;
+
+  const dosesRemaining = Math.max(0, schedule.timesPerDay - dosesTakenToday);
+
+  // Build formatted text
+  const scheduleText = `${schedule.unitsPerDose} unidades, ${schedule.timesPerDay} ${schedule.timesPerDay === 1 ? "vez" : "veces"} al día (${dosesTakenToday} de ${schedule.timesPerDay} completadas hoy, ${dosesRemaining === 0 ? "completo" : `quedan ${dosesRemaining}`})`;
+
+  return {
+    insulinType,
+    configured: true,
+    configuredDosesPerDay: schedule.timesPerDay,
+    unitsPerDose: schedule.unitsPerDose,
+    dosesTakenToday,
+    dosesRemaining,
+    scheduleText,
+  };
 }
 
 // ============================================

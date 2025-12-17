@@ -61,3 +61,19 @@ export const getPatientContextById = internalQuery({
     return Patients.getPatientContext(ctx, args.patientId, { limit: 10 });
   },
 });
+
+/**
+ * Gets insulin day status for a specific type (internal, no auth required)
+ */
+export const getInsulinDayStatus = internalQuery({
+  args: {
+    patientId: v.id("patientProfiles"),
+    insulinType: v.union(v.literal("rapid"), v.literal("basal")),
+  },
+  handler: async (ctx, args) => {
+    return InsulinRecords.getInsulinDayStatus(ctx, {
+      patientId: args.patientId,
+      insulinType: args.insulinType,
+    });
+  },
+});

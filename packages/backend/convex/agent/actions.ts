@@ -33,7 +33,19 @@ export const initiateCall = internalAction({
       );
     }
 
-    // 3. Build dynamic variables for ElevenLabs
+    // 3. Get insulin schedules and day status
+    const [rapidStatus, basalStatus] = await Promise.all([
+      ctx.runQuery(internal.agent.queries.getInsulinDayStatus, {
+        patientId: args.patientId,
+        insulinType: "rapid",
+      }),
+      ctx.runQuery(internal.agent.queries.getInsulinDayStatus, {
+        patientId: args.patientId,
+        insulinType: "basal",
+      }),
+    ]);
+
+    // 4. Build dynamic variables for ElevenLabs
     const dynamicVariables = {
       patient_id: args.patientId,
       patient_name: patientContext.name,
@@ -43,11 +55,13 @@ export const initiateCall = internalAction({
       recent_glucometries: patientContext.recentGlucometries,
       recent_sleep: patientContext.recentSleep,
       recent_insulin: patientContext.recentInsulin,
+      insulin_rapid_schedule: rapidStatus.scheduleText,
+      insulin_basal_schedule: basalStatus.scheduleText,
       is_reminder: String(args.isReminder ?? false),
       alert_type: args.alertType ?? "",
     };
 
-    // 4. Validate environment variables
+    // 5. Validate environment variables
     const apiKey = process.env.ELEVENLABS_API_KEY;
     const agentId = process.env.ELEVENLABS_AGENT_ID;
     const phoneNumberId = process.env.ELEVENLABS_PHONE_NUMBER_ID;
@@ -62,7 +76,7 @@ export const initiateCall = internalAction({
       throw new Error("ELEVENLABS_PHONE_NUMBER_ID environment variable not set");
     }
 
-    // 5. Call ElevenLabs API
+    // 6. Call ElevenLabs API
     console.log(`[initiateCall] Calling ${phoneNumber} for patient ${patientContext.name}`);
     console.log("[initiateCall] Dynamic variables:", JSON.stringify(dynamicVariables));
 
