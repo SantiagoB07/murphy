@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs"
+import { useUser, SignInButton } from "@clerk/nextjs"
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
@@ -150,7 +150,6 @@ function DashboardContent() {
               {userName ? `, ${userName}` : ""}. Aquí tienes tu resumen del día.
             </p>
           </div>
-          <UserButton />
         </div>
       </header>
 

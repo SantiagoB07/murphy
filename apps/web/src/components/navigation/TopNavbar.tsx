@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Settings, UserCircle, Activity } from "lucide-react"
+import { Settings, Activity } from "lucide-react"
+import { UserButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { getNavItems, getHomeRoute, getSettingsRoute } from "@/lib/navigation"
 
@@ -97,17 +98,9 @@ export function TopNavbar({ userName }: TopNavbarProps) {
             <Settings className="w-5 h-5" aria-hidden="true" />
           </Link>
 
-          {/* User Info */}
-          <div className="flex items-center gap-2 pl-3 border-l border-border/50">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-              <UserCircle className="w-5 h-5 text-foreground" aria-hidden="true" />
-            </div>
-            <div className="hidden lg:block">
-              <p className="text-sm font-medium text-foreground leading-tight">
-                {userName}
-              </p>
-              <p className="text-xs text-muted-foreground">Paciente</p>
-            </div>
+          {/* User Button */}
+          <div className="pl-3 border-l border-border/50">
+            <UserButton afterSignOutUrl="/" />
           </div>
         </div>
       </div>
