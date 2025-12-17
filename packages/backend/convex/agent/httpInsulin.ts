@@ -1,6 +1,6 @@
 import { httpAction } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
 import { parseAndValidate, errorResponse, successResponse } from "./helpers";
 import { SaveInsulinSchema, UpdateInsulinSchema } from "./schemas";
 

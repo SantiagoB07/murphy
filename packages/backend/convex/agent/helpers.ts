@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AgentResponse } from "./types";
+import type { AgentResponse } from "./types";
 
 // ============================================
 // HTTP Response Helpers

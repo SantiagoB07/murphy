@@ -1,5 +1,5 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
-import { Id, Doc } from "../_generated/dataModel";
+import type { QueryCtx, MutationCtx } from "../_generated/server";
+import type { Id, Doc } from "../_generated/dataModel";
 import { formatRelativeTime } from "../lib/validators";
 
 // ============================================

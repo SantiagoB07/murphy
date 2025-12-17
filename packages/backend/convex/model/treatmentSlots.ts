@@ -1,6 +1,6 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
-import { Id, Doc } from "../_generated/dataModel";
-import { SlotType, InsulinType } from "../lib/validators";
+import type { QueryCtx, MutationCtx } from "../_generated/server";
+import type { Id, Doc } from "../_generated/dataModel";
+import type { SlotType, InsulinType } from "../lib/validators";
 
 // ============================================
 // Types

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalAction } from "../_generated/server";
 import { internal } from "../_generated/api";
-import { InitiateCallResult } from "./types";
+import type { InitiateCallResult } from "./types";
 
 /**
  * Initiates an outbound call to a patient via ElevenLabs
