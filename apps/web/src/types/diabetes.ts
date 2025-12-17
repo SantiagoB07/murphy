@@ -211,3 +211,16 @@ export interface ConnectedDevice {
   lastSync: string | null
   batteryLevel?: number
 }
+
+// Alert Schedule types (programmed notifications)
+export type AlertChannel = "whatsapp" | "call"
+export type AlertScheduleType = "glucometry" | "insulin" | "wellness" | "general"
+export type ScheduleFrequency = "daily" | "once"
+
+export interface AlertSchedule {
+  id: string
+  time: string // "HH:MM"
+  channel: AlertChannel
+  type: AlertScheduleType
+  frequency: ScheduleFrequency
+}

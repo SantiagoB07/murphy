@@ -3,10 +3,25 @@
 import { useState } from "react"
 import { useUser, SignInButton } from "@clerk/nextjs"
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
-import { Bell, AlertTriangle, CheckCircle, Clock, Info } from "lucide-react"
+import { 
+  Bell, 
+  AlertTriangle, 
+  CheckCircle, 
+  Clock, 
+  Info, 
+  Plus,
+  Trash2,
+  MessageCircle,
+  Phone,
+  Droplet,
+  Syringe,
+  Heart,
+} from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { CreateAlertDialog } from "@/components/alertas/CreateAlertDialog"
+import type { AlertSchedule, AlertChannel, AlertScheduleType, ScheduleFrequency } from "@/types/diabetes"
 
 type AlertType = "warning" | "success" | "info" | "critical"
 
@@ -120,10 +135,36 @@ export default function AlertasPage() {
   )
 }
 
+// Alert type config for icons and colors
+const ALERT_TYPE_CONFIG = {
+  glucometry: { label: "Glucometría", icon: Droplet, color: "red-500" },
+  insulin: { label: "Insulina", icon: Syringe, color: "purple-500" },
+  wellness: { label: "Bienestar", icon: Heart, color: "emerald-500" },
+  general: { label: "General", icon: Bell, color: "sky-500" },
+}
+
+const ALERT_CHANNEL_CONFIG = {
+  whatsapp: { label: "WhatsApp", icon: MessageCircle, color: "green-500" },
+  call: { label: "Llamada", icon: Phone, color: "blue-500" },
+}
+
+const FREQUENCY_LABELS = {
+  daily: "Todos los días",
+  once: "Solo hoy",
+}
+
 function AlertasContent() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)
+  
+  // Alert schedules state (mock data)
+  const [alertSchedules, setAlertSchedules] = useState<AlertSchedule[]>([
+    { id: "1", time: "07:00", channel: "whatsapp", type: "glucometry", frequency: "daily" },
+    { id: "2", time: "12:00", channel: "call", type: "insulin", frequency: "daily" },
+    { id: "3", time: "22:00", channel: "whatsapp", type: "wellness", frequency: "once" },
+  ])
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
 
   const unreadCount = alerts.filter((a) => !a.read).length
 
@@ -136,6 +177,32 @@ function AlertasContent() {
     setAlerts((prev) =>
       prev.map((a) => (a.id === id ? { ...a, read: true } : a))
     )
+  }
+
+  const handleAddAlert = async (
+    time: string,
+    channel: AlertChannel,
+    type: AlertScheduleType,
+    frequency: ScheduleFrequency
+  ) => {
+    // Simulate async operation
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    
+    const newAlert: AlertSchedule = {
+      id: Date.now().toString(),
+      time,
+      channel,
+      type,
+      frequency,
+    }
+    
+    setAlertSchedules((prev) => [...prev, newAlert])
+    toast.success("Alerta creada exitosamente")
+  }
+
+  const handleDeleteAlert = (id: string) => {
+    setAlertSchedules((prev) => prev.filter((a) => a.id !== id))
+    toast.success("Alerta eliminada")
   }
 
   return (
@@ -164,6 +231,78 @@ function AlertasContent() {
             </Button>
           )}
         </div>
+
+        {/* Alert Schedules Section */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Mis alertas
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCreateAlertDialog(true)}
+              className="gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              Agregar
+            </Button>
+          </div>
+
+          {alertSchedules.length === 0 ? (
+            <div className="text-center py-6 glass-card">
+              <Bell className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">
+                No tienes alertas configuradas
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {alertSchedules.map((schedule) => {
+                const typeConfig = ALERT_TYPE_CONFIG[schedule.type]
+                const channelConfig = ALERT_CHANNEL_CONFIG[schedule.channel]
+                const TypeIcon = typeConfig.icon
+                const ChannelIcon = channelConfig.icon
+
+                return (
+                  <div
+                    key={schedule.id}
+                    className="glass-card p-3 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl bg-${typeConfig.color}/20 flex items-center justify-center`}>
+                        <TypeIcon className={`w-5 h-5 text-${typeConfig.color}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {schedule.time}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {typeConfig.label} · {FREQUENCY_LABELS[schedule.frequency]}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <ChannelIcon className="w-3 h-3" />
+                        {channelConfig.label}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteAlert(schedule.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </section>
 
         {/* Alerts History */}
         <div className="space-y-3">
@@ -213,22 +352,12 @@ function AlertasContent() {
           )}
         </div>
 
-        {/* Future: AI Call Schedule Manager will go here */}
-        <div className="glass-card p-4 border-dashed border-2 border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Bell className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">
-                Alertas Automaticas
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Proximamente: Programa recordatorios por llamada o WhatsApp
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Create Alert Dialog */}
+        <CreateAlertDialog
+          open={showCreateAlertDialog}
+          onOpenChange={setShowCreateAlertDialog}
+          onSubmit={handleAddAlert}
+        />
       </div>
     </DashboardLayout>
   )
