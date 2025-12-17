@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useUser, SignInButton } from "@clerk/nextjs"
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
+import { useUser } from "@clerk/nextjs"
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { HabitTrackerCard } from "./-components/HabitTrackerCard"
@@ -16,7 +15,7 @@ import { useGlucoseLog } from "@/hooks/useGlucoseLog"
 import { Activity, TrendingUp, Flame, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-function DashboardContent() {
+export default function DashboardPage() {
   const { user } = useUser()
 
   // Dialog states for wellness tracking
@@ -281,35 +280,5 @@ function DashboardContent() {
         }
       />
     </DashboardLayout>
-  )
-}
-
-export default function DashboardPage() {
-  return (
-    <>
-      <Authenticated>
-        <DashboardContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
-            <p className="text-muted-foreground">
-              Inicia sesión para acceder a tu dashboard
-            </p>
-            <SignInButton mode="modal">
-              <button className="btn-neon px-6 py-2 rounded-xl">
-                Iniciar Sesión
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </AuthLoading>
-    </>
   )
 }

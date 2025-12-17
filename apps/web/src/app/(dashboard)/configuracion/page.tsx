@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useUser, useClerk, SignInButton } from "@clerk/nextjs"
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { User, Bell, Shield, Smartphone, ChevronRight, LogOut } from "lucide-react"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { PersonalDataSheet } from "./-components/PersonalDataSheet"
@@ -43,36 +42,6 @@ const settingsItems = [
 ]
 
 export default function ConfiguracionPage() {
-  return (
-    <>
-      <Authenticated>
-        <ConfiguracionContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
-            <p className="text-muted-foreground">
-              Inicia sesion para acceder a la configuracion
-            </p>
-            <SignInButton mode="modal">
-              <button className="btn-neon px-6 py-2 rounded-xl">
-                Iniciar Sesion
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </AuthLoading>
-    </>
-  )
-}
-
-function ConfiguracionContent() {
   const router = useRouter()
   const { user } = useUser()
   const { signOut } = useClerk()

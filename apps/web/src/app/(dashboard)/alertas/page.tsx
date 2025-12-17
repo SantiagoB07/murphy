@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useUser, SignInButton } from "@clerk/nextjs"
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
+import { useUser } from "@clerk/nextjs"
 import { 
   Bell, 
   AlertTriangle, 
@@ -105,36 +104,6 @@ const getAlertBgColor = (type: AlertType) => {
   }
 }
 
-export default function AlertasPage() {
-  return (
-    <>
-      <Authenticated>
-        <AlertasContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
-            <p className="text-muted-foreground">
-              Inicia sesion para ver tus alertas
-            </p>
-            <SignInButton mode="modal">
-              <button className="btn-neon px-6 py-2 rounded-xl">
-                Iniciar Sesion
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </AuthLoading>
-    </>
-  )
-}
-
 // Alert type config for icons and colors
 const ALERT_TYPE_CONFIG = {
   glucometry: { label: "Glucometría", icon: Droplet, color: "red-500" },
@@ -153,7 +122,7 @@ const FREQUENCY_LABELS = {
   once: "Solo hoy",
 }
 
-function AlertasContent() {
+export default function AlertasPage() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)

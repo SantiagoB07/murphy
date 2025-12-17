@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useUser, SignInButton } from "@clerk/nextjs"
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
+import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { InsulinConfigCard } from "./-components/InsulinConfigCard"
 import { InsulinUpdateDialog } from "./-components/InsulinUpdateDialog"
@@ -16,7 +15,7 @@ import {
 import { useInsulinDoseRecords } from "@/hooks/useInsulinDoseRecords"
 import { toast } from "sonner"
 
-function InsulinaContent() {
+export default function InsulinaPage() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
 
@@ -168,35 +167,5 @@ function InsulinaContent() {
         />
       </div>
     </DashboardLayout>
-  )
-}
-
-export default function InsulinaPage() {
-  return (
-    <>
-      <Authenticated>
-        <InsulinaContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
-            <p className="text-muted-foreground">
-              Inicia sesion para acceder a tu configuracion de insulina
-            </p>
-            <SignInButton mode="modal">
-              <button className="btn-neon px-6 py-2 rounded-xl">
-                Iniciar Sesion
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </AuthLoading>
-    </>
   )
 }

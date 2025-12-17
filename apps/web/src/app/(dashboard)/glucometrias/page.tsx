@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useUser, SignInButton } from "@clerk/nextjs"
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react"
+import { useUser } from "@clerk/nextjs"
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { GlucoseRecordCard } from "./-components/GlucoseRecordCard"
 import { AddGlucoseDialog } from "./-components/AddGlucoseDialog"
@@ -42,36 +41,6 @@ import {
 } from "lucide-react"
 
 export default function GlucometriasPage() {
-  return (
-    <>
-      <Authenticated>
-        <GlucometriasContent />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="text-center space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">Murphy</h1>
-            <p className="text-muted-foreground">
-              Inicia sesion para acceder a tus glucometrias
-            </p>
-            <SignInButton mode="modal">
-              <button className="btn-neon px-6 py-2 rounded-xl">
-                Iniciar Sesion
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </AuthLoading>
-    </>
-  )
-}
-
-function GlucometriasContent() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
 
