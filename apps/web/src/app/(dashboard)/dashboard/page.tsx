@@ -3,7 +3,6 @@
 import { useState, useMemo } from "react"
 import { useUser } from "@clerk/nextjs"
 
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { HabitTrackerCard } from "./-components/HabitTrackerCard"
 import { XPDonut } from "./-components/XPDonut"
 import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
@@ -127,16 +126,14 @@ export default function DashboardPage() {
   // Show loading state
   if (wellnessLoading || glucoseLoading) {
     return (
-      <DashboardLayout userName={userName} userRole="patient">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-pulse text-muted-foreground">Cargando...</div>
-        </div>
-      </DashboardLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-pulse text-muted-foreground">Cargando...</div>
+      </div>
     )
   }
 
   return (
-    <DashboardLayout userName={userName} userRole="patient">
+    <>
       {/* Page Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between">
@@ -279,6 +276,6 @@ export default function DashboardPage() {
               : dizzinessHistory
         }
       />
-    </DashboardLayout>
+    </>
   )
 }

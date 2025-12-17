@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useUser } from "@clerk/nextjs"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { InsulinConfigCard } from "./-components/InsulinConfigCard"
 import { InsulinUpdateDialog } from "./-components/InsulinUpdateDialog"
 import { InsulinTodoList } from "./-components/InsulinTodoList"
@@ -68,8 +67,7 @@ export default function InsulinaPage() {
     (rapidSchedule?.timesPerDay ?? 0) + (basalSchedule?.timesPerDay ?? 0)
 
   return (
-    <DashboardLayout userName={userName} userRole="patient">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Insulina</h1>
           <p className="text-muted-foreground mt-1">
@@ -165,7 +163,6 @@ export default function InsulinaPage() {
           onSave={handleSaveUpdate}
           isLoading={isUpdating}
         />
-      </div>
-    </DashboardLayout>
+    </div>
   )
 }

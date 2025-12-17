@@ -16,7 +16,6 @@ import {
   Syringe,
   Heart,
 } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { CreateAlertDialog } from "@/components/alertas/CreateAlertDialog"
@@ -175,8 +174,7 @@ export default function AlertasPage() {
   }
 
   return (
-    <DashboardLayout userName={userName} userRole="patient">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Alertas</h1>
@@ -327,7 +325,6 @@ export default function AlertasPage() {
           onOpenChange={setShowCreateAlertDialog}
           onSubmit={handleAddAlert}
         />
-      </div>
-    </DashboardLayout>
+    </div>
   )
 }

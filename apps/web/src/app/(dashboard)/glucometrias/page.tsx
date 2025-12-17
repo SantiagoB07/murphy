@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react"
 import { useUser } from "@clerk/nextjs"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { GlucoseRecordCard } from "./-components/GlucoseRecordCard"
 import { AddGlucoseDialog } from "./-components/AddGlucoseDialog"
 import { DailyXPSummary } from "./-components/DailyXPSummary"
@@ -175,7 +174,7 @@ export default function GlucometriasPage() {
   }
 
   return (
-    <DashboardLayout userName={userName} userRole="patient">
+    <>
       {/* Page Header */}
       <header className="mb-6">
         <div className="flex items-center justify-between">
@@ -380,6 +379,6 @@ export default function GlucometriasPage() {
         onSave={handleSaveRecord}
         onDelete={handleDeleteFromDialog}
       />
-    </DashboardLayout>
+    </>
   )
 }

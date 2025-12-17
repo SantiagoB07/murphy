@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { User, Bell, Shield, Smartphone, ChevronRight, LogOut } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
 import { PersonalDataSheet } from "./-components/PersonalDataSheet"
 import { SecuritySheet } from "./-components/SecuritySheet"
 import { NotificationsSheet } from "./-components/NotificationsSheet"
@@ -72,7 +71,7 @@ export default function ConfiguracionPage() {
   }
 
   return (
-    <DashboardLayout userName={userName} userRole="patient">
+    <>
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Configuracion</h1>
@@ -136,6 +135,6 @@ export default function ConfiguracionPage() {
         open={openSheet === "devices"}
         onOpenChange={(open) => !open && handleCloseSheet()}
       />
-    </DashboardLayout>
+    </>
   )
 }
