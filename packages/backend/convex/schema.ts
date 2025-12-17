@@ -126,8 +126,6 @@ export default defineSchema({
   // Programación de alertas automáticas (llamadas/WhatsApp)
   aiCallSchedules: defineTable({
     patientId: v.id("patientProfiles"),
-    scheduledByClerkUserId: v.string(),
-    scheduledByRole: userRoles,
     callTime: v.string(),
     scheduleType: scheduleTypes,
     daysOfWeek: v.optional(v.array(v.number())),
@@ -137,6 +135,7 @@ export default defineSchema({
     customMessage: v.optional(v.string()),
     isActive: v.boolean(),
     updatedAt: v.number(),
+    scheduleFunctionId: v.optional(v.id("_scheduled_functions")),
   }).index("by_patient_active", ["patientId", "isActive"]),
 
   // Registros de dosis de insulina administradas

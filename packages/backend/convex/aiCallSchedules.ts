@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server"
 import { v } from "convex/values"
 import { getCurrentPatient } from "./lib/auth"
+import { internal } from "./_generated/api"
+import type { Id } from "./_generated/dataModel"
 
 const userRoles = v.union(v.literal("patient"), v.literal("coadmin"))
 const scheduleTypes = v.union(v.literal("recurring"), v.literal("specific"))
@@ -57,6 +59,7 @@ export const getById = query({
   },
 })
 
+
 // ============================================
 // Mutations
 // ============================================
@@ -78,10 +81,17 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const patient = await getCurrentPatient(ctx)
 
+    const runDate = new Date(args.callTime)
+
+
+    const scheduledFunctionId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
+      runDate,
+      internal.agent.actions.initiateCall,
+      { patientId: patient._id }
+    )
+
     const scheduleId = await ctx.db.insert("aiCallSchedules", {
       patientId: patient._id,
-      scheduledByClerkUserId: patient.clerkUserId,
-      scheduledByRole: "patient",
       callTime: args.callTime,
       scheduleType: args.scheduleType,
       daysOfWeek: args.daysOfWeek,
@@ -91,6 +101,7 @@ export const create = mutation({
       customMessage: args.customMessage,
       isActive: args.isActive ?? true,
       updatedAt: Date.now(),
+      scheduleFunctionId: scheduledFunctionId
     })
 
     return { id: scheduleId }
