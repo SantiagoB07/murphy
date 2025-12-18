@@ -4,6 +4,50 @@ import { internal } from "../_generated/api";
 import type { InitiateCallResult } from "./types";
 
 /**
+ * Executes a scheduled alert based on the channel type.
+ * Handles both call and whatsapp channels, and triggers reschedule/cleanup after execution.
+ */
+export const executeScheduledAlert = internalAction({
+  args: {
+    scheduleId: v.id("aiCallSchedules"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the schedule record
+    const schedule = await ctx.runQuery(
+      internal.aiCallSchedules.getByIdInternal,
+      { id: args.scheduleId }
+    );
+
+    if (!schedule) {
+      console.log(`[executeScheduledAlert] Schedule ${args.scheduleId} not found, skipping`);
+      return;
+    }
+
+    if (!schedule.isActive) {
+      console.log(`[executeScheduledAlert] Schedule ${args.scheduleId} is inactive, skipping`);
+      return;
+    }
+
+    // 2. Execute based on channel
+    if (schedule.channel === "call") {
+      console.log(`[executeScheduledAlert] Initiating call for schedule ${args.scheduleId}`);
+      await ctx.runAction(internal.agent.actions.initiateCall, {
+        patientId: schedule.patientId,
+        alertType: schedule.type,
+      });
+    } else if (schedule.channel === "whatsapp") {
+      // Future: WhatsApp integration
+      console.log(`[executeScheduledAlert] WhatsApp not implemented yet for schedule ${args.scheduleId}`);
+    }
+
+    // 3. Handle reschedule or cleanup
+    await ctx.runMutation(internal.aiCallSchedules.rescheduleOrCleanup, {
+      scheduleId: args.scheduleId,
+    });
+  },
+});
+
+/**
  * Initiates an outbound call to a patient via ElevenLabs
  * Can be triggered from the Convex dashboard or scheduled
  */

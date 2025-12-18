@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server"
+import { query, mutation, internalQuery, internalMutation } from "./_generated/server"
 import { v } from "convex/values"
 import { getCurrentPatient } from "./lib/auth"
 import { internal } from "./_generated/api"
@@ -105,13 +105,26 @@ export const getById = query({
   },
 })
 
+/**
+ * Internal query to get a schedule by ID (no auth check)
+ * Used by scheduled functions that don't have user context
+ */
+export const getByIdInternal = internalQuery({
+  args: {
+    id: v.id("aiCallSchedules"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id)
+  },
+})
+
 
 // ============================================
 // Mutations
 // ============================================
 
 /**
- * Creates a new alert schedule and schedules the first call
+ * Creates a new alert schedule and schedules the first execution
  */
 export const create = mutation({
   args: {
@@ -125,18 +138,7 @@ export const create = mutation({
     const patient = await getCurrentPatient(ctx)
     const isActive = args.isActive ?? true
 
-    // Schedule the first call if active
-    let scheduledFunctionId: Id<"_scheduled_functions"> | undefined = undefined
-    if (isActive) {
-      const runTime = getNextRunTime(args.time)
-      const funcId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
-        runTime,
-        internal.agent.actions.initiateCall,
-        { patientId: patient._id }
-      )
-      scheduledFunctionId = funcId
-    }
-
+    // First, insert the schedule record (without scheduledFunctionId)
     const scheduleId: Id<"aiCallSchedules"> = await ctx.db.insert("aiCallSchedules", {
       patientId: patient._id,
       time: args.time,
@@ -145,8 +147,18 @@ export const create = mutation({
       frequency: args.frequency,
       isActive,
       updatedAt: Date.now(),
-      scheduledFunctionId,
     })
+
+    // Then, if active, schedule the first execution and update the record
+    if (isActive) {
+      const runTime = getNextRunTime(args.time)
+      const funcId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
+        runTime,
+        internal.agent.actions.executeScheduledAlert,
+        { scheduleId }
+      )
+      await ctx.db.patch(scheduleId, { scheduledFunctionId: funcId })
+    }
 
     return { id: scheduleId }
   },
@@ -212,15 +224,15 @@ export const toggle = mutation({
     let scheduledFunctionId = schedule.scheduledFunctionId
 
     if (args.isActive && !schedule.isActive) {
-      // Activating: schedule a new call
+      // Activating: schedule a new execution
       const runTime = getNextRunTime(schedule.time)
       scheduledFunctionId = await ctx.scheduler.runAt(
         runTime,
-        internal.agent.actions.initiateCall,
-        { patientId: patient._id }
+        internal.agent.actions.executeScheduledAlert,
+        { scheduleId: args.id }
       )
     } else if (!args.isActive && schedule.isActive && schedule.scheduledFunctionId) {
-      // Deactivating: cancel the scheduled call
+      // Deactivating: cancel the scheduled execution
       await ctx.scheduler.cancel(schedule.scheduledFunctionId)
       scheduledFunctionId = undefined
     }
@@ -263,5 +275,49 @@ export const remove = mutation({
     await ctx.db.delete(args.id)
 
     return { success: true }
+  },
+})
+
+
+// ============================================
+// Internal Mutations (for scheduled functions)
+// ============================================
+
+/**
+ * Reschedules a daily alert or cleans up a one-time alert after execution.
+ * Called by executeScheduledAlert after the alert has been triggered.
+ */
+export const rescheduleOrCleanup = internalMutation({
+  args: {
+    scheduleId: v.id("aiCallSchedules"),
+  },
+  handler: async (ctx, args) => {
+    const schedule = await ctx.db.get(args.scheduleId)
+
+    if (!schedule) {
+      console.log(`[rescheduleOrCleanup] Schedule ${args.scheduleId} not found`)
+      return
+    }
+
+    if (schedule.frequency === "once") {
+      // Delete one-time alerts after execution
+      console.log(`[rescheduleOrCleanup] Deleting one-time schedule ${args.scheduleId}`)
+      await ctx.db.delete(args.scheduleId)
+    } else if (schedule.frequency === "daily") {
+      // Schedule next occurrence (tomorrow same time)
+      const nextRunTime = getNextRunTime(schedule.time)
+      console.log(`[rescheduleOrCleanup] Rescheduling daily alert ${args.scheduleId} for ${new Date(nextRunTime).toISOString()}`)
+
+      const funcId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
+        nextRunTime,
+        internal.agent.actions.executeScheduledAlert,
+        { scheduleId: args.scheduleId }
+      )
+
+      await ctx.db.patch(args.scheduleId, {
+        scheduledFunctionId: funcId,
+        updatedAt: Date.now(),
+      })
+    }
   },
 })
