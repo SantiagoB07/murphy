@@ -1,29 +1,11 @@
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
-import { type InsulinType, getCurrentTime } from "../lib/validators";
-
-// ============================================
-// Helper Functions
-// ============================================
-
-/**
- * Helper: Get start of day timestamp for a given timestamp
- * Uses the timestamp as-is assuming the client sends it in their local timezone
- */
-function getStartOfDay(timestamp: number): number {
-  const date = new Date(timestamp);
-  date.setHours(0, 0, 0, 0);
-  return date.getTime();
-}
-
-/**
- * Helper: Get end of day timestamp for a given timestamp
- */
-function getEndOfDay(timestamp: number): number {
-  const date = new Date(timestamp);
-  date.setHours(23, 59, 59, 999);
-  return date.getTime();
-}
+import {
+  type InsulinType,
+  getCurrentTime,
+  getStartOfDayColombia as getStartOfDay,
+  getEndOfDayColombia as getEndOfDay,
+} from "../lib/validators";
 
 // ============================================
 // Types - Dose Records

@@ -3,19 +3,7 @@ import { v } from "convex/values"
 import { getCurrentPatient } from "./lib/auth"
 import { internal } from "./_generated/api"
 import type { Id } from "./_generated/dataModel"
-
-/**
- * Colombia timezone offset in milliseconds (UTC-5, no DST)
- */
-const COLOMBIA_OFFSET_MS = -5 * 60 * 60 * 1000
-
-/**
- * Gets the current time in Colombia (UTC-5)
- */
-function getNowInColombia(): Date {
-  const nowUtc = Date.now()
-  return new Date(nowUtc + COLOMBIA_OFFSET_MS)
-}
+import { COLOMBIA_OFFSET_MS, getNowInColombia } from "./lib/validators"
 
 /**
  * Calculates the next run time from a "HH:MM" time string.
