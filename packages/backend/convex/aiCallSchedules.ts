@@ -5,22 +5,44 @@ import { internal } from "./_generated/api"
 import type { Id } from "./_generated/dataModel"
 
 /**
+ * Colombia timezone offset in milliseconds (UTC-5, no DST)
+ */
+const COLOMBIA_OFFSET_MS = -5 * 60 * 60 * 1000
+
+/**
+ * Gets the current time in Colombia (UTC-5)
+ */
+function getNowInColombia(): Date {
+  const nowUtc = Date.now()
+  return new Date(nowUtc + COLOMBIA_OFFSET_MS)
+}
+
+/**
  * Calculates the next run time from a "HH:MM" time string.
- * If the time has already passed today, schedules for tomorrow.
+ * The input time is interpreted as Colombia local time (UTC-5).
+ * Returns a UTC timestamp for scheduling.
+ * If the time has already passed today in Colombia, schedules for tomorrow.
  */
 function getNextRunTime(timeStr: string): number {
   const [hours, minutes] = timeStr.split(":").map(Number)
-  const now = new Date()
-  const runDate = new Date(now)
   
-  runDate.setHours(hours, minutes, 0, 0)
+  // Get current time in Colombia
+  const nowColombia = getNowInColombia()
   
-  // If the time has already passed today, schedule for tomorrow
-  if (runDate.getTime() <= now.getTime()) {
-    runDate.setDate(runDate.getDate() + 1)
+  // Build the target time in Colombia (as if it were UTC, then we'll convert)
+  const targetColombia = new Date(nowColombia)
+  targetColombia.setUTCHours(hours, minutes, 0, 0)
+  
+  // If the time has already passed today in Colombia, schedule for tomorrow
+  if (targetColombia.getTime() <= nowColombia.getTime()) {
+    targetColombia.setUTCDate(targetColombia.getUTCDate() + 1)
   }
   
-  return runDate.getTime()
+  // Convert Colombia time back to UTC by subtracting the offset
+  // (Colombia is UTC-5, so to get UTC we add 5 hours)
+  const utcTimestamp = targetColombia.getTime() - COLOMBIA_OFFSET_MS
+  
+  return utcTimestamp
 }
 
 const notificationChannels = v.union(v.literal("call"), v.literal("whatsapp"))
