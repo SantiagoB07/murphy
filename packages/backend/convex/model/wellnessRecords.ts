@@ -1,6 +1,6 @@
 import type { QueryCtx, MutationCtx } from "../_generated/server";
 import type { Id, Doc } from "../_generated/dataModel";
-import { getDateRange } from "../lib/validators";
+import { getDateRange, COLOMBIA_OFFSET_MS } from "../lib/validators";
 
 // ============================================
 // Sleep Records - Types
@@ -363,8 +363,11 @@ export async function upsertStressRecord(
     return { id: existing._id, updated: true };
   }
 
-  // Use midday of the given date to avoid timezone edge cases
-  const recordedAt = new Date(input.date + "T12:00:00").getTime();
+  // Use midday of the given date in Colombia timezone to avoid edge cases
+  // Parse date as Colombia time and convert to UTC timestamp
+  const [year, month, day] = input.date.split("-").map(Number);
+  const middayColombia = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
+  const recordedAt = middayColombia.getTime() - COLOMBIA_OFFSET_MS;
   const id = await ctx.db.insert("stressRecords", {
     patientId: input.patientId,
     level: input.level,
@@ -574,8 +577,11 @@ export async function upsertDizzinessRecord(
     return { id: existing._id, updated: true };
   }
 
-  // Use midday of the given date to avoid timezone edge cases
-  const recordedAt = new Date(input.date + "T12:00:00").getTime();
+  // Use midday of the given date in Colombia timezone to avoid edge cases
+  // Parse date as Colombia time and convert to UTC timestamp
+  const [year, month, day] = input.date.split("-").map(Number);
+  const middayColombia = new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
+  const recordedAt = middayColombia.getTime() - COLOMBIA_OFFSET_MS;
   const id = await ctx.db.insert("dizzinessRecords", {
     patientId: input.patientId,
     severity: input.severity,

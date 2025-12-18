@@ -88,27 +88,100 @@ export function isValidInsulinType(type: unknown): type is InsulinType {
   return type === "rapid" || type === "basal";
 }
 
+// ============================================
+// Colombia Timezone Helpers
+// ============================================
+
 /**
- * Gets today's date in YYYY-MM-DD format
+ * Colombia timezone offset in milliseconds (UTC-5, no DST)
+ */
+export const COLOMBIA_OFFSET_MS = -5 * 60 * 60 * 1000;
+
+/**
+ * Gets the current time as a Date object adjusted to Colombia timezone (UTC-5)
+ * Note: The returned Date object's internal UTC time is shifted to represent Colombia local time
+ */
+export function getNowInColombia(): Date {
+  const nowUtc = Date.now();
+  return new Date(nowUtc + COLOMBIA_OFFSET_MS);
+}
+
+/**
+ * Gets today's date in YYYY-MM-DD format using Colombia timezone
  */
 export function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0];
+  const nowColombia = getNowInColombia();
+  const year = nowColombia.getUTCFullYear();
+  const month = String(nowColombia.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(nowColombia.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**
- * Gets current time in HH:MM format
+ * Gets current time in HH:MM format using Colombia timezone
  */
 export function getCurrentTime(): string {
-  return new Date().toTimeString().split(" ")[0].slice(0, 5);
+  const nowColombia = getNowInColombia();
+  const hours = String(nowColombia.getUTCHours()).padStart(2, "0");
+  const minutes = String(nowColombia.getUTCMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
 }
 
 /**
- * Calculates start and end timestamps for a given date
+ * Calculates start and end timestamps for a given date in Colombia timezone
+ * The date string is interpreted as Colombia local date
+ * Returns UTC timestamps that correspond to midnight and end of day in Colombia
  */
 export function getDateRange(date: string): { startOfDay: number; endOfDay: number } {
-  const startOfDay = new Date(date + "T00:00:00").getTime();
-  const endOfDay = new Date(date + "T23:59:59.999").getTime();
+  // Parse the date as Colombia midnight (00:00:00 Colombia time)
+  // Colombia is UTC-5, so midnight Colombia = 05:00:00 UTC
+  const [year, month, day] = date.split("-").map(Number);
+  
+  // Create date at midnight UTC, then subtract Colombia offset to get Colombia midnight in UTC
+  const midnightColombia = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+  const startOfDay = midnightColombia.getTime() - COLOMBIA_OFFSET_MS;
+  
+  // End of day is 23:59:59.999 Colombia time
+  const endOfDayColombia = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+  const endOfDay = endOfDayColombia.getTime() - COLOMBIA_OFFSET_MS;
+  
   return { startOfDay, endOfDay };
+}
+
+/**
+ * Gets start of day timestamp for a given timestamp in Colombia timezone
+ * Returns UTC timestamp for midnight Colombia time of that day
+ */
+export function getStartOfDayColombia(timestamp: number): number {
+  // Convert UTC timestamp to Colombia "local" time
+  const colombiaTime = new Date(timestamp + COLOMBIA_OFFSET_MS);
+  
+  // Get the date components in Colombia time
+  const year = colombiaTime.getUTCFullYear();
+  const month = colombiaTime.getUTCMonth();
+  const day = colombiaTime.getUTCDate();
+  
+  // Create midnight in Colombia, then convert back to UTC
+  const midnightColombia = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+  return midnightColombia.getTime() - COLOMBIA_OFFSET_MS;
+}
+
+/**
+ * Gets end of day timestamp for a given timestamp in Colombia timezone
+ * Returns UTC timestamp for 23:59:59.999 Colombia time of that day
+ */
+export function getEndOfDayColombia(timestamp: number): number {
+  // Convert UTC timestamp to Colombia "local" time
+  const colombiaTime = new Date(timestamp + COLOMBIA_OFFSET_MS);
+  
+  // Get the date components in Colombia time
+  const year = colombiaTime.getUTCFullYear();
+  const month = colombiaTime.getUTCMonth();
+  const day = colombiaTime.getUTCDate();
+  
+  // Create end of day in Colombia, then convert back to UTC
+  const endOfDayColombia = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+  return endOfDayColombia.getTime() - COLOMBIA_OFFSET_MS;
 }
 
 /**
