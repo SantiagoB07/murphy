@@ -40,7 +40,7 @@ export function useOnboardingForm() {
       // Map form values to backend API format
       return await onboardAction({
         fullName: values.name,
-        phoneNumber: values.phone,
+        phoneNumber: `+57${values.phone}`,
         age: parseInt(values.age) || 0,
         gender: values.sex as 'masculino' | 'femenino' | 'otro' | 'prefiero_no_decir',
         diabetesType: values.diabetesType as 'Tipo 1' | 'Tipo 2' | 'Gestacional' | 'LADA' | 'MODY',
