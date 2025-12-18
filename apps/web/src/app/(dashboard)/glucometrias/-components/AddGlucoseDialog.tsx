@@ -8,20 +8,32 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { AlertTriangle, CheckCircle2, Droplets } from "lucide-react"
-import { getGlucoseStatus, GLUCOSE_RANGES } from "@/types/diabetes"
-import type { Glucometry } from "@/types/diabetes"
+import {
+  getGlucoseStatus,
+  GLUCOSE_RANGES,
+  GLUCOSE_SLOTS,
+  GLUCOSE_SLOT_LABELS,
+} from "@/types/diabetes"
+import type { Glucometry, GlucoseSlot } from "@/types/diabetes"
 
 interface AddGlucoseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialRecord?: Glucometry // For editing existing record
-  onSave: (value: number, notes?: string) => void
+  onSave: (value: number, slot?: GlucoseSlot, notes?: string) => void
   onDelete?: (id: string) => void // For deleting existing record
 }
 
@@ -33,6 +45,7 @@ export function AddGlucoseDialog({
   onDelete,
 }: AddGlucoseDialogProps) {
   const [value, setValue] = useState<string>("")
+  const [slot, setSlot] = useState<GlucoseSlot | undefined>(undefined)
   const [notes, setNotes] = useState("")
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,6 +55,7 @@ export function AddGlucoseDialog({
   useEffect(() => {
     if (open) {
       setValue(initialRecord?.value?.toString() || "")
+      setSlot(initialRecord?.slot)
       setNotes(initialRecord?.notes || "")
       setError(null)
       setTimeout(() => inputRef.current?.focus(), 100)
@@ -61,7 +75,7 @@ export function AddGlucoseDialog({
       setError("El valor debe estar entre 20 y 600 mg/dL")
       return
     }
-    onSave(numericValue, notes.trim() || undefined)
+    onSave(numericValue, slot, notes.trim() || undefined)
     onOpenChange(false)
   }
 
@@ -159,20 +173,38 @@ export function AddGlucoseDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="glucose-slot" className="text-muted-foreground">
+              Momento del dia (opcional)
+            </Label>
+            <Select
+              value={slot || ""}
+              onValueChange={(val) => setSlot(val as GlucoseSlot || undefined)}
+            >
+              <SelectTrigger id="glucose-slot" className="w-full">
+                <SelectValue placeholder="Selecciona un momento" />
+              </SelectTrigger>
+              <SelectContent>
+                {GLUCOSE_SLOTS.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {GLUCOSE_SLOT_LABELS[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="glucose-notes" className="text-muted-foreground">
               Nota (opcional)
             </Label>
             <Textarea
               id="glucose-notes"
-              placeholder="Ej: Antes del desayuno, despues de ejercicio..."
+              placeholder="Ej: despues de ejercicio, me senti mareado..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="resize-none h-20"
+              className="resize-none h-16"
               maxLength={200}
             />
-            <p className="text-xs text-muted-foreground">
-              Agrega contexto como el momento del dia o actividad reciente
-            </p>
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/30">

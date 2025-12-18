@@ -19,6 +19,18 @@ const insulinTypeSchema = z.enum(["rapid", "basal"], {
   message: "insulin_type debe ser 'rapid' o 'basal'",
 });
 
+/**
+ * Glucose slot validator (meal timing)
+ */
+const glucoseSlotSchema = z.enum([
+  "before_breakfast",
+  "after_breakfast",
+  "before_lunch",
+  "after_lunch",
+  "before_dinner",
+  "after_dinner",
+]).optional();
+
 // ============================================
 // Glucometry Schemas
 // ============================================
@@ -26,11 +38,13 @@ const insulinTypeSchema = z.enum(["rapid", "basal"], {
 export const SaveGlucometrySchema = z.object({
   patient_id: patientIdSchema,
   value: z.number({ message: "value debe ser un número" }),
+  slot: glucoseSlotSchema,
 });
 
 export const UpdateGlucometrySchema = z.object({
   patient_id: patientIdSchema,
   value: z.number({ message: "value debe ser un número" }),
+  slot: glucoseSlotSchema,
 });
 
 // ============================================

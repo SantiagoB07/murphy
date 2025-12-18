@@ -1,7 +1,7 @@
 "use client"
 
 import type { Glucometry } from "@/types/diabetes"
-import { getGlucoseStatus } from "@/types/diabetes"
+import { getGlucoseStatus, GLUCOSE_SLOT_LABELS } from "@/types/diabetes"
 import { cn } from "@/lib/utils"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -105,10 +105,10 @@ export function GlucoseRecordCard({
         </div>
       </div>
 
-      {/* Notes (if any) */}
-      {record.notes && (
+      {/* Slot label (if any) */}
+      {record.slot && (
         <p className="mt-2 text-sm text-muted-foreground pl-1 border-l-2 border-border/50 ml-1">
-          {record.notes}
+          {GLUCOSE_SLOT_LABELS[record.slot]}
         </p>
       )}
     </article>

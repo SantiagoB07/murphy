@@ -6,11 +6,20 @@ import { getTodayDate } from "../lib/validators";
 // Types
 // ============================================
 
+export type GlucoseSlot =
+  | "before_breakfast"
+  | "after_breakfast"
+  | "before_lunch"
+  | "after_lunch"
+  | "before_dinner"
+  | "after_dinner";
+
 export type GlucoseRecordInput = {
   patientId: Id<"patientProfiles">;
   value: number;
   date: string;
   recordedAt?: number;
+  slot?: GlucoseSlot;
   notes?: string;
 };
 
@@ -18,6 +27,7 @@ export type GlucoseRecordUpdate = {
   value?: number;
   date?: string;
   recordedAt?: number;
+  slot?: GlucoseSlot;
   notes?: string;
 };
 
@@ -210,6 +220,7 @@ export async function createRecord(
     value: input.value,
     date: input.date || getTodayDate(),
     recordedAt: input.recordedAt ?? now,
+    slot: input.slot,
     notes: input.notes,
     updatedAt: now,
   });
@@ -243,10 +254,11 @@ export async function updateRecord(
  */
 export async function updateRecordInternal(
   ctx: MutationCtx,
-  { id, value }: { id: Id<"glucoseRecords">; value: number }
+  { id, value, slot }: { id: Id<"glucoseRecords">; value: number; slot?: GlucoseSlot }
 ): Promise<{ id: Id<"glucoseRecords"> }> {
   await ctx.db.patch(id, {
     value,
+    slot,
     updatedAt: Date.now(),
   });
   return { id };

@@ -3,6 +3,18 @@ import { v } from "convex/values";
 import { getCurrentPatient } from "./lib/auth";
 import * as GlucoseRecords from "./model/glucoseRecords";
 
+// Glucose slot validator
+const glucoseSlotValidator = v.optional(
+  v.union(
+    v.literal("before_breakfast"),
+    v.literal("after_breakfast"),
+    v.literal("before_lunch"),
+    v.literal("after_lunch"),
+    v.literal("before_dinner"),
+    v.literal("after_dinner")
+  )
+);
+
 // ============================================
 // Queries
 // ============================================
@@ -103,6 +115,7 @@ export const create = mutation({
     value: v.number(),
     date: v.string(),
     recordedAt: v.optional(v.number()),
+    slot: glucoseSlotValidator,
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -123,6 +136,7 @@ export const update = mutation({
     value: v.optional(v.number()),
     date: v.optional(v.string()),
     recordedAt: v.optional(v.number()),
+    slot: glucoseSlotValidator,
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
