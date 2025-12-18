@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+  - packages/*
+
+catalog:
+  convex: ^1.29.3
+  dotenv: ^17.2.2
+  typescript: ^5
+  zod: 4.2.0

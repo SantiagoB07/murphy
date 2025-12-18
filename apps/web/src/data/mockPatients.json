@@ -1,0 +1,46 @@
+{
+  "patients": [
+    {
+      "id": "p001",
+      "name": "Maria Garcia Lopez",
+      "age": 45,
+      "diabetesType": "Tipo 2",
+      "estrato": 4,
+      "avatar": null,
+      "telegramConnected": true,
+      "coadminId": "ca001",
+      "xpLevel": 78,
+      "streak": 12,
+      "glucometrias": [
+        { "id": "g001", "value": 142, "timestamp": "2024-12-06T07:30:00Z", "type": "before_breakfast" },
+        { "id": "g002", "value": 168, "timestamp": "2024-12-06T09:15:00Z", "type": "after_breakfast" },
+        { "id": "g003", "value": 125, "timestamp": "2024-12-06T12:00:00Z", "type": "before_lunch" },
+        { "id": "g004", "value": 155, "timestamp": "2024-12-06T14:30:00Z", "type": "after_lunch" },
+        { "id": "g005", "value": 138, "timestamp": "2024-12-05T07:45:00Z", "type": "before_breakfast" },
+        { "id": "g006", "value": 185, "timestamp": "2024-12-05T09:30:00Z", "type": "after_breakfast" }
+      ],
+      "insulina": [
+        { "id": "i001", "units": 12, "type": "rapid", "timestamp": "2024-12-06T07:35:00Z" },
+        { "id": "i002", "units": 10, "type": "rapid", "timestamp": "2024-12-06T12:55:00Z" },
+        { "id": "i003", "units": 24, "type": "basal", "timestamp": "2024-12-06T22:00:00Z" }
+      ],
+      "sueno": [
+        { "id": "s001", "hours": 6.5, "quality": 7, "date": "2024-12-06" },
+        { "id": "s002", "hours": 7.2, "quality": 8, "date": "2024-12-05" },
+        { "id": "s003", "hours": 5.8, "quality": 5, "date": "2024-12-04" }
+      ],
+      "estres": [
+        { "id": "e001", "level": 6, "timestamp": "2024-12-06T09:00:00Z" },
+        { "id": "e002", "level": 4, "timestamp": "2024-12-06T18:00:00Z" },
+        { "id": "e003", "level": 7, "timestamp": "2024-12-05T15:00:00Z" }
+      ],
+      "mareos": [],
+      "alertas": [
+        { "id": "a001", "type": "hyperglycemia", "severity": "warning", "message": "Glucosa despues del desayuno elevada: 185 mg/dL", "timestamp": "2024-12-05T09:30:00Z", "resolved": false }
+      ]
+    }
+  ],
+  "coadmins": [
+    { "id": "ca001", "name": "Juan Garcia", "patientId": "p001", "telegramConnected": true }
+  ]
+}

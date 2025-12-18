@@ -1,0 +1,22 @@
+{
+  "name": "@murphy/backend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "convex dev",
+    "dev:setup": "convex dev --configure --until-success"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@murphy/config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@clerk/backend": "^2.27.1",
+    "convex": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  }
+}
