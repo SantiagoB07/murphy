@@ -37,6 +37,7 @@ import type * as model_wellnessRecords from "../model/wellnessRecords.js";
 import type * as notificationPreferences from "../notificationPreferences.js";
 import type * as patients from "../patients.js";
 import type * as privateData from "../privateData.js";
+import type * as scripts from "../scripts.js";
 import type * as sleepRecords from "../sleepRecords.js";
 import type * as stressRecords from "../stressRecords.js";
 import type * as treatmentSlots from "../treatmentSlots.js";
@@ -78,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   notificationPreferences: typeof notificationPreferences;
   patients: typeof patients;
   privateData: typeof privateData;
+  scripts: typeof scripts;
   sleepRecords: typeof sleepRecords;
   stressRecords: typeof stressRecords;
   treatmentSlots: typeof treatmentSlots;
