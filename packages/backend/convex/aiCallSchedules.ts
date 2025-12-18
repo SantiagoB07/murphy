@@ -4,16 +4,40 @@ import { getCurrentPatient } from "./lib/auth"
 import { internal } from "./_generated/api"
 import type { Id } from "./_generated/dataModel"
 
-const userRoles = v.union(v.literal("patient"), v.literal("coadmin"))
-const scheduleTypes = v.union(v.literal("recurring"), v.literal("specific"))
+/**
+ * Calculates the next run time from a "HH:MM" time string.
+ * If the time has already passed today, schedules for tomorrow.
+ */
+function getNextRunTime(timeStr: string): number {
+  const [hours, minutes] = timeStr.split(":").map(Number)
+  const now = new Date()
+  const runDate = new Date(now)
+  
+  runDate.setHours(hours, minutes, 0, 0)
+  
+  // If the time has already passed today, schedule for tomorrow
+  if (runDate.getTime() <= now.getTime()) {
+    runDate.setDate(runDate.getDate() + 1)
+  }
+  
+  return runDate.getTime()
+}
+
 const notificationChannels = v.union(v.literal("call"), v.literal("whatsapp"))
+const alertScheduleTypes = v.union(
+  v.literal("glucometry"),
+  v.literal("insulin"),
+  v.literal("wellness"),
+  v.literal("general")
+)
+const scheduleFrequency = v.union(v.literal("daily"), v.literal("once"))
 
 // ============================================
 // Queries
 // ============================================
 
 /**
- * Lists AI call schedules
+ * Lists AI call schedules for the current patient
  */
 export const list = query({
   args: {
@@ -65,43 +89,41 @@ export const getById = query({
 // ============================================
 
 /**
- * Creates a new AI call schedule
+ * Creates a new alert schedule and schedules the first call
  */
 export const create = mutation({
   args: {
-    callTime: v.string(), // "HH:MM"
-    scheduleType: scheduleTypes,
-    daysOfWeek: v.optional(v.array(v.number())), // [0-6] for recurring
-    specificDates: v.optional(v.array(v.string())), // ["YYYY-MM-DD"] for specific
-    callPurposes: v.array(v.string()),
-    notificationChannel: notificationChannels,
-    customMessage: v.optional(v.string()),
+    time: v.string(), // "HH:MM"
+    channel: notificationChannels,
+    type: alertScheduleTypes,
+    frequency: scheduleFrequency,
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const patient = await getCurrentPatient(ctx)
+    const isActive = args.isActive ?? true
 
-    const runDate = new Date(args.callTime)
+    // Schedule the first call if active
+    let scheduledFunctionId: Id<"_scheduled_functions"> | undefined = undefined
+    if (isActive) {
+      const runTime = getNextRunTime(args.time)
+      const funcId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
+        runTime,
+        internal.agent.actions.initiateCall,
+        { patientId: patient._id }
+      )
+      scheduledFunctionId = funcId
+    }
 
-
-    const scheduledFunctionId: Id<"_scheduled_functions"> = await ctx.scheduler.runAt(
-      runDate,
-      internal.agent.actions.initiateCall,
-      { patientId: patient._id }
-    )
-
-    const scheduleId = await ctx.db.insert("aiCallSchedules", {
+    const scheduleId: Id<"aiCallSchedules"> = await ctx.db.insert("aiCallSchedules", {
       patientId: patient._id,
-      callTime: args.callTime,
-      scheduleType: args.scheduleType,
-      daysOfWeek: args.daysOfWeek,
-      specificDates: args.specificDates,
-      callPurposes: args.callPurposes,
-      notificationChannel: args.notificationChannel,
-      customMessage: args.customMessage,
-      isActive: args.isActive ?? true,
+      time: args.time,
+      channel: args.channel,
+      type: args.type,
+      frequency: args.frequency,
+      isActive,
       updatedAt: Date.now(),
-      scheduleFunctionId: scheduledFunctionId
+      scheduledFunctionId,
     })
 
     return { id: scheduleId }
@@ -109,17 +131,15 @@ export const create = mutation({
 })
 
 /**
- * Updates an AI call schedule
+ * Updates an alert schedule
  */
 export const update = mutation({
   args: {
     id: v.id("aiCallSchedules"),
-    callTime: v.optional(v.string()),
-    daysOfWeek: v.optional(v.array(v.number())),
-    specificDates: v.optional(v.array(v.string())),
-    callPurposes: v.optional(v.array(v.string())),
-    notificationChannel: v.optional(notificationChannels),
-    customMessage: v.optional(v.string()),
+    time: v.optional(v.string()),
+    channel: v.optional(notificationChannels),
+    type: v.optional(alertScheduleTypes),
+    frequency: v.optional(scheduleFrequency),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
@@ -147,7 +167,7 @@ export const update = mutation({
 })
 
 /**
- * Toggles schedule active status
+ * Toggles schedule active status (cancels or schedules the function)
  */
 export const toggle = mutation({
   args: {
@@ -167,8 +187,25 @@ export const toggle = mutation({
       throw new Error("Unauthorized")
     }
 
+    let scheduledFunctionId = schedule.scheduledFunctionId
+
+    if (args.isActive && !schedule.isActive) {
+      // Activating: schedule a new call
+      const runTime = getNextRunTime(schedule.time)
+      scheduledFunctionId = await ctx.scheduler.runAt(
+        runTime,
+        internal.agent.actions.initiateCall,
+        { patientId: patient._id }
+      )
+    } else if (!args.isActive && schedule.isActive && schedule.scheduledFunctionId) {
+      // Deactivating: cancel the scheduled call
+      await ctx.scheduler.cancel(schedule.scheduledFunctionId)
+      scheduledFunctionId = undefined
+    }
+
     await ctx.db.patch(args.id, {
       isActive: args.isActive,
+      scheduledFunctionId,
       updatedAt: Date.now(),
     })
 
@@ -177,7 +214,7 @@ export const toggle = mutation({
 })
 
 /**
- * Deletes an AI call schedule
+ * Deletes an alert schedule and cancels any pending scheduled function
  */
 export const remove = mutation({
   args: {
@@ -194,6 +231,11 @@ export const remove = mutation({
     // Verify ownership
     if (schedule.patientId !== patient._id) {
       throw new Error("Unauthorized")
+    }
+
+    // Cancel the scheduled function if it exists
+    if (schedule.scheduledFunctionId) {
+      await ctx.scheduler.cancel(schedule.scheduledFunctionId)
     }
 
     await ctx.db.delete(args.id)

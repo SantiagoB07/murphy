@@ -27,14 +27,21 @@ const userRoles = v.union(
   v.literal("coadmin")
 );
 
-const scheduleTypes = v.union(
-  v.literal("recurring"),
-  v.literal("specific")
-);
-
 const notificationChannels = v.union(
   v.literal("call"),
   v.literal("whatsapp")
+);
+
+const alertScheduleTypes = v.union(
+  v.literal("glucometry"),
+  v.literal("insulin"),
+  v.literal("wellness"),
+  v.literal("general")
+);
+
+const scheduleFrequency = v.union(
+  v.literal("daily"),
+  v.literal("once")
 );
 
 export default defineSchema({
@@ -126,16 +133,13 @@ export default defineSchema({
   // Programación de alertas automáticas (llamadas/WhatsApp)
   aiCallSchedules: defineTable({
     patientId: v.id("patientProfiles"),
-    callTime: v.string(),
-    scheduleType: scheduleTypes,
-    daysOfWeek: v.optional(v.array(v.number())),
-    specificDates: v.optional(v.array(v.string())),
-    callPurposes: v.array(v.string()),
-    notificationChannel: notificationChannels,
-    customMessage: v.optional(v.string()),
+    time: v.string(), // "HH:MM"
+    channel: notificationChannels, // "whatsapp" | "call"
+    type: alertScheduleTypes, // "glucometry" | "insulin" | "wellness" | "general"
+    frequency: scheduleFrequency, // "daily" | "once"
     isActive: v.boolean(),
     updatedAt: v.number(),
-    scheduleFunctionId: v.optional(v.id("_scheduled_functions")),
+    scheduledFunctionId: v.optional(v.id("_scheduled_functions")),
   }).index("by_patient_active", ["patientId", "isActive"]),
 
   // Registros de dosis de insulina administradas

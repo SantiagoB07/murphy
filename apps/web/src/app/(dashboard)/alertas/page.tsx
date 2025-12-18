@@ -15,11 +15,13 @@ import {
   Droplet,
   Syringe,
   Heart,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { CreateAlertDialog } from "@/components/alertas/CreateAlertDialog"
-import type { AlertSchedule, AlertChannel, AlertScheduleType, ScheduleFrequency } from "@/types/diabetes"
+import { useAlertSchedules } from "@/hooks/useAlertSchedules"
+import type { AlertChannel, AlertScheduleType, ScheduleFrequency } from "@/types/diabetes"
 
 type AlertType = "warning" | "success" | "info" | "critical"
 
@@ -125,14 +127,16 @@ export default function AlertasPage() {
   const { user } = useUser()
   const userName = user?.firstName || "Usuario"
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)
-  
-  // Alert schedules state (mock data)
-  const [alertSchedules, setAlertSchedules] = useState<AlertSchedule[]>([
-    { id: "1", time: "07:00", channel: "whatsapp", type: "glucometry", frequency: "daily" },
-    { id: "2", time: "12:00", channel: "call", type: "insulin", frequency: "daily" },
-    { id: "3", time: "22:00", channel: "whatsapp", type: "wellness", frequency: "once" },
-  ])
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // Alert schedules from Convex
+  const {
+    schedules: alertSchedules,
+    addSchedule,
+    deleteSchedule,
+    isLoading: isLoadingSchedules,
+    isPending: isSchedulesPending,
+  } = useAlertSchedules()
 
   const unreadCount = alerts.filter((a) => !a.read).length
 
@@ -153,24 +157,11 @@ export default function AlertasPage() {
     type: AlertScheduleType,
     frequency: ScheduleFrequency
   ) => {
-    // Simulate async operation
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    
-    const newAlert: AlertSchedule = {
-      id: Date.now().toString(),
-      time,
-      channel,
-      type,
-      frequency,
-    }
-    
-    setAlertSchedules((prev) => [...prev, newAlert])
-    toast.success("Alerta creada exitosamente")
+    await addSchedule(time, channel, type, frequency)
   }
 
   const handleDeleteAlert = (id: string) => {
-    setAlertSchedules((prev) => prev.filter((a) => a.id !== id))
-    toast.success("Alerta eliminada")
+    deleteSchedule(id)
   }
 
   return (
@@ -217,7 +208,14 @@ export default function AlertasPage() {
             </Button>
           </div>
 
-          {alertSchedules.length === 0 ? (
+          {isLoadingSchedules ? (
+            <div className="text-center py-6 glass-card">
+              <Loader2 className="w-8 h-8 mx-auto text-muted-foreground mb-2 animate-spin" />
+              <p className="text-sm text-muted-foreground">
+                Cargando alertas...
+              </p>
+            </div>
+          ) : alertSchedules.length === 0 ? (
             <div className="text-center py-6 glass-card">
               <Bell className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm text-muted-foreground">
@@ -260,6 +258,7 @@ export default function AlertasPage() {
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         onClick={() => handleDeleteAlert(schedule.id)}
+                        disabled={isSchedulesPending}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
