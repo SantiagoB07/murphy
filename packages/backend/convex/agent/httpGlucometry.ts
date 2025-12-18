@@ -12,9 +12,9 @@ export const httpSaveGlucometry = httpAction(async (ctx, request) => {
   const result = await parseAndValidate(request, SaveGlucometrySchema);
   if (!result.success) return result.response;
 
-  const { patient_id, value } = result.data;
+  const { patient_id, value, slot } = result.data;
 
-  console.log("[Agent] save-glucometry:", { patient_id, value });
+  console.log("[Agent] save-glucometry:", { patient_id, value, slot });
 
   // Validate patient exists
   const patient = await ctx.runQuery(internal.agent.queries.getPatientById, {
@@ -28,6 +28,7 @@ export const httpSaveGlucometry = httpAction(async (ctx, request) => {
   await ctx.runMutation(internal.agent.mutations.saveGlucoseRecord, {
     patientId: patient_id as Id<"patientProfiles">,
     value,
+    slot,
   });
 
   return successResponse(`Glucosa de ${value} mg/dL registrada correctamente`);
@@ -37,9 +38,9 @@ export const httpUpdateGlucometry = httpAction(async (ctx, request) => {
   const result = await parseAndValidate(request, UpdateGlucometrySchema);
   if (!result.success) return result.response;
 
-  const { patient_id, value } = result.data;
+  const { patient_id, value, slot } = result.data;
 
-  console.log("[Agent] update-glucometry:", { patient_id, value });
+  console.log("[Agent] update-glucometry:", { patient_id, value, slot });
 
   // Find latest record
   const latest = await ctx.runQuery(internal.agent.queries.getLatestGlucoseRecord, {
@@ -55,6 +56,7 @@ export const httpUpdateGlucometry = httpAction(async (ctx, request) => {
   await ctx.runMutation(internal.agent.mutations.updateGlucoseRecord, {
     recordId: latest._id,
     value,
+    slot,
   });
 
   return successResponse(`Glucosa actualizada de ${oldValue} a ${value} mg/dL`);

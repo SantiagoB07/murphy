@@ -4,7 +4,7 @@ import { useMemo, useCallback } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
 import { api } from "@murphy/backend/convex/_generated/api"
-import type { Glucometry } from "@/types/diabetes"
+import type { Glucometry, GlucoseSlot } from "@/types/diabetes"
 import { GLUCOSE_RANGES } from "@/types/diabetes"
 import { toast } from "sonner"
 import {
@@ -81,8 +81,8 @@ export function calculatePeriodStats(
 interface GlucoseLogReturn {
   records: Glucometry[]
   todayRecords: Glucometry[]
-  addRecord: (value: number, notes?: string) => void
-  updateRecord: (id: string, value: number, notes?: string) => void
+  addRecord: (value: number, slot?: GlucoseSlot, notes?: string) => void
+  updateRecord: (id: string, value: number, slot?: GlucoseSlot, notes?: string) => void
   deleteRecord: (id: string) => void
   getRecordsByDate: (date: Date) => Glucometry[]
   getRecordsInRange: (start: Date, end: Date) => Glucometry[]
@@ -95,12 +95,14 @@ function convexToGlucometry(record: {
   _id: string
   value: number
   recordedAt: number
+  slot?: GlucoseSlot
   notes?: string
 }): Glucometry {
   return {
     id: record._id,
     value: record.value,
     timestamp: new Date(record.recordedAt).toISOString(),
+    slot: record.slot,
     notes: record.notes,
   }
 }
@@ -197,7 +199,7 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
 
   // Add a new record
   const addRecord = useCallback(
-    (value: number, notes?: string) => {
+    (value: number, slot?: GlucoseSlot, notes?: string) => {
       const now = new Date()
       const date = format(now, "yyyy-MM-dd")
 
@@ -205,6 +207,7 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
         value,
         date,
         recordedAt: now.getTime(),
+        slot,
         notes,
       })
     },
@@ -213,10 +216,11 @@ export function useGlucoseLog(_patientId?: string): GlucoseLogReturn {
 
   // Update an existing record
   const updateRecord = useCallback(
-    (id: string, value: number, notes?: string) => {
+    (id: string, value: number, slot?: GlucoseSlot, notes?: string) => {
       updateMutation.mutate({
         id: id as any, // Type assertion needed for Convex ID
         value,
+        slot,
         notes,
       })
     },

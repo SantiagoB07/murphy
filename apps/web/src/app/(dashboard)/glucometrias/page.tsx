@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { useGlucoseLog } from "@/hooks/useGlucoseLog"
 import { useXPCalculation } from "@/hooks/useXPCalculation"
 import { useWellnessLog } from "@/hooks/useWellnessLog"
-import type { Glucometry, ViewMode } from "@/types/diabetes"
+import type { Glucometry, ViewMode, GlucoseSlot } from "@/types/diabetes"
 import { cn } from "@/lib/utils"
 import {
   format,
@@ -135,11 +135,11 @@ export default function GlucometriasPage() {
     deleteRecord(record.id)
   }
 
-  const handleSaveRecord = (value: number, notes?: string) => {
+  const handleSaveRecord = (value: number, slot?: GlucoseSlot, notes?: string) => {
     if (selectedRecord) {
-      updateRecord(selectedRecord.id, value, notes)
+      updateRecord(selectedRecord.id, value, slot, notes)
     } else {
-      addRecord(value, notes)
+      addRecord(value, slot, notes)
     }
   }
 

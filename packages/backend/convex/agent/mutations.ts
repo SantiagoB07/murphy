@@ -5,6 +5,18 @@ import * as InsulinRecords from "../model/insulinRecords";
 import * as WellnessRecords from "../model/wellnessRecords";
 import { getTodayDate } from "../lib/validators";
 
+// Glucose slot validator
+const glucoseSlotValidator = v.optional(
+  v.union(
+    v.literal("before_breakfast"),
+    v.literal("after_breakfast"),
+    v.literal("before_lunch"),
+    v.literal("after_lunch"),
+    v.literal("before_dinner"),
+    v.literal("after_dinner")
+  )
+);
+
 // ============================================
 // Internal Mutations (thin wrappers for HTTP actions)
 // ============================================
@@ -15,6 +27,7 @@ export const saveGlucoseRecord = internalMutation({
   args: {
     patientId: v.id("patientProfiles"),
     value: v.number(),
+    slot: glucoseSlotValidator,
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -22,6 +35,7 @@ export const saveGlucoseRecord = internalMutation({
       patientId: args.patientId,
       value: args.value,
       date: getTodayDate(),
+      slot: args.slot,
       notes: args.notes,
     });
     return { success: true };
@@ -32,11 +46,13 @@ export const updateGlucoseRecord = internalMutation({
   args: {
     recordId: v.id("glucoseRecords"),
     value: v.number(),
+    slot: glucoseSlotValidator,
   },
   handler: async (ctx, args) => {
     await GlucoseRecords.updateRecordInternal(ctx, {
       id: args.recordId,
       value: args.value,
+      slot: args.slot,
     });
     return { success: true };
   },

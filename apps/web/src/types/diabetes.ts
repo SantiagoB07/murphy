@@ -47,12 +47,40 @@ export function getGlucoseStatus(
   return "critical_high"
 }
 
+// Glucose slot types (meal timing)
+export type GlucoseSlot =
+  | "before_breakfast"
+  | "after_breakfast"
+  | "before_lunch"
+  | "after_lunch"
+  | "before_dinner"
+  | "after_dinner"
+
+export const GLUCOSE_SLOT_LABELS: Record<GlucoseSlot, string> = {
+  before_breakfast: "Antes del desayuno",
+  after_breakfast: "Despues del desayuno",
+  before_lunch: "Antes del almuerzo",
+  after_lunch: "Despues del almuerzo",
+  before_dinner: "Antes de la cena",
+  after_dinner: "Despues de la cena",
+}
+
+export const GLUCOSE_SLOTS: GlucoseSlot[] = [
+  "before_breakfast",
+  "after_breakfast",
+  "before_lunch",
+  "after_lunch",
+  "before_dinner",
+  "after_dinner",
+]
+
 // Simplified Glucometry interface - no more type/slot
 export interface Glucometry {
   id: string
   value: number
   timestamp: string // ISO string - used for ordering and displaying time
-  notes?: string // Optional context (e.g., "antes del desayuno", "despues de ejercicio")
+  slot?: GlucoseSlot // Meal timing slot
+  notes?: string // Optional context (e.g., "despues de ejercicio")
 }
 
 export interface InsulinDose {

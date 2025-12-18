@@ -44,6 +44,15 @@ const scheduleFrequency = v.union(
   v.literal("once")
 );
 
+const glucoseSlots = v.union(
+  v.literal("before_breakfast"),
+  v.literal("after_breakfast"),
+  v.literal("before_lunch"),
+  v.literal("after_lunch"),
+  v.literal("before_dinner"),
+  v.literal("after_dinner")
+);
+
 export default defineSchema({
   // Perfiles de pacientes (datos médicos extendidos)
   patientProfiles: defineTable({
@@ -77,7 +86,8 @@ export default defineSchema({
     value: v.number(),
     date: v.string(), // "YYYY-MM-DD"
     recordedAt: v.number(), // Unix timestamp - used for ordering and displaying time
-    notes: v.optional(v.string()), // Optional note (e.g., "antes del desayuno")
+    slot: v.optional(glucoseSlots), // Meal timing slot (e.g., "before_breakfast")
+    notes: v.optional(v.string()), // Optional note
     updatedAt: v.number(),
   }).index("by_patient_date", ["patientId", "date"]),
 
