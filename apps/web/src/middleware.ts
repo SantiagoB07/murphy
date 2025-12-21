@@ -1,26 +1,50 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-const isOnboardingRoute = createRouteMatcher(["/onboarding"])
-const isApiROute = createRouteMatcher(["/api/(.*)", "/rpc(.*)", "/trpc(.*)"])
+const isPatientOnboardingRoute = createRouteMatcher(["/onboarding"])
+const isCoadminOnboardingRoute = createRouteMatcher(["/onboarding/coadmin"])
+const isAnyOnboardingRoute = createRouteMatcher(["/onboarding", "/onboarding/coadmin"])
+const isApiRoute = createRouteMatcher(["/api/(.*)", "/rpc(.*)", "/trpc(.*)"])
+
+interface ClerkMetadata {
+  role?: "patient" | "coadmin"
+  intendedRole?: "coadmin"
+  invitedByPatientId?: string
+}
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { isAuthenticated, sessionClaims } = await auth()
 
-  if (isApiROute(req)) return NextResponse.next()
+  // Skip middleware for API routes
+  if (isApiRoute(req)) return NextResponse.next()
 
-  // For users visiting /onboarding, don't try to redirect
-  if (isAuthenticated && isOnboardingRoute(req)) {
+  // For users already on any onboarding route, don't redirect
+  if (isAuthenticated && isAnyOnboardingRoute(req)) {
     return NextResponse.next()
   }
 
-  // if user is authenticated but hasn't completed onboarding, redirect to /onboarding
-  if (isAuthenticated && !sessionClaims?.metadata?.role) {
+  if (isAuthenticated) {
+    const metadata = sessionClaims?.metadata as ClerkMetadata | undefined
+    const role = metadata?.role
+    const intendedRole = metadata?.intendedRole
+
+    // User has completed onboarding (has a role)
+    if (role) {
+      return NextResponse.next()
+    }
+
+    // User was invited as a coadmin but hasn't completed onboarding
+    if (intendedRole === "coadmin") {
+      const coadminOnboardingUrl = new URL('/onboarding/coadmin', req.url)
+      return NextResponse.redirect(coadminOnboardingUrl)
+    }
+
+    // User has no role and wasn't invited as coadmin - regular patient onboarding
     const onboardingUrl = new URL('/onboarding', req.url)
     return NextResponse.redirect(onboardingUrl)
   }
 
-  // otherwise continue as normal
+  // Not authenticated - continue as normal
   return NextResponse.next()
 });
 
@@ -32,4 +56,3 @@ export const config = {
     '/(api|trpc|rpc)(.*)',
   ],
 };
-

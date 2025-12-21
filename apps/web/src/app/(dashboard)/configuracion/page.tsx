@@ -3,15 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
-import { User, Bell, Shield, Smartphone, ChevronRight, LogOut } from "lucide-react"
+import { User, Bell, Shield, Smartphone, ChevronRight, LogOut, Users } from "lucide-react"
 import { PersonalDataSheet } from "./-components/PersonalDataSheet"
 import { SecuritySheet } from "./-components/SecuritySheet"
 import { NotificationsSheet } from "./-components/NotificationsSheet"
 import { DevicesSheet } from "./-components/DevicesSheet"
+import { CoadminSheet } from "./-components/CoadminSheet"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 
-type SettingsSection = "personal" | "security" | "notifications" | "devices"
+type SettingsSection = "personal" | "security" | "notifications" | "devices" | "coadmin"
 
 const settingsItems = [
   {
@@ -37,6 +38,12 @@ const settingsItems = [
     icon: Smartphone,
     label: "Dispositivos",
     description: "Glucometros conectados",
+  },
+  {
+    key: "coadmin" as SettingsSection,
+    icon: Users,
+    label: "Coadministradores",
+    description: "Familiares con acceso a tu cuenta",
   },
 ]
 
@@ -133,6 +140,10 @@ export default function ConfiguracionPage() {
       />
       <DevicesSheet
         open={openSheet === "devices"}
+        onOpenChange={(open) => !open && handleCloseSheet()}
+      />
+      <CoadminSheet
+        open={openSheet === "coadmin"}
         onOpenChange={(open) => !open && handleCloseSheet()}
       />
     </>
