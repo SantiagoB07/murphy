@@ -230,7 +230,7 @@ export const inviteCoadmin = action({
         invitedByClerkUserId: identity.subject,
         invitedByPatientName: patient.fullName || "Paciente",
       },
-      // redirectUrl: `${process.env.CLERK_REDIRECT_URL || "http://localhost:3000"}/onboarding/coadmin`,
+      redirectUrl: `${process.env.CLERK_REDIRECT_URL || "http://localhost:3000"}/sign-in`,
     });
 
     return {
