@@ -44,6 +44,15 @@ const scheduleFrequency = v.union(
   v.literal("once")
 );
 
+const callStatus = v.union(
+  v.literal("initiated"),   // Llamada iniciada, esperando resultado
+  v.literal("completed"),   // Llamada exitosa (≥ 20 segundos)
+  v.literal("no_answer"),   // No contestaron
+  v.literal("busy"),        // Línea ocupada
+  v.literal("failed"),      // Error o timeout sin webhook
+  v.literal("too_short")    // Llamada muy corta (< 20 segundos)
+);
+
 const glucoseSlots = v.union(
   v.literal("before_breakfast"),
   v.literal("after_breakfast"),
@@ -175,4 +184,21 @@ export default defineSchema({
   })
     .index("by_patient_type", ["patientId", "type"])
     .index("by_patient_enabled", ["patientId", "isEnabled"]),
+
+  // Registros de llamadas realizadas (para sistema de reintentos)
+  callRecords: defineTable({
+    patientId: v.id("patientProfiles"),
+    scheduleId: v.optional(v.id("aiCallSchedules")), // Si fue llamada programada
+    conversationId: v.string(),                      // ID de ElevenLabs
+    status: callStatus,
+    durationSeconds: v.optional(v.number()),
+    retryCount: v.number(),                          // 0, 1, 2, 3
+    alertType: v.optional(v.string()),               // glucometry, insulin, etc.
+    createdAt: v.number(),
+    completedAt: v.optional(v.number()),
+    checkScheduledFunctionId: v.optional(v.id("_scheduled_functions")), // Para cancelar fallback
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_patient", ["patientId"])
+    .index("by_status", ["status"]),
 });

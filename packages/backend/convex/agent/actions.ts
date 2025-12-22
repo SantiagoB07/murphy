@@ -34,6 +34,7 @@ export const executeScheduledAlert = internalAction({
       await ctx.runAction(internal.agent.actions.initiateCall, {
         patientId: schedule.patientId,
         alertType: schedule.type,
+        scheduleId: args.scheduleId,
       });
     } else if (schedule.channel === "whatsapp") {
       // Future: WhatsApp integration
@@ -57,6 +58,8 @@ export const initiateCall = internalAction({
     toNumber: v.optional(v.string()), // Override phone number
     isReminder: v.optional(v.boolean()),
     alertType: v.optional(v.string()),
+    scheduleId: v.optional(v.id("aiCallSchedules")), // If triggered by a schedule
+    retryCount: v.optional(v.number()), // For retry tracking
   },
   handler: async (ctx, args): Promise<InitiateCallResult> => {
     // 1. Get patient context
@@ -143,20 +146,64 @@ export const initiateCall = internalAction({
       }
     );
 
-    const data: { call_id?: string; id?: string } = await response.json();
+    const data: { call_id?: string; id?: string; conversation_id?: string } = await response.json();
 
     if (!response.ok) {
       console.error("[initiateCall] ElevenLabs API error:", data);
       throw new Error(`Failed to initiate call: ${JSON.stringify(data)}`);
     }
 
-    console.log("[initiateCall] Call initiated successfully:", data);
+    const conversationId = data.conversation_id || data.call_id || data.id || "";
+
+    // 7. Create call record for retry tracking
+    await ctx.runMutation(internal.callRecords.create, {
+      patientId: args.patientId,
+      scheduleId: args.scheduleId,
+      conversationId,
+      alertType: args.alertType,
+      retryCount: args.retryCount ?? 0,
+    });
+
+    console.log("[initiateCall] Call initiated and record created:", conversationId);
 
     return {
       success: true,
-      callId: data.call_id || data.id || "",
+      callId: conversationId,
       phoneNumber,
       patientName: patientContext.name,
     };
+  },
+});
+
+/**
+ * Retries a failed call based on an existing call record
+ * Called by scheduled functions when a call fails or is too short
+ */
+export const retryCall = internalAction({
+  args: {
+    callRecordId: v.id("callRecords"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the original call record
+    const originalRecord = await ctx.runQuery(
+      internal.callRecords.getById,
+      { id: args.callRecordId }
+    );
+
+    if (!originalRecord) {
+      console.log(`[retryCall] Record ${args.callRecordId} not found`);
+      return;
+    }
+
+    const newRetryCount = originalRecord.retryCount + 1;
+    console.log(`[retryCall] Retrying call for patient ${originalRecord.patientId} (attempt ${newRetryCount})`);
+
+    // 2. Initiate new call with incremented retry count
+    await ctx.runAction(internal.agent.actions.initiateCall, {
+      patientId: originalRecord.patientId,
+      scheduleId: originalRecord.scheduleId,
+      alertType: originalRecord.alertType,
+      retryCount: newRetryCount,
+    });
   },
 });
