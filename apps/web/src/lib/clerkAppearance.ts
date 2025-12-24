@@ -1,4 +1,7 @@
-import type { Appearance } from "@clerk/types"
+import type { ClerkProvider } from "@clerk/nextjs"
+import type { ComponentProps } from "react"
+
+type Appearance = ComponentProps<typeof ClerkProvider>["appearance"]
 
 export const clerkAppearance: Appearance = {
   variables: {
