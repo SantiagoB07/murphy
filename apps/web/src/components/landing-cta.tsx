@@ -25,7 +25,7 @@ export function LandingCTA({ isAuthenticated }: LandingCTAProps) {
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
-      <SignInButton mode="modal">
+      <SignInButton mode="redirect">
         <Button 
           size="lg" 
           className="w-full sm:w-auto"
@@ -34,7 +34,7 @@ export function LandingCTA({ isAuthenticated }: LandingCTAProps) {
           Iniciar Sesión
         </Button>
       </SignInButton>
-      <SignUpButton mode="modal">
+      <SignUpButton mode="redirect">
         <Button 
           variant="secondary" 
           size="lg" 
