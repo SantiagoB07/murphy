@@ -1,17 +1,20 @@
 "use client"
 
 import { useState } from "react"
+
 import { useRouter } from "next/navigation"
 import { useClerk } from "@clerk/nextjs"
+import { toast } from "sonner"
 import { User, Bell, Shield, Smartphone, ChevronRight, LogOut, Users } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+
+import { CoadminSheet } from "./CoadminSheet"
 import { ConfiguracionHeader } from "./ConfiguracionHeader"
+import { DevicesSheet } from "./DevicesSheet"
+import { NotificationsSheet } from "./NotificationsSheet"
 import { PersonalDataSheet } from "./PersonalDataSheet"
 import { SecuritySheet } from "./SecuritySheet"
-import { NotificationsSheet } from "./NotificationsSheet"
-import { DevicesSheet } from "./DevicesSheet"
-import { CoadminSheet } from "./CoadminSheet"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
 
 type SettingsSection = "personal" | "security" | "notifications" | "devices" | "coadmin"
 
