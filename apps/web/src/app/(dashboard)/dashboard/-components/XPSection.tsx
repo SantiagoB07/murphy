@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { XPDonut } from "./XPDonut"
 import { useGlucoseRecords } from "@/features/glucose"
 import { useWellnessRecords } from "@/features/wellness"
-import { useXPCalculation } from "@/hooks/useXPCalculation"
+import { useXPCalculation } from "@/features/xp"
 
 export function XPSection() {
   const { records, todayRecords } = useGlucoseRecords()

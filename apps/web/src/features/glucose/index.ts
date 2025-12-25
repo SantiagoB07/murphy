@@ -6,6 +6,9 @@ export { useGlucoseRecords } from "./hooks/useGlucoseRecords"
 export type { GlucoseRecord } from "./hooks/useGlucoseRecords"
 export { useGlucoseMutations } from "./hooks/useGlucoseMutations"
 
+// Utils
+export { calculatePeriodStats } from "./utils/calculatePeriodStats"
+
 // Context
 export {
   GlucoseDialogProvider,

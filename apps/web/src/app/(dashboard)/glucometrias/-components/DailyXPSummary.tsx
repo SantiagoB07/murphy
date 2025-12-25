@@ -2,7 +2,7 @@
 
 import { Zap, Moon, Brain, Droplets, Check, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { DailyXPResult } from "@/hooks/useXPCalculation"
+import type { DailyXPResult } from "@/features/xp"
 
 interface DailyXPSummaryProps {
   xpResult: DailyXPResult

@@ -4,20 +4,31 @@ import { useCallback } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
 import { api } from "@murphy/backend/convex/_generated/api"
-import type { AlertSchedule, AlertChannel, AlertScheduleType, ScheduleFrequency } from "@/types/diabetes"
 import { toast } from "sonner"
+import type {
+  AlertSchedule,
+  AlertChannel,
+  AlertScheduleType,
+  ScheduleFrequency,
+} from "../alerts.types"
 
-interface AlertSchedulesReturn {
+interface UseAlertSchedulesReturn {
+  /** List of alert schedules */
   schedules: AlertSchedule[]
+  /** Add a new alert schedule */
   addSchedule: (
     time: string,
     channel: AlertChannel,
     type: AlertScheduleType,
     frequency: ScheduleFrequency
   ) => Promise<void>
+  /** Delete an alert schedule */
   deleteSchedule: (id: string) => void
+  /** Toggle alert schedule active status */
   toggleSchedule: (id: string, isActive: boolean) => void
+  /** Whether data is loading */
   isLoading: boolean
+  /** Whether a mutation is in progress */
   isPending: boolean
 }
 
@@ -39,7 +50,7 @@ function convexToAlertSchedule(record: {
   }
 }
 
-export function useAlertSchedules(): AlertSchedulesReturn {
+export function useAlertSchedules(): UseAlertSchedulesReturn {
   const queryClient = useQueryClient()
 
   // Fetch all alert schedules from Convex

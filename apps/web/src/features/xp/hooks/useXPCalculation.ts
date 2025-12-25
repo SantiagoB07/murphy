@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
 import {
   calculateRecordsXP,
   calculateInRangeXP,
@@ -11,44 +10,15 @@ import {
   MIN_REQUIRED_RECORDS,
   MAX_DAILY_XP,
 } from "@/lib/xpSystem"
+import type { DailyXPResult } from "../xp.types"
 
-export interface DailyXPResult {
-  // XP breakdown
-  baseXP: number
-  finalXP: number
-  breakdown: {
-    recordsXP: number
-    baseRecordsXP: number
-    extraRecordsXP: number
-    inRangeXP: number
-    wellnessXP: number
-  }
-  // Streak info
-  streakDays: number
-  streakMultiplier: number
-  // Records info
-  recordsCompleted: number
-  minRequiredRecords: number
-  hasMinRecords: boolean
-  // Glucose info
-  inRangePercent: number
-  // Wellness info
-  hasSleepLogged: boolean
-  hasStressLogged: boolean
-  // Level info
-  levelInfo: {
-    level: number
-    title: string
-    currentLevelXP: number
-    nextLevelThreshold: number
-    progressPercent: number
-  }
-  // Meta
-  maxDailyXP: number
+// Generic glucose record interface that works with any record shape
+interface GlucoseRecordLike {
+  value: number
 }
 
 interface UseXPCalculationParams {
-  todayGlucoseRecords: Glucometry[]
+  todayGlucoseRecords: GlucoseRecordLike[]
   hasSleepLogged: boolean
   hasStressLogged: boolean
   streakDays: number
@@ -114,3 +84,4 @@ export function useXPCalculation({
     totalAccumulatedXP,
   ])
 }
+

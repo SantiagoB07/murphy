@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import type { Glucometry } from "@/types/diabetes"
 import { getGlucoseStatus } from "@/types/diabetes"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/hooks/useGlucoseLog"
+import { calculatePeriodStats } from "@/features/glucose"
 import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,

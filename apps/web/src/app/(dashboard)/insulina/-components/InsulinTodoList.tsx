@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import type { InsulinSchedule } from "@/types/diabetes"
-import type { InsulinDoseRecord, InsulinDoseRecordId } from "@/hooks/useInsulinDoseRecords"
+import type { InsulinDoseRecord } from "@/features/insulin"
+
+// ID type for insulin dose records - using string since that's what the hook provides
+type InsulinDoseRecordId = string
 import { InsulinLogDialog } from "./InsulinLogDialog"
 
 interface TodoItem {

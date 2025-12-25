@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import type { InsulinSchedule } from "@/types/diabetes"
-import type { UpdateInsulinData } from "@/hooks/useInsulinSchedule"
+import type { UpdateInsulinData } from "@/features/insulin"
 
 const insulinUpdateSchema = z.object({
   unitsPerDose: z.number().min(0.5, "Minimo 0.5 U").max(100, "Maximo 100 U"),
