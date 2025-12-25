@@ -3,6 +3,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../index.css";
 import BaseProviders from "@/components/providers/base";
 
+let Devtools: React.ComponentType | null = null
+if (process.env.NODE_ENV === 'development') {
+  const module = await import('@/lib/devtools-setup')
+  Devtools = module.default
+}
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,6 +39,7 @@ export default function RootLayout({
           <div className="grid grid-rows-[auto_1fr] h-svh">
             {children}
           </div>
+          {Devtools && <Devtools />}
         </BaseProviders>
       </body>
     </html>
