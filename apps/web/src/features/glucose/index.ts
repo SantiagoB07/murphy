@@ -9,6 +9,10 @@ export { useGlucoseMutations } from "./hooks/useGlucoseMutations"
 // Utils
 export { calculatePeriodStats } from "./utils/calculatePeriodStats"
 
+// Adapters
+export type { GlucoseRecordLike } from "./adapters"
+export { getRecordDate, toChartFormat } from "./adapters"
+
 // Context
 export {
   GlucoseDialogProvider,

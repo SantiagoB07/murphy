@@ -4,8 +4,9 @@ import { useMemo } from "react"
 import {
   calculatePeriodStats,
   GlucoseChart,
-  type GlucoseRecord,
 } from "@/features/glucose"
+import type { GlucoseRecordLike } from "@/features/glucose/adapters"
+import { getRecordDate, toChartFormat } from "@/features/glucose/adapters"
 import { PeriodStatsCard } from "./PeriodStatsCard"
 import {
   format,
@@ -27,21 +28,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-// Support both Convex and legacy formats during migration
-type GlucoseRecordLike = GlucoseRecord | { id: string; value: number; timestamp: string; slot?: string; notes?: string }
-
-function getRecordDate(record: GlucoseRecordLike): Date {
-  if ("recordedAt" in record) return new Date(record.recordedAt)
-  return new Date(record.timestamp)
-}
-
-function toChartFormat(record: GlucoseRecordLike) {
-  if ("recordedAt" in record) {
-    return { id: record._id, value: record.value, timestamp: new Date(record.recordedAt).toISOString(), slot: record.slot, notes: record.notes }
-  }
-  return record
-}
 
 interface QuarterlyViewProps {
   records: GlucoseRecordLike[]
