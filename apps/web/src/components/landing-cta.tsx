@@ -1,15 +1,16 @@
-"use client"
-
 import Link from "next/link"
 import { ArrowRight, LogIn, UserPlus } from "lucide-react"
 import { SignInButton, SignUpButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 
-interface LandingCTAProps {
-  isAuthenticated: boolean
-}
+import { auth } from "@clerk/nextjs/server"
 
-export function LandingCTA({ isAuthenticated }: LandingCTAProps) {
+
+export async function LandingCTA() {
+
+  const session = await auth()
+  const isAuthenticated = !!session.userId
+
   if (isAuthenticated) {
     return (
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
@@ -44,15 +45,6 @@ export function LandingCTA({ isAuthenticated }: LandingCTAProps) {
           Registrarte
         </Button>
       </SignUpButton>
-    </div>
-  )
-}
-
-export function LandingCTASkeleton() {
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up stagger-3">
-      <div className="h-11 w-full sm:w-[180px] rounded-hig bg-secondary/50 animate-pulse" />
-      <div className="h-11 w-full sm:w-[180px] rounded-hig bg-secondary/50 animate-pulse" />
     </div>
   )
 }
