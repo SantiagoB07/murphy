@@ -5,12 +5,13 @@ This document defines the patterns and conventions for the Murphy frontend codeb
 ## Table of Contents
 
 1. [Directory Structure](#directory-structure)
-2. [Component Patterns](#component-patterns)
-3. [Data Fetching Patterns](#data-fetching-patterns)
-4. [Convex Hook Patterns](#convex-hook-patterns)
-5. [Composition Patterns](#composition-patterns)
-6. [Dialog Patterns](#dialog-patterns)
-7. [Key Principles](#key-principles)
+2. [Component Locations](#component-locations)
+3. [Component Patterns](#component-patterns)
+4. [Data Fetching Patterns](#data-fetching-patterns)
+5. [Convex Hook Patterns](#convex-hook-patterns)
+6. [Composition Patterns](#composition-patterns)
+7. [Dialog Patterns](#dialog-patterns)
+8. [Key Principles](#key-principles)
 
 ---
 
@@ -23,24 +24,131 @@ src/
       hooks/             # Feature-specific Convex hooks
         useGlucoseRecords.ts
         useGlucoseMutations.ts
-      components/        # Feature components
+      components/        # Reusable domain components
+        GlucoseDialog.tsx
         GlucoseRecordCard.tsx
-        GlucoseRecordList.tsx
       context/           # Feature-specific context (if needed)
         GlucoseDialogContext.tsx
+      utils/             # Feature-specific utilities
+        calculatePeriodStats.ts
       glucose.types.ts   # Feature types
       index.ts           # Barrel export
     wellness/
       ...
     insulin/
       ...
+    alerts/
+      ...
+    xp/
+      ...
   components/
-    ui/                  # shadcn primitives (unchanged)
-    composed/            # Composed UI patterns built from primitives
-  hooks/                 # Shared hooks (non-feature-specific)
+    ui/                  # shadcn primitives (Button, Dialog, Card)
+    composed/            # Composed UI patterns (StatCard, DataCard)
+    navigation/          # App-wide navigation components
+    providers/           # Context providers
+  hooks/                 # Non-domain utilities only (use-mobile.tsx)
   lib/                   # Utilities
-  app/                   # Next.js pages (thin, layout only)
+  app/                   # Next.js pages
+    (dashboard)/
+      glucometrias/
+        page.tsx         # Thin page - composition only
+        -components/     # Page-specific components
+          GlucometriasContent.tsx
+          GlucometriasHeader.tsx
+          WeeklyView.tsx
+          MonthlyView.tsx
 ```
+
+---
+
+## Component Locations
+
+Components can live in three locations, each with a distinct purpose:
+
+### 1. `src/components/` - Generic UI Toolkit
+
+**Purpose**: Domain-agnostic, reusable UI building blocks.
+
+| Subfolder | Contents | Examples |
+|-----------|----------|----------|
+| `ui/` | shadcn primitives | Button, Dialog, Card, Input |
+| `composed/` | Composed patterns | StatCard, DataCard |
+| `navigation/` | App-wide navigation | TopNavbar, MobileBottomNav |
+| `providers/` | Context providers | ThemeProvider |
+
+**When to use**: Component has NO business logic and could be used in any app.
+
+```typescript
+// components/composed/StatCard.tsx
+// Generic stat display - no domain knowledge
+export function StatCard({ label, value, icon }) { ... }
+```
+
+### 2. `features/[domain]/components/` - Domain Components
+
+**Purpose**: Domain-specific components **reused across multiple pages**.
+
+**When to use**: Component represents a domain concept AND is used in 2+ pages.
+
+```typescript
+// features/glucose/components/GlucoseRecordCard.tsx
+// Used in: dashboard, glucometrias page
+export function GlucoseRecordCard({ record, onEdit, onDelete }) { ... }
+
+// features/glucose/components/GlucoseDialog.tsx
+// Used in: dashboard, glucometrias page
+export function GlucoseDialog({ open, onOpenChange }) { ... }
+```
+
+**Import pattern**:
+```typescript
+import { GlucoseRecordCard, GlucoseDialog } from "@/features/glucose"
+```
+
+### 3. `app/.../-components/` - Page-Specific Components
+
+**Purpose**: Components **only used by that specific page**.
+
+The `-` prefix is a Next.js convention to mark "private" folders excluded from routing.
+
+**When to use**: Component is specific to one page's layout/structure.
+
+```typescript
+// app/(dashboard)/glucometrias/-components/
+GlucometriasContent.tsx   // Container - orchestrates the page
+GlucometriasHeader.tsx    // Page header
+WeeklyView.tsx            // Only used in glucometrias
+MonthlyView.tsx           // Only used in glucometrias
+QuarterlyView.tsx         // Only used in glucometrias
+```
+
+**Import pattern** (relative imports):
+```typescript
+import { GlucometriasContent } from "./-components/GlucometriasContent"
+```
+
+### Decision Flow
+
+```
+Is it a generic UI primitive/pattern?
+  │
+  ├── YES → src/components/ui/ or src/components/composed/
+  │
+  └── NO → Is it used in multiple pages?
+              │
+              ├── YES → features/[domain]/components/
+              │
+              └── NO → app/.../-components/
+```
+
+### Summary Table
+
+| Location | Scope | Domain-specific? | Import Path |
+|----------|-------|------------------|-------------|
+| `components/ui/` | App-wide | No | `@/components/ui/button` |
+| `components/composed/` | App-wide | No | `@/components/composed` |
+| `features/[domain]/components/` | Cross-page | Yes | `@/features/glucose` |
+| `app/.../-components/` | Single page | Yes | `"./-components/X"` |
 
 ---
 
@@ -130,24 +238,52 @@ export function GlucoseRecordCard({
 ### Pages Should Be Thin
 
 Pages should only handle:
-- Layout composition
-- Provider wrapping
+- Importing and composing container components
+- Provider wrapping (if needed)
 - Route-level concerns
+
+**Pattern**: Each page imports a `XxxContent` component from `-components/` that handles all the logic.
 
 ```typescript
 // app/(dashboard)/glucometrias/page.tsx
 "use client"
 
-import { GlucosePageHeader } from "@/features/glucose/components/GlucosePageHeader"
-import { GlucoseRecordList } from "@/features/glucose/components/GlucoseRecordList"
-import { GlucoseDialogProvider } from "@/features/glucose/context/GlucoseDialogProvider"
+import { GlucometriasContent } from "./-components/GlucometriasContent"
 
 export default function GlucometriasPage() {
+  return <GlucometriasContent />
+}
+```
+
+The `XxxContent` component is a **container** that:
+- Fetches data using `features/` hooks
+- Manages local state (dialogs, view modes, etc.)
+- Composes presentational components from `-components/`
+
+```typescript
+// app/(dashboard)/glucometrias/-components/GlucometriasContent.tsx
+"use client"
+
+import { useState } from "react"
+import { useGlucoseRecords, useGlucoseMutations } from "@/features/glucose"
+import { useWellnessRecords } from "@/features/wellness"
+import { GlucometriasHeader } from "./GlucometriasHeader"
+import { WeeklyView } from "./WeeklyView"
+import { MonthlyView } from "./MonthlyView"
+
+export function GlucometriasContent() {
+  const [viewMode, setViewMode] = useState<ViewMode>("daily")
+  const { records, isLoading } = useGlucoseRecords()
+  const { createRecord, deleteRecord } = useGlucoseMutations()
+  
+  if (isLoading) return <GlucometriasSkeleton />
+  
   return (
-    <GlucoseDialogProvider>
-      <GlucosePageHeader />
-      <GlucoseRecordList date={new Date()} />
-    </GlucoseDialogProvider>
+    <>
+      <GlucometriasHeader viewMode={viewMode} />
+      {viewMode === "weekly" && <WeeklyView records={records} />}
+      {viewMode === "monthly" && <MonthlyView records={records} />}
+    </>
   )
 }
 ```
@@ -414,13 +550,18 @@ function GlucoseRecordCard({ record }) {
 
 ## Key Principles
 
-1. **Pages are thin** - Only layout, providers, and top-level composition
-2. **Containers fetch** - Only container components use data hooks
+1. **Pages are thin** - Pages import a single `XxxContent` container component
+2. **Containers fetch** - Only container components (`XxxContent`) use data hooks
 3. **Presentational are pure** - No hooks, just props
 4. **Compose over configure** - Prefer composition API over prop objects
-5. **Colocate by feature** - Keep related code together
-6. **Use Convex generated types** - Prefer `Doc<"table">` and `Id<"table">` over manual interfaces
-7. **Frontend types stay in frontend** - Define form/UI types locally in feature modules
+5. **Colocate by feature** - Keep related domain code together in `features/`
+6. **Right location for components**:
+   - Generic UI → `components/`
+   - Domain + reusable → `features/[domain]/components/`
+   - Page-specific → `-components/`
+7. **Use Convex generated types** - Prefer `Doc<"table">` and `Id<"table">` over manual interfaces
+8. **Frontend types stay in frontend** - Define form/UI types locally in feature modules
+9. **Domain hooks in features/** - Only non-domain utilities (like `use-mobile`) stay in `src/hooks/`
 
 ---
 
@@ -429,8 +570,11 @@ function GlucoseRecordCard({ record }) {
 When refactoring existing components:
 
 1. Identify if component is container or presentational
-2. Extract data fetching into custom hooks
-3. Move to appropriate feature directory
+2. Extract data fetching into custom hooks in `features/[domain]/hooks/`
+3. Determine component location:
+   - Used in multiple pages? → `features/[domain]/components/`
+   - Page-specific? → `app/.../-components/`
+   - Generic UI? → `src/components/`
 4. Update imports in consuming files
-5. Add to feature barrel export
+5. Add to feature barrel export (`features/[domain]/index.ts`)
 
