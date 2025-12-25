@@ -19,8 +19,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { CreateAlertDialog } from "@/components/alertas/CreateAlertDialog"
 import {
+  CreateAlertDialog,
   useAlertSchedules,
   type AlertChannel,
   type AlertScheduleType,

@@ -1,7 +1,6 @@
 "use client"
 
-import type { ViewMode } from "@/types/diabetes"
-import { VIEW_MODE_LABELS } from "@/types/diabetes"
+import { type ViewMode, VIEW_MODE_LABELS } from "@/features/glucose"
 import { cn } from "@/lib/utils"
 
 interface ViewModeSelectorProps {

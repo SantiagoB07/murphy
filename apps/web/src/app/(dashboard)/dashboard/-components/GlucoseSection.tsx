@@ -1,6 +1,6 @@
 "use client"
 
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
+import { GlucoseChart } from "@/features/glucose"
 import { useGlucoseRecords } from "@/features/glucose"
 
 export function GlucoseSection() {

@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import {
   useGlucoseRecords,
   useGlucoseMutations,
+  GlucoseRecordCard,
   type ViewMode,
   type GlucoseSlot,
   type GlucoseRecord,
@@ -11,7 +12,6 @@ import {
 import { useWellnessRecords } from "@/features/wellness"
 import { useXPCalculation } from "@/features/xp"
 import { GlucometriasHeader } from "./GlucometriasHeader"
-import { GlucoseRecordCard } from "./GlucoseRecordCard"
 import { AddGlucoseDialog } from "./AddGlucoseDialog"
 import { DailyXPSummary } from "./DailyXPSummary"
 import { ViewModeSelector } from "./ViewModeSelector"
@@ -43,22 +43,14 @@ import {
   Droplets,
 } from "lucide-react"
 
-// Legacy Glucometry interface for backwards compatibility with existing components
-interface LegacyGlucometry {
-  id: string
-  value: number
-  timestamp: string
-  slot?: GlucoseSlot
-  notes?: string
-}
-
-// Convert GlucoseRecord to legacy Glucometry format
-function toLegacyGlucometry(record: GlucoseRecord): LegacyGlucometry {
+// Legacy format converter - only needed for XP calculation hook
+// TODO: Update XP hook to accept Convex types
+function toLegacyFormat(record: GlucoseRecord) {
   return {
     id: record._id,
     value: record.value,
     timestamp: new Date(record.recordedAt).toISOString(),
-    slot: record.slot as GlucoseSlot | undefined,
+    slot: record.slot,
     notes: record.notes,
   }
 }
@@ -67,7 +59,7 @@ export function GlucometriasContent() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>("daily")
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [selectedRecord, setSelectedRecord] = useState<LegacyGlucometry | undefined>(
+  const [selectedRecord, setSelectedRecord] = useState<GlucoseRecord | undefined>(
     undefined
   )
 
@@ -103,26 +95,26 @@ export function GlucometriasContent() {
     }
   }, [viewMode, selectedDate])
 
-  // Get records for the selected period (converted to legacy format)
+  // Get records for the selected period (Convex types - views now support both)
   const periodRecords = useMemo(() => {
-    const records = viewMode === "daily"
+    return viewMode === "daily"
       ? getRecordsByDate(selectedDate)
       : getRecordsInRange(startDate, endDate)
-    return records.map(toLegacyGlucometry)
   }, [viewMode, selectedDate, startDate, endDate, getRecordsByDate, getRecordsInRange])
 
-  // Get records for selected date (for daily view)
+  // Get records for selected date (for daily view) - using Convex types directly
   const dayRecords = useMemo(() => {
-    return getRecordsByDate(selectedDate).map(toLegacyGlucometry)
+    return getRecordsByDate(selectedDate)
   }, [selectedDate, getRecordsByDate])
 
   // Get today's records for XP calculation (as legacy format for XP hook)
+  // TODO: Update XP hook to accept Convex types
   const todayRecordsLegacy = useMemo(() => {
     const today = new Date()
     if (isSameDay(selectedDate, today)) {
-      return dayRecords
+      return dayRecords.map(toLegacyFormat)
     }
-    return todayRecords.map(toLegacyGlucometry)
+    return todayRecords.map(toLegacyFormat)
   }, [selectedDate, dayRecords, todayRecords])
 
   // Calculate XP for today
@@ -142,25 +134,25 @@ export function GlucometriasContent() {
     setDialogOpen(true)
   }
 
-  const handleEditRecord = (record: LegacyGlucometry) => {
+  const handleEditRecord = (record: GlucoseRecord) => {
     setSelectedRecord(record)
     setDialogOpen(true)
   }
 
-  const handleDeleteRecord = (record: LegacyGlucometry) => {
-    deleteRecord(record.id as any)
+  const handleDeleteRecord = (id: GlucoseRecord["_id"]) => {
+    deleteRecord(id)
   }
 
   const handleSaveRecord = (value: number, slot?: GlucoseSlot, notes?: string) => {
     if (selectedRecord) {
-      updateRecord(selectedRecord.id as any, value, slot, notes)
+      updateRecord(selectedRecord._id, value, slot, notes)
     } else {
       createRecord(value, slot, notes)
     }
   }
 
   const handleDeleteFromDialog = (id: string) => {
-    deleteRecord(id as any)
+    deleteRecord(id as GlucoseRecord["_id"])
   }
 
   // Calculate daily stats (for daily view)
@@ -295,7 +287,7 @@ export function GlucometriasContent() {
 
             {dayRecords.map((record, index) => (
               <div
-                key={record.id}
+                key={record._id}
                 className="animate-fade-up"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >

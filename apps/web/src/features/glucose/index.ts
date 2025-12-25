@@ -18,3 +18,4 @@ export {
 // Components
 export { GlucoseDialog } from "./components/GlucoseDialog"
 export { GlucoseRecordCard } from "./components/GlucoseRecordCard"
+export { GlucoseChart } from "./components/GlucoseChart"

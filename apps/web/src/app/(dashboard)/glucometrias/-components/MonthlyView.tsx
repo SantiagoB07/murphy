@@ -1,18 +1,19 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
-import { getGlucoseStatus } from "@/types/diabetes"
+import {
+  calculatePeriodStats,
+  GlucoseChart,
+  getGlucoseStatus,
+  type GlucoseRecord,
+} from "@/features/glucose"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/features/glucose"
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
   isSameDay,
-  parseISO,
   getWeek,
   startOfWeek,
   endOfWeek,
@@ -23,8 +24,23 @@ import { ChevronLeft, ChevronRight, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+// Support both Convex and legacy formats during migration
+type GlucoseRecordLike = GlucoseRecord | { id: string; value: number; timestamp: string; slot?: string; notes?: string }
+
+function getRecordDate(record: GlucoseRecordLike): Date {
+  if ("recordedAt" in record) return new Date(record.recordedAt)
+  return new Date(record.timestamp)
+}
+
+function toChartFormat(record: GlucoseRecordLike) {
+  if ("recordedAt" in record) {
+    return { id: record._id, value: record.value, timestamp: new Date(record.recordedAt).toISOString(), slot: record.slot, notes: record.notes }
+  }
+  return record
+}
+
 interface MonthlyViewProps {
-  records: Glucometry[]
+  records: GlucoseRecordLike[]
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
@@ -49,7 +65,7 @@ export function MonthlyView({
   const dailySummary = useMemo(() => {
     return monthDays.map((day) => {
       const dayRecords = records.filter((r) =>
-        isSameDay(parseISO(r.timestamp), day)
+        isSameDay(getRecordDate(r), day)
       )
       const avg =
         dayRecords.length > 0
@@ -81,7 +97,7 @@ export function MonthlyView({
     while (currentWeekStart <= monthEnd) {
       const currentWeekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 })
       const weekRecords = records.filter((r) => {
-        const date = parseISO(r.timestamp)
+        const date = getRecordDate(r)
         return isWithinInterval(date, {
           start: currentWeekStart,
           end: currentWeekEnd,
@@ -179,7 +195,7 @@ export function MonthlyView({
       {/* Trend Chart - Positioned prominently after navigation */}
       {records.length > 0 && (
         <div className="glass-card p-4">
-          <GlucoseChart data={records} showTargetRange className="w-full" />
+          <GlucoseChart data={records.map(toChartFormat)} showTargetRange className="w-full" />
         </div>
       )}
 

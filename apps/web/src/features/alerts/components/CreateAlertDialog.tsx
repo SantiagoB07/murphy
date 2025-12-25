@@ -25,7 +25,7 @@ import {
   Repeat,
   Calendar,
 } from "lucide-react"
-import type { AlertChannel, AlertScheduleType, ScheduleFrequency } from "@/types/diabetes"
+import type { AlertChannel, AlertScheduleType, ScheduleFrequency } from "../alerts.types"
 
 interface CreateAlertDialogProps {
   open: boolean
@@ -318,3 +318,4 @@ export function CreateAlertDialog({
     </Dialog>
   )
 }
+

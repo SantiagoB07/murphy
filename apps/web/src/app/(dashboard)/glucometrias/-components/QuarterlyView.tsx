@@ -1,10 +1,12 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
+import {
+  calculatePeriodStats,
+  GlucoseChart,
+  type GlucoseRecord,
+} from "@/features/glucose"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/features/glucose"
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,
   startOfQuarter,
@@ -12,7 +14,6 @@ import {
   startOfMonth,
   endOfMonth,
   eachMonthOfInterval,
-  parseISO,
   isWithinInterval,
 } from "date-fns"
 import { es } from "date-fns/locale"
@@ -27,8 +28,23 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+// Support both Convex and legacy formats during migration
+type GlucoseRecordLike = GlucoseRecord | { id: string; value: number; timestamp: string; slot?: string; notes?: string }
+
+function getRecordDate(record: GlucoseRecordLike): Date {
+  if ("recordedAt" in record) return new Date(record.recordedAt)
+  return new Date(record.timestamp)
+}
+
+function toChartFormat(record: GlucoseRecordLike) {
+  if ("recordedAt" in record) {
+    return { id: record._id, value: record.value, timestamp: new Date(record.recordedAt).toISOString(), slot: record.slot, notes: record.notes }
+  }
+  return record
+}
+
 interface QuarterlyViewProps {
-  records: Glucometry[]
+  records: GlucoseRecordLike[]
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
@@ -57,7 +73,7 @@ export function QuarterlyView({
       const monthEndDate = endOfMonth(monthDate)
 
       const monthRecords = records.filter((r) => {
-        const date = parseISO(r.timestamp)
+        const date = getRecordDate(r)
         return isWithinInterval(date, {
           start: monthStartDate,
           end: monthEndDate,
@@ -167,7 +183,7 @@ export function QuarterlyView({
       {/* Trend Chart - Positioned prominently after navigation */}
       {records.length > 0 && (
         <div className="glass-card p-4">
-          <GlucoseChart data={records} showTargetRange className="w-full" />
+          <GlucoseChart data={records.map(toChartFormat)} showTargetRange className="w-full" />
         </div>
       )}
 

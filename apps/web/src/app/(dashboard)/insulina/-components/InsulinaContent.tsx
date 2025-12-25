@@ -1,17 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { InsulinaHeader } from "./InsulinaHeader"
-import { InsulinConfigCard } from "./InsulinConfigCard"
-import { InsulinUpdateDialog } from "./InsulinUpdateDialog"
-import { InsulinTodoList } from "./InsulinTodoList"
-import { Card, CardContent } from "@/components/ui/card"
-import { Activity } from "lucide-react"
 import {
+  InsulinConfigCard,
+  InsulinUpdateDialog,
   useInsulinSchedule,
   useInsulinDoseRecords,
   type UpdateInsulinData,
 } from "@/features/insulin"
+import { InsulinaHeader } from "./InsulinaHeader"
+import { InsulinTodoList } from "./InsulinTodoList"
+import { Card, CardContent } from "@/components/ui/card"
+import { Activity } from "lucide-react"
 import { toast } from "sonner"
 
 export function InsulinaContent() {

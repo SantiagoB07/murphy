@@ -23,6 +23,13 @@ export interface GlucoseFormData {
 
 export type ViewMode = "daily" | "weekly" | "monthly" | "quarterly"
 
+export const VIEW_MODE_LABELS: Record<ViewMode, string> = {
+  daily: "Diario",
+  weekly: "Semanal",
+  monthly: "Mensual",
+  quarterly: "Trimestral",
+}
+
 // Statistics interface for period calculations
 export interface PeriodStats {
   count: number

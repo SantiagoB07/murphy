@@ -8,7 +8,26 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Syringe } from "lucide-react"
-import type { InsulinSchedule } from "@/types/diabetes"
+
+// InsulinSchedule interface - compatible with Convex schema
+export interface InsulinSchedule {
+  id: string
+  patientId: string
+  type: "rapid" | "basal"
+  timesPerDay: number
+  unitsPerDose: number
+  brand?: string
+  effectiveFrom: string
+  effectiveUntil?: string
+  changeReason?: string
+  orderedBy?: string
+  changedByUserId?: string
+  changedByRole?: "patient"
+  notes?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
 
 interface InsulinConfigCardProps {
   type: "rapid" | "basal"
@@ -74,3 +93,4 @@ export function InsulinConfigCard({
     </Card>
   )
 }
+

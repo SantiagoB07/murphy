@@ -7,6 +7,8 @@ export type { UpdateInsulinData } from "./hooks/useInsulinSchedule"
 export { useInsulinDoseRecords } from "./hooks/useInsulinDoseRecords"
 export type { InsulinDoseRecord } from "./hooks/useInsulinDoseRecords"
 
-// Components will be exported here after migration
-// export * from "./components/InsulinCard"
-// export * from "./components/InsulinTodoList"
+// Components
+export { InsulinConfigCard } from "./components/InsulinConfigCard"
+export type { InsulinSchedule } from "./components/InsulinConfigCard"
+export { InsulinLogDialog } from "./components/InsulinLogDialog"
+export { InsulinUpdateDialog } from "./components/InsulinUpdateDialog"
