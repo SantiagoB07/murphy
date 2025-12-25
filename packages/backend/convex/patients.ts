@@ -148,9 +148,6 @@ export const updateProfile = mutation({
     diagnosisYear: v.optional(v.number()),
     city: v.optional(v.string()),
     estrato: v.optional(v.number()),
-    coadminName: v.optional(v.string()),
-    coadminPhone: v.optional(v.string()),
-    coadminEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const patient = await getCurrentPatient(ctx);

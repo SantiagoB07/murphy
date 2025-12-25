@@ -165,9 +165,6 @@ export type ProfileUpdate = {
   diagnosisYear?: number;
   city?: string;
   estrato?: number;
-  coadminName?: string;
-  coadminPhone?: string;
-  coadminEmail?: string;
 };
 
 /**

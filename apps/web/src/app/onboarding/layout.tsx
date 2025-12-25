@@ -6,9 +6,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   if (!session.isAuthenticated) {
     redirect('/')
   }
-  if (session.sessionClaims?.metadata.role) {
-    redirect('/')
-  }
 
   return <>{children}</>
 }

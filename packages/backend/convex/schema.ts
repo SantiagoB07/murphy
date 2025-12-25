@@ -72,9 +72,6 @@ export default defineSchema({
     gender: v.optional(genderTypes),
     city: v.optional(v.string()),
     estrato: v.optional(v.number()),
-    coadminName: v.optional(v.string()),
-    coadminPhone: v.optional(v.string()),
-    coadminEmail: v.optional(v.string()),
     age: v.optional(v.number()),
     fullName: v.optional(v.string()),
     phoneNumber: v.optional(v.string()),
@@ -84,6 +81,8 @@ export default defineSchema({
   coadminProfiles: defineTable({
     clerkUserId: v.string(),
     patientId: v.id("patientProfiles"),
+    fullName: v.string(),
+    phoneNumber: v.string(),
     updatedAt: v.number(),
   })
     .index("by_clerk_user", ["clerkUserId"])
