@@ -6,7 +6,7 @@ import { internal } from "./_generated/api";
 // Constantes
 // ============================================
 
-const RETRY_DELAY_MS = 5 * 60 * 1000; // 5 minutos
+const RETRY_DELAY_MS = 1000; // 1 segundo (retry inmediato)
 const MAX_RETRIES = 3;
 const MIN_CALL_DURATION = 20; // segundos
 const FALLBACK_CHECK_DELAY_MS = 6 * 60 * 1000; // 6 minutos
