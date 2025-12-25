@@ -28,7 +28,7 @@ export function AlertasHeader({ unreadCount, onMarkAllRead }: AlertasHeaderProps
           className="text-primary hover:text-primary"
           onClick={onMarkAllRead}
         >
-          Marcar todas como leidas
+          Marcar todas como leídas
         </Button>
       )}
     </div>
