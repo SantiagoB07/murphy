@@ -8,6 +8,9 @@ import { getCurrentPatient } from "./lib/auth";
 // Queries
 // ============================================
 
+const VERCEL_URL = process.env.VERCEL_URL
+const PROD_URL = VERCEL_URL ? `https://${VERCEL_URL}` : null
+
 /**
  * Gets the current coadmin's profile and linked patient info
  */
@@ -230,7 +233,7 @@ export const inviteCoadmin = action({
         invitedByClerkUserId: identity.subject,
         invitedByPatientName: patient.fullName || "Paciente",
       },
-      redirectUrl: `${process.env.CLERK_REDIRECT_URL || "http://localhost:3000"}/sign-in`,
+      redirectUrl: `${PROD_URL || "http://localhost:3000"}/sign-in`,
     });
 
     return {
