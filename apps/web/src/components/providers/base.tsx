@@ -4,6 +4,7 @@ import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 import { ClerkProvider } from "@clerk/nextjs";
+import { clerkAppearance } from "@/lib/clerkAppearance";
 
 import { useAuth } from "@clerk/nextjs";
 import { ConvexReactClient } from "convex/react";
@@ -30,8 +31,7 @@ export default function BaseProviders({ children }: { children: React.ReactNode 
       enableSystem
       disableTransitionOnChange
     >
-      <ClerkProvider>
-
+      <ClerkProvider appearance={clerkAppearance}>
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
           <QueryClientProvider client={queryClient}>
             {children}

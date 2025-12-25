@@ -20,6 +20,7 @@ import type * as agent_queries from "../agent/queries.js";
 import type * as agent_schemas from "../agent/schemas.js";
 import type * as agent_types from "../agent/types.js";
 import type * as aiCallSchedules from "../aiCallSchedules.js";
+import type * as coadmins from "../coadmins.js";
 import type * as dizzinessRecords from "../dizzinessRecords.js";
 import type * as glucoseRecords from "../glucoseRecords.js";
 import type * as healthCheck from "../healthCheck.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "agent/schemas": typeof agent_schemas;
   "agent/types": typeof agent_types;
   aiCallSchedules: typeof aiCallSchedules;
+  coadmins: typeof coadmins;
   dizzinessRecords: typeof dizzinessRecords;
   glucoseRecords: typeof glucoseRecords;
   healthCheck: typeof healthCheck;
