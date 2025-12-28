@@ -240,6 +240,8 @@ export const inviteCoadmin = action({
       redirectUrl: `${PROD_URL || "http://localhost:3000"}/sign-in`,
     });
 
+    console.log("invitation", invitation)
+
     return {
       success: true,
       invitationId: invitation.id,
