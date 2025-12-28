@@ -7,24 +7,24 @@ import type { AgentResponse } from "./types";
 
 /**
  * Constant-time string comparison to prevent timing attacks.
- * Always compares all characters regardless of early mismatches.
+ * Always iterates over max(a.length, b.length) regardless of whether
+ * the lengths match, treating out-of-range indexes as 0.
+ * Returns true only if both strings are identical in content and length.
  */
 function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Still do a dummy comparison to maintain constant time
-    let dummy = 0;
-    for (let i = 0; i < a.length; i++) {
-      dummy |= a.charCodeAt(i) ^ a.charCodeAt(i);
-    }
-    return false;
-  }
-
+  const maxLen = Math.max(a.length, b.length);
   let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+
+  // Always iterate maxLen times regardless of length match
+  for (let i = 0; i < maxLen; i++) {
+    // Treat out-of-range indexes as 0
+    const aChar = i < a.length ? a.charCodeAt(i) : 0;
+    const bChar = i < b.length ? b.charCodeAt(i) : 0;
+    result |= aChar ^ bChar;
   }
 
-  return result === 0;
+  // Check both result and length equality after the full loop
+  return result === 0 && a.length === b.length;
 }
 
 /**
