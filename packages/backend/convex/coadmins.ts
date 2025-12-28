@@ -8,8 +8,7 @@ import { getCurrentPatient } from "./lib/auth";
 // Queries
 // ============================================
 
-const VERCEL_URL = process.env.VERCEL_URL
-const PROD_URL = VERCEL_URL ? `https://${VERCEL_URL}` : null
+const PROD_URL = process.env.PROD_URL
 
 /**
  * Gets the current coadmin's profile and linked patient info
@@ -223,6 +222,11 @@ export const inviteCoadmin = action({
         throw new Error("Este usuario ya es coadministrador de tu cuenta");
       }
     }
+
+    console.log("Creating invitation for coadmin:", args.email);
+    console.log("Invited by patient ID:", patient._id);
+    console.log("Patient name:", patient.fullName);
+    console.log("Redirect URL:", `${PROD_URL || "http://localhost:3000"}/sign-in`);
 
     // Create the invitation with metadata
     const invitation = await clerkClient.invitations.createInvitation({
