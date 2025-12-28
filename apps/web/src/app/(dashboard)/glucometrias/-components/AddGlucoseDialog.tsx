@@ -26,13 +26,14 @@ import {
   GLUCOSE_RANGES,
   GLUCOSE_SLOTS,
   GLUCOSE_SLOT_LABELS,
-} from "@/types/diabetes"
-import type { Glucometry, GlucoseSlot } from "@/types/diabetes"
+  type GlucoseSlot,
+  type GlucoseRecord,
+} from "@/features/glucose"
 
 interface AddGlucoseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  initialRecord?: Glucometry // For editing existing record
+  initialRecord?: GlucoseRecord // For editing existing record (Convex type)
   onSave: (value: number, slot?: GlucoseSlot, notes?: string) => void
   onDelete?: (id: string) => void // For deleting existing record
 }
@@ -81,7 +82,7 @@ export function AddGlucoseDialog({
 
   const handleDelete = () => {
     if (initialRecord && onDelete) {
-      onDelete(initialRecord.id)
+      onDelete(initialRecord._id)
       onOpenChange(false)
     }
   }

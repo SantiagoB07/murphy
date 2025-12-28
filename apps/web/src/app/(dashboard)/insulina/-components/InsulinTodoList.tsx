@@ -14,9 +14,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
-import type { InsulinSchedule } from "@/types/diabetes"
-import type { InsulinDoseRecord, InsulinDoseRecordId } from "@/hooks/useInsulinDoseRecords"
-import { InsulinLogDialog } from "./InsulinLogDialog"
+import {
+  InsulinLogDialog,
+  type InsulinSchedule,
+  type InsulinDoseRecord,
+} from "@/features/insulin"
+
+// ID type for insulin dose records - using string since that's what the hook provides
+type InsulinDoseRecordId = string
 
 interface TodoItem {
   id: string

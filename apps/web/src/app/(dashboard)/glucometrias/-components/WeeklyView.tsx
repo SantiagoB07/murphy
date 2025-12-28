@@ -1,18 +1,20 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
-import { getGlucoseStatus } from "@/types/diabetes"
+import {
+  calculatePeriodStats,
+  GlucoseChart,
+  getGlucoseStatus,
+} from "@/features/glucose"
+import type { GlucoseRecordLike } from "@/features/glucose/adapters"
+import { getRecordDate, toChartFormat } from "@/features/glucose/adapters"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/hooks/useGlucoseLog"
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,
   startOfWeek,
   endOfWeek,
   eachDayOfInterval,
   isSameDay,
-  parseISO,
 } from "date-fns"
 import { es } from "date-fns/locale"
 import { ChevronLeft, ChevronRight, Activity } from "lucide-react"
@@ -20,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface WeeklyViewProps {
-  records: Glucometry[]
+  records: GlucoseRecordLike[]
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
@@ -45,7 +47,7 @@ export function WeeklyView({
   const dailySummary = useMemo(() => {
     return weekDays.map((day) => {
       const dayRecords = records.filter((r) =>
-        isSameDay(parseISO(r.timestamp), day)
+        isSameDay(getRecordDate(r), day)
       )
       const avg =
         dayRecords.length > 0
@@ -127,7 +129,7 @@ export function WeeklyView({
       {/* Trend Chart - Positioned prominently after navigation */}
       {records.length > 0 && (
         <div className="glass-card p-4">
-          <GlucoseChart data={records} showTargetRange className="w-full" />
+          <GlucoseChart data={records.map(toChartFormat)} showTargetRange className="w-full" />
         </div>
       )}
 

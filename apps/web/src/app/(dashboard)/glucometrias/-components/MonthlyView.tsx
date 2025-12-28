@@ -1,18 +1,20 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
-import { getGlucoseStatus } from "@/types/diabetes"
+import {
+  calculatePeriodStats,
+  GlucoseChart,
+  getGlucoseStatus,
+} from "@/features/glucose"
+import type { GlucoseRecordLike } from "@/features/glucose/adapters"
+import { getRecordDate, toChartFormat } from "@/features/glucose/adapters"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/hooks/useGlucoseLog"
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,
   startOfMonth,
   endOfMonth,
   eachDayOfInterval,
   isSameDay,
-  parseISO,
   getWeek,
   startOfWeek,
   endOfWeek,
@@ -24,7 +26,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface MonthlyViewProps {
-  records: Glucometry[]
+  records: GlucoseRecordLike[]
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
@@ -49,7 +51,7 @@ export function MonthlyView({
   const dailySummary = useMemo(() => {
     return monthDays.map((day) => {
       const dayRecords = records.filter((r) =>
-        isSameDay(parseISO(r.timestamp), day)
+        isSameDay(getRecordDate(r), day)
       )
       const avg =
         dayRecords.length > 0
@@ -81,7 +83,7 @@ export function MonthlyView({
     while (currentWeekStart <= monthEnd) {
       const currentWeekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 })
       const weekRecords = records.filter((r) => {
-        const date = parseISO(r.timestamp)
+        const date = getRecordDate(r)
         return isWithinInterval(date, {
           start: currentWeekStart,
           end: currentWeekEnd,
@@ -179,7 +181,7 @@ export function MonthlyView({
       {/* Trend Chart - Positioned prominently after navigation */}
       {records.length > 0 && (
         <div className="glass-card p-4">
-          <GlucoseChart data={records} showTargetRange className="w-full" />
+          <GlucoseChart data={records.map(toChartFormat)} showTargetRange className="w-full" />
         </div>
       )}
 

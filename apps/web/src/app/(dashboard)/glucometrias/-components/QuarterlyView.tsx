@@ -1,10 +1,13 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Glucometry } from "@/types/diabetes"
+import {
+  calculatePeriodStats,
+  GlucoseChart,
+} from "@/features/glucose"
+import type { GlucoseRecordLike } from "@/features/glucose/adapters"
+import { getRecordDate, toChartFormat } from "@/features/glucose/adapters"
 import { PeriodStatsCard } from "./PeriodStatsCard"
-import { calculatePeriodStats } from "@/hooks/useGlucoseLog"
-import { GlucoseChart } from "@/components/dashboard/GlucoseChart"
 import {
   format,
   startOfQuarter,
@@ -12,7 +15,6 @@ import {
   startOfMonth,
   endOfMonth,
   eachMonthOfInterval,
-  parseISO,
   isWithinInterval,
 } from "date-fns"
 import { es } from "date-fns/locale"
@@ -28,7 +30,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface QuarterlyViewProps {
-  records: Glucometry[]
+  records: GlucoseRecordLike[]
   selectedDate: Date
   onDateChange: (date: Date) => void
 }
@@ -57,7 +59,7 @@ export function QuarterlyView({
       const monthEndDate = endOfMonth(monthDate)
 
       const monthRecords = records.filter((r) => {
-        const date = parseISO(r.timestamp)
+        const date = getRecordDate(r)
         return isWithinInterval(date, {
           start: monthStartDate,
           end: monthEndDate,
@@ -167,7 +169,7 @@ export function QuarterlyView({
       {/* Trend Chart - Positioned prominently after navigation */}
       {records.length > 0 && (
         <div className="glass-card p-4">
-          <GlucoseChart data={records} showTargetRange className="w-full" />
+          <GlucoseChart data={records.map(toChartFormat)} showTargetRange className="w-full" />
         </div>
       )}
 

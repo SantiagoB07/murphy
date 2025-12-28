@@ -1,11 +1,8 @@
 import { Suspense } from "react"
 import { Activity, Zap, Shield } from "lucide-react"
-import { auth } from "@clerk/nextjs/server"
-import { LandingCTA, LandingCTASkeleton } from "@/components/landing-cta"
+import { LandingCTA } from "@/components/landing-cta"
 
 export default async function HomePage() {
-  const session = await auth()
-  const isAuthenticated = !!session.userId
 
   return (
     <div className="min-h-screen flex flex-col safe-area-inset">
@@ -17,8 +14,8 @@ export default async function HomePage() {
       </div>
 
       {/* Skip link for accessibility */}
-      <a 
-        href="#main-content" 
+      <a
+        href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-hig"
       >
         Saltar al contenido principal
@@ -49,9 +46,9 @@ export default async function HomePage() {
               bajo control
             </span>
           </h2>
-          
+
           <p className="text-hig-lg md:text-hig-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-up stagger-1 leading-hig-normal">
-            Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp 
+            Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp
             y análisis personalizado.
           </p>
 
@@ -69,16 +66,16 @@ export default async function HomePage() {
         </div>
 
         {/* CTA Section - Suspense Boundary */}
-        <Suspense fallback={<LandingCTASkeleton />}>
-          <LandingCTA isAuthenticated={isAuthenticated} />
+        <Suspense >
+          <LandingCTA />
         </Suspense>
       </main>
 
       {/* Footer */}
       <footer className="relative z-10 px-6 py-4 border-t border-border/50">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-hig-sm text-muted-foreground">
-          <p>© 2024 MurphyIA</p>
-          <p>Versión 1.0.0 - Beta</p>
+          <p>© 2025 MurphyIA</p>
+          {/* <p>Versión 1.0.0 - Beta</p> */}
         </div>
       </footer>
     </div>
