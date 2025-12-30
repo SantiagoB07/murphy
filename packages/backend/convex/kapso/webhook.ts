@@ -54,7 +54,7 @@ export const httpKapsoWebhook = httpAction(async (ctx, request) => {
       }
 
       console.log("[Kapso Webhook] Received WhatsApp message:", parsedData.data);
-      await ctx.runAction(internal.kapso.agent.handleKapsoWhatsappMessage, {
+      await ctx.scheduler.runAfter(0, internal.kapso.agent.handleKapsoWhatsappMessage, {
         ...parsedData.data
       })
       return new Response("OK", { status: 200 });

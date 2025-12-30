@@ -7,14 +7,14 @@ import { whatsappMessageReceivedSchema } from "./schema";
 
 type WhatsappMessageReceivedSchema = z.infer<typeof whatsappMessageReceivedSchema>;
 
-const GEMINI_APIK_KEY = process.env.GEMINI_APIK_KEY || ""
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ""
 
 import { Agent, createThread } from "@convex-dev/agent";
 import { openai } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 
 const google = createGoogleGenerativeAI({
-  apiKey: GEMINI_APIK_KEY,
+  apiKey: GEMINI_API_KEY,
 })
 
 const model = google("gemini-3-flash-preview")

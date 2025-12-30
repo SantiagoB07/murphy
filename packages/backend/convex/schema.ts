@@ -75,7 +75,9 @@ export default defineSchema({
     age: v.optional(v.number()),
     fullName: v.optional(v.string()),
     phoneNumber: v.optional(v.string()),
-  }).index("by_clerk_user", ["clerkUserId"]),
+  })
+    .index("by_clerk_user", ["clerkUserId"])
+    .index("by_phone_number", ["phoneNumber"]),
 
   // Perfiles de co-administradores
   coadminProfiles: defineTable({
