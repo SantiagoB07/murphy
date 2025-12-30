@@ -29,6 +29,7 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as http from "../http.js";
 import type * as insulinDoseRecords from "../insulinDoseRecords.js";
 import type * as insulinSchedules from "../insulinSchedules.js";
+import type * as kapso_webhook from "../kapso/webhook.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as model_glucoseRecords from "../model/glucoseRecords.js";
@@ -74,6 +75,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   insulinDoseRecords: typeof insulinDoseRecords;
   insulinSchedules: typeof insulinSchedules;
+  "kapso/webhook": typeof kapso_webhook;
   "lib/auth": typeof lib_auth;
   "lib/validators": typeof lib_validators;
   "model/glucoseRecords": typeof model_glucoseRecords;

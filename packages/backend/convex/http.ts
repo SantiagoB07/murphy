@@ -5,6 +5,7 @@ import { httpSaveSleep, httpUpdateSleep } from "./agent/httpSleep";
 import { httpSaveStress, httpUpdateStress } from "./agent/httpStress";
 import { httpSaveDizziness, httpUpdateDizziness } from "./agent/httpDizziness";
 import { httpElevenLabsWebhook } from "./agent/webhooks";
+import { httpKapsoWebhook } from "./kapso/webhook";
 
 const http = httpRouter();
 
@@ -97,6 +98,21 @@ http.route({
   method: "POST",
   handler: httpElevenLabsWebhook,
 });
+
+
+// ============================================
+// Kapso Webhooks 
+// ============================================
+
+
+http.route({
+  path: "/api/webhooks/kapso",
+  method: "POST",
+  handler: httpKapsoWebhook
+})
+
+
+
 
 // Convex expects the router to be the default export
 export default http;
