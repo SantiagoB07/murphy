@@ -138,18 +138,6 @@ export default defineSchema({
     recordedAt: v.number(),
   }).index("by_patient", ["patientId"]),
 
-  // Preferencias de notificaciones
-  notificationPreferences: defineTable({
-    clerkUserId: v.string(),
-    glucoseAlerts: v.boolean(),
-    hypoglycemiaAlerts: v.boolean(),
-    hyperglycemiaAlerts: v.boolean(),
-    medicationReminders: v.boolean(),
-    measurementReminders: v.boolean(),
-    dailySummary: v.boolean(),
-    updatedAt: v.number(),
-  }).index("by_clerk_user", ["clerkUserId"]),
-
   // Programación de alertas automáticas (llamadas/WhatsApp)
   aiCallSchedules: defineTable({
     patientId: v.id("patientProfiles"),

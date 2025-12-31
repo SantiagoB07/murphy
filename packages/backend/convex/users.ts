@@ -3,7 +3,6 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { createClerkClient } from "@clerk/backend";
 import { diabetesTypes, genderTypes } from "./lib/validators";
-import * as Notifications from "./model/notifications";
 
 export const createUser = internalMutation({
   args: {
@@ -21,10 +20,6 @@ export const createUser = internalMutation({
     const patientId = await ctx.db.insert("patientProfiles", {
       ...args,
     });
-
-    // Initialize default notification preferences for new patient
-    // Using model helper directly instead of ctx.runMutation
-    await Notifications.initializePreferences(ctx, args.clerkUserId);
 
     return patientId;
   },
