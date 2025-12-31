@@ -70,14 +70,6 @@ const initialAlerts: AlertHistoryItem[] = [
     value: "62 mg/dL",
     read: true,
   },
-  {
-    id: 5,
-    type: "info",
-    title: "Nueva racha de 7 dias",
-    time: "Hace 5 dias",
-    value: "+50 XP bonus",
-    read: true,
-  },
 ]
 
 const getAlertIcon = (type: AlertSeverity) => {
