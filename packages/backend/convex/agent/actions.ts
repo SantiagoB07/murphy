@@ -37,8 +37,11 @@ export const executeScheduledAlert = internalAction({
         scheduleId: args.scheduleId,
       });
     } else if (schedule.channel === "whatsapp") {
-      // Future: WhatsApp integration
-      console.log(`[executeScheduledAlert] WhatsApp not implemented yet for schedule ${args.scheduleId}`);
+      console.log(`[executeScheduledAlert] Initiating WhatsApp alert for schedule ${args.scheduleId}`);
+      await ctx.runAction(internal.agent.actions.initiateWhatsappAlert, {
+        patientId: schedule.patientId,
+        alertType: schedule.type,
+      });
     }
 
     // 3. Handle reschedule or cleanup
@@ -205,5 +208,74 @@ export const retryCall = internalAction({
       alertType: originalRecord.alertType,
       retryCount: newRetryCount,
     });
+  },
+});
+
+// ============================================
+// WhatsApp Alert Messages
+// ============================================
+
+const WHATSAPP_ALERT_MESSAGES: Record<string, (name: string) => string> = {
+  glucometry: (name) => `¡Hola ${name}! Es hora de medir tu glucosa. ¿Cuánto te dio?`,
+  insulin: (name) => `¡Hola ${name}! Es hora de tu insulina. ¿Ya te la aplicaste?`,
+  wellness: (name) => `¡Hola ${name}! ¿Cómo te sientes hoy? ¿Dormiste bien anoche?`,
+  general: (name) => `¡Hola ${name}! Soy Murphy. ¿Cómo estás hoy?`,
+};
+
+/**
+ * Initiates an outbound WhatsApp message to a patient via Kapso
+ * Sends a template message based on the alert type
+ */
+export const initiateWhatsappAlert = internalAction({
+  args: {
+    patientId: v.id("patientProfiles"),
+    alertType: v.optional(v.string()),
+    toNumber: v.optional(v.string()), // Override phone number
+  },
+  handler: async (ctx, args): Promise<{
+    success: boolean;
+    phoneNumber: string;
+    patientName: string;
+    alertType: string;
+  }> => {
+    // 1. Get patient context
+    const patientContext = await ctx.runQuery(
+      internal.agent.queries.getPatientContextById,
+      { patientId: args.patientId }
+    );
+
+    if (!patientContext) {
+      throw new Error(`Patient not found: ${args.patientId}`);
+    }
+
+    // 2. Determine phone number
+    const phoneNumber: string | undefined = args.toNumber || patientContext.phoneNumber;
+    if (!phoneNumber) {
+      throw new Error(
+        `No phone number available for patient: ${patientContext.name}`
+      );
+    }
+
+    // 3. Generate message based on alert type
+    const alertType = args.alertType || "general";
+    const messageGenerator = WHATSAPP_ALERT_MESSAGES[alertType] || WHATSAPP_ALERT_MESSAGES.general;
+    const message = messageGenerator(patientContext.name);
+
+    // 4. Send WhatsApp message
+    console.log(`[initiateWhatsappAlert] Sending to ${phoneNumber}: "${message}"`);
+    
+    await ctx.runAction(internal.kapso.lib.sendWhatsappMessage, {
+      to: phoneNumber,
+      body: message,
+    });
+
+    console.log(`[initiateWhatsappAlert] Message sent successfully to ${patientContext.name}`);
+
+    return {
+      success: true,
+      phoneNumber,
+      patientName: patientContext.name,
+      alertType,
+    };
   },
 });

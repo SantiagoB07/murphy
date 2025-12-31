@@ -75,7 +75,9 @@ export default defineSchema({
     age: v.optional(v.number()),
     fullName: v.optional(v.string()),
     phoneNumber: v.optional(v.string()),
-  }).index("by_clerk_user", ["clerkUserId"]),
+  })
+    .index("by_clerk_user", ["clerkUserId"])
+    .index("by_phone_number", ["phoneNumber"]),
 
   // Perfiles de co-administradores
   coadminProfiles: defineTable({
@@ -183,6 +185,18 @@ export default defineSchema({
   })
     .index("by_patient_type", ["patientId", "type"])
     .index("by_patient_enabled", ["patientId", "isEnabled"]),
+
+  // Conversaciones de WhatsApp (Kapso) - mapeo a threads de Convex Agent
+  kapsoConversations: defineTable({
+    phoneNumber: v.string(),
+    kapsoConversationId: v.string(),
+    convexThreadId: v.string(),
+    patientId: v.optional(v.id("patientProfiles")),
+    lastMessageAt: v.number(),
+    isActive: v.boolean(),
+  })
+    .index("by_phone_number", ["phoneNumber"])
+    .index("by_kapso_conversation_id", ["kapsoConversationId"]),
 
   // Registros de llamadas realizadas (para sistema de reintentos)
   callRecords: defineTable({
