@@ -9,11 +9,8 @@ import {
   type GlucoseSlot,
   type GlucoseRecord,
 } from "@/features/glucose"
-import { useWellnessRecords } from "@/features/wellness"
-import { useXPCalculation } from "@/features/xp"
 import { GlucometriasHeader } from "./GlucometriasHeader"
 import { AddGlucoseDialog } from "./AddGlucoseDialog"
-import { DailyXPSummary } from "./DailyXPSummary"
 import { ViewModeSelector } from "./ViewModeSelector"
 import { WeeklyView } from "./WeeklyView"
 import { MonthlyView } from "./MonthlyView"
@@ -43,18 +40,6 @@ import {
   Droplets,
 } from "lucide-react"
 
-// Legacy format converter - only needed for XP calculation hook
-// TODO: Update XP hook to accept Convex types
-function toLegacyFormat(record: GlucoseRecord) {
-  return {
-    id: record._id,
-    value: record.value,
-    timestamp: new Date(record.recordedAt).toISOString(),
-    slot: record.slot,
-    notes: record.notes,
-  }
-}
-
 export function GlucometriasContent() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>("daily")
@@ -63,13 +48,8 @@ export function GlucometriasContent() {
     undefined
   )
 
-  // Get wellness state for XP calculation
-  const { todaySleep, todayStress } = useWellnessRecords()
-  const hasSleepLogged = !!todaySleep
-  const hasStressLogged = !!todayStress
-
   // Get glucose records and mutations
-  const { getRecordsByDate, getRecordsInRange, todayRecords } = useGlucoseRecords()
+  const { getRecordsByDate, getRecordsInRange } = useGlucoseRecords()
   const { createRecord, updateRecord, deleteRecord } = useGlucoseMutations()
 
   // Calculate date range based on view mode
@@ -106,25 +86,6 @@ export function GlucometriasContent() {
   const dayRecords = useMemo(() => {
     return getRecordsByDate(selectedDate)
   }, [selectedDate, getRecordsByDate])
-
-  // Get today's records for XP calculation (as legacy format for XP hook)
-  // TODO: Update XP hook to accept Convex types
-  const todayRecordsLegacy = useMemo(() => {
-    const today = new Date()
-    if (isSameDay(selectedDate, today)) {
-      return dayRecords.map(toLegacyFormat)
-    }
-    return todayRecords.map(toLegacyFormat)
-  }, [selectedDate, dayRecords, todayRecords])
-
-  // Calculate XP for today
-  const xpResult = useXPCalculation({
-    todayGlucoseRecords: todayRecordsLegacy,
-    hasSleepLogged,
-    hasStressLogged,
-    streakDays: 5, // TODO: Get from user profile
-    totalAccumulatedXP: 1250, // TODO: Get from user profile
-  })
 
   const isToday = isSameDay(selectedDate, new Date())
 
@@ -234,9 +195,6 @@ export function GlucometriasContent() {
       {/* Daily View - EDITABLE */}
       {viewMode === "daily" && (
         <>
-          {/* XP Summary for today */}
-          {isToday && <DailyXPSummary xpResult={xpResult} className="mb-6" />}
-
           {/* Daily Stats */}
           {stats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

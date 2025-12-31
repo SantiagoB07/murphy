@@ -22,7 +22,6 @@ export type AlertType =
   | "hyperglycemia"
   | "missed_dose"
   | "pattern"
-  | "streak"
   | "reminder"
 
 // Glucose ranges for color coding
@@ -198,7 +197,6 @@ export interface Patient {
   avatar: string | null
   telegramConnected: boolean
   coadminId: string | null
-  xpLevel: number
   streak: number
   glucometrias: Glucometry[]
   insulina: InsulinDose[]
@@ -216,17 +214,6 @@ export interface MockData {
     patientId: string
     telegramConnected: boolean
   }>
-}
-
-// XP System types
-export interface DailyXPLog {
-  date: string
-  baseXP: number
-  finalXP: number
-  recordsCompleted: number // Changed from slotsCompleted
-  inRangePercent: number
-  streakDays: number
-  streakMultiplier: number
 }
 
 // Connected devices for settings
