@@ -248,16 +248,6 @@ export async function deleteAllPatientData(
     ...aiCallSchedules.map((r) => ctx.db.delete(r._id)),
   ]);
 
-  // Delete notification preferences
-  const notifPrefs = await ctx.db
-    .query("notificationPreferences")
-    .withIndex("by_clerk_user", (q) => q.eq("clerkUserId", patient.clerkUserId))
-    .unique();
-
-  if (notifPrefs) {
-    await ctx.db.delete(notifPrefs._id);
-  }
-
   // Finally, delete the patient profile
   await ctx.db.delete(patient._id);
 }
