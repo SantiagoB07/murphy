@@ -16,7 +16,7 @@ const google = createGoogleGenerativeAI({
   apiKey: GEMINI_API_KEY,
 });
 
-const model = google("gemini-2.0-flash");
+const model = google("gemini-3-flash-preview");
 
 /**
  * System prompt for Murphy WhatsApp agent.
@@ -100,7 +100,7 @@ export const handleKapsoWhatsappMessage = internalAction({
     // Normalizar número de teléfono a formato E.164 (con +)
     const rawPhone = args.message.from;
     const phoneNumber = rawPhone.startsWith("+") ? rawPhone : `+${rawPhone}`;
-    
+
     const kapsoConversationId = args.conversation.id;
     const messageText = args.message.text?.body || "";
 
@@ -185,6 +185,19 @@ export const handleKapsoWhatsappMessage = internalAction({
       { threadId },
       { prompt: messageText },
       {
+
+        contextOptions: {
+          recentMessages: 15,
+          searchOptions: {
+            limit: 5,
+            textSearch: true,
+            messageRange: {
+              before: 2,
+              after: 1
+            }
+          }
+        },
+
         contextHandler: async (_handlerCtx, handlerArgs) => {
           // Construir mensaje de contexto igual que ElevenLabs
           const contextMessage = {
