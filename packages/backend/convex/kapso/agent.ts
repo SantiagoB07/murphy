@@ -18,10 +18,11 @@ const google = createGoogleGenerativeAI({
 
 const model = google("gemini-2.0-flash");
 
-// ============================================
-// Instrucciones del Agente (adaptadas de ElevenLabs para WhatsApp)
-// ============================================
-
+/**
+ * System prompt for Murphy WhatsApp agent.
+ * @see prompts/murphyWhatsapp.md for the canonical version of this prompt.
+ * Keep both files in sync when making changes.
+ */
 const MURPHY_INSTRUCTIONS = `Eres Murphy, un asistente de salud amigable para personas con diabetes que se comunica por WhatsApp.
 
 ## Tu Personalidad

@@ -72,6 +72,4 @@ export const whatsappMessageReceivedSchema = z.object({
   phone_number_id: z.string(),
   test: z.boolean().optional(),
   test_timestamp: z.string().optional()
-})
-
-
+});

@@ -1,9 +1,6 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "../_generated/server";
 
-/**
- * Obtiene una conversación existente por número de teléfono
- */
 export const getConversationByPhone = internalQuery({
   args: { phoneNumber: v.string() },
   handler: async (ctx, { phoneNumber }) => {
@@ -15,22 +12,8 @@ export const getConversationByPhone = internalQuery({
 });
 
 /**
- * Obtiene una conversación existente por ID de conversación de Kapso
- */
-export const getConversationByKapsoId = internalQuery({
-  args: { kapsoConversationId: v.string() },
-  handler: async (ctx, { kapsoConversationId }) => {
-    return await ctx.db
-      .query("kapsoConversations")
-      .withIndex("by_kapso_conversation_id", (q) =>
-        q.eq("kapsoConversationId", kapsoConversationId)
-      )
-      .first();
-  },
-});
-
-/**
- * Crea un nuevo thread de Convex Agent y lo guarda en la base de datos
+ * Crea un nuevo thread de Convex Agent y lo guarda en la base de datos.
+ * Incluye verificación de duplicados para prevenir race conditions.
  * Esta función DEBE llamarse desde un action porque createThread lo requiere
  */
 export const createConversation = internalMutation({
@@ -41,6 +24,20 @@ export const createConversation = internalMutation({
     patientId: v.optional(v.id("patientProfiles")),
   },
   handler: async (ctx, args) => {
+    // Check for existing conversation to prevent race condition duplicates
+    const existing = await ctx.db
+      .query("kapsoConversations")
+      .withIndex("by_phone_number", (q) => q.eq("phoneNumber", args.phoneNumber))
+      .first();
+
+    if (existing) {
+      return {
+        conversationId: existing._id,
+        convexThreadId: existing.convexThreadId,
+        isNew: false,
+      };
+    }
+
     const conversationId = await ctx.db.insert("kapsoConversations", {
       phoneNumber: args.phoneNumber,
       kapsoConversationId: args.kapsoConversationId,
@@ -93,23 +90,6 @@ export const linkPatientToConversation = internalMutation({
 
     if (conversation) {
       await ctx.db.patch(conversation._id, { patientId });
-    }
-  },
-});
-
-/**
- * Desactiva una conversación (por ejemplo, si el usuario se da de baja)
- */
-export const deactivateConversation = internalMutation({
-  args: { phoneNumber: v.string() },
-  handler: async (ctx, { phoneNumber }) => {
-    const conversation = await ctx.db
-      .query("kapsoConversations")
-      .withIndex("by_phone_number", (q) => q.eq("phoneNumber", phoneNumber))
-      .first();
-
-    if (conversation) {
-      await ctx.db.patch(conversation._id, { isActive: false });
     }
   },
 });

@@ -60,7 +60,6 @@ export const saveGlucose = createTool({
       notes?: string;
     }
   ): Promise<string> => {
-    console.log("[Tool] saveGlucose:", args);
     await ctx.runMutation(internal.agent.mutations.saveGlucoseRecord, {
       patientId: ctx.patientId,
       value: args.value,
@@ -110,7 +109,6 @@ export const updateGlucose = createTool({
     ctx: KapsoToolCtx,
     args: { value: number; slot?: string }
   ): Promise<string> => {
-    console.log("[Tool] updateGlucose:", args);
     const latest = await ctx.runQuery(
       internal.agent.queries.getLatestGlucoseRecord,
       { patientId: ctx.patientId }
@@ -160,7 +158,6 @@ export const saveInsulin = createTool({
     ctx: KapsoToolCtx,
     args: { dose: number; insulinType: "rapid" | "basal"; notes?: string }
   ): Promise<string> => {
-    console.log("[Tool] saveInsulin:", args);
     try {
       await ctx.runMutation(internal.agent.mutations.saveInsulinRecord, {
         patientId: ctx.patientId,
@@ -202,7 +199,6 @@ export const updateInsulin = createTool({
     ctx: KapsoToolCtx,
     args: { dose: number; insulinType: "rapid" | "basal" }
   ): Promise<string> => {
-    console.log("[Tool] updateInsulin:", args);
     const latest = await ctx.runQuery(
       internal.agent.queries.getLatestInsulinRecord,
       { patientId: ctx.patientId }
@@ -247,7 +243,6 @@ export const saveSleep = createTool({
     ctx: KapsoToolCtx,
     args: { hours: number; quality?: number }
   ): Promise<string> => {
-    console.log("[Tool] saveSleep:", args);
     await ctx.runMutation(internal.agent.mutations.saveSleepRecord, {
       patientId: ctx.patientId,
       hours: args.hours,
@@ -277,7 +272,6 @@ export const updateSleep = createTool({
     ctx: KapsoToolCtx,
     args: { hours: number; quality?: number }
   ): Promise<string> => {
-    console.log("[Tool] updateSleep:", args);
     const latest = await ctx.runQuery(
       internal.agent.queries.getLatestSleepRecord,
       { patientId: ctx.patientId }
@@ -324,7 +318,6 @@ export const saveStress = createTool({
     ctx: KapsoToolCtx,
     args: { level: number; notes?: string }
   ): Promise<string> => {
-    console.log("[Tool] saveStress:", args);
     await ctx.runMutation(internal.agent.mutations.saveStressRecord, {
       patientId: ctx.patientId,
       level: args.level,
@@ -349,7 +342,6 @@ export const updateStress = createTool({
     ctx: KapsoToolCtx,
     args: { level: number; notes?: string }
   ): Promise<string> => {
-    console.log("[Tool] updateStress:", args);
     const latest = await ctx.runQuery(
       internal.agent.queries.getLatestStressRecord,
       { patientId: ctx.patientId }
@@ -397,7 +389,6 @@ export const saveDizziness = createTool({
     ctx: KapsoToolCtx,
     args: { severity: number; durationMinutes?: number; notes?: string }
   ): Promise<string> => {
-    console.log("[Tool] saveDizziness:", args);
     await ctx.runMutation(internal.agent.mutations.saveDizzinessRecord, {
       patientId: ctx.patientId,
       severity: args.severity,
@@ -424,7 +415,6 @@ export const updateDizziness = createTool({
     ctx: KapsoToolCtx,
     args: { severity: number; durationMinutes?: number; notes?: string }
   ): Promise<string> => {
-    console.log("[Tool] updateDizziness:", args);
     const latest = await ctx.runQuery(
       internal.agent.queries.getLatestDizzinessRecord,
       { patientId: ctx.patientId }

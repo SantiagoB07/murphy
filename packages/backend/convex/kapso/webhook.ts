@@ -25,12 +25,19 @@ async function verifyWebhook(payload: string, signature: string | null, secret: 
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return signature === expectedSignature;
+  // Use constant-time comparison to prevent timing attacks
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+  
+  let result = 0;
+  for (let i = 0; i < signature.length; i++) {
+    result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);
+  }
+  return result === 0;
 }
 
-const KAPSO_WEBHOOK_SECRET = process.env.KAPSO_WEBHOOK_SECRET
-
-
+const KAPSO_WEBHOOK_SECRET = process.env.KAPSO_WEBHOOK_SECRET;
 
 export const httpKapsoWebhook = httpAction(async (ctx, request) => {
   const signature = request.headers.get("x-webhook-signature");
@@ -53,7 +60,6 @@ export const httpKapsoWebhook = httpAction(async (ctx, request) => {
         return new Response("Invalid payload structure", { status: 400 });
       }
 
-      console.log("[Kapso Webhook] Received WhatsApp message:", parsedData.data);
       await ctx.scheduler.runAfter(0, internal.kapso.agent.handleKapsoWhatsappMessage, {
         ...parsedData.data
       })
