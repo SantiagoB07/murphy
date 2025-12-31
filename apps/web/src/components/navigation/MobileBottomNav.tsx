@@ -31,8 +31,10 @@ export function MobileBottomNav() {
                 aria-current={active ? "page" : undefined}
                 className="flex items-center justify-center -mt-4"
               >
-                <div className="w-14 h-10 flex items-center justify-center rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
-                  <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+                <div className="tiktok-button">
+                  <div className="tiktok-button-inner w-14 h-10 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-background" aria-hidden="true" />
+                  </div>
                 </div>
               </Link>
             )
