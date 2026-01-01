@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import { Brain } from "lucide-react"
 import type { StressFormData } from "../wellness.types"
 
@@ -21,19 +22,6 @@ interface StressDialogProps {
   onOpenChange: (open: boolean) => void
   initialData?: StressFormData | null
   onSave: (data: StressFormData) => void
-}
-
-const STRESS_LEVEL_LABELS: Record<number, string> = {
-  1: "Muy relajado",
-  2: "Muy relajado",
-  3: "Relajado",
-  4: "Relajado",
-  5: "Normal",
-  6: "Normal",
-  7: "Estresado",
-  8: "Estresado",
-  9: "Muy estresado",
-  10: "Muy estresado",
 }
 
 function getStressColor(level: number): string {
@@ -56,6 +44,9 @@ export function StressDialog({
   initialData,
   onSave,
 }: StressDialogProps) {
+  const t = useTranslations("Dashboard.wellnessDialogs.stress")
+  const tActions = useTranslations("Dashboard.wellnessDialogs.actions")
+  
   const [level, setLevel] = useState<number>(initialData?.level ?? 5)
   const [notes, setNotes] = useState(initialData?.notes ?? "")
 
@@ -71,13 +62,21 @@ export function StressDialog({
     onOpenChange(false)
   }
 
+  const getStressLevelLabel = (level: number): string => {
+    if (level <= 2) return t("levels.veryRelaxed")
+    if (level <= 4) return t("levels.relaxed")
+    if (level <= 6) return t("levels.normal")
+    if (level <= 8) return t("levels.stressed")
+    return t("levels.veryStressed")
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Brain className="w-5 h-5 text-rose-400" />
-            Nivel de Estres
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -85,7 +84,7 @@ export function StressDialog({
           {/* Stress level slider */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <Label className="text-muted-foreground">Como te sientes?</Label>
+              <Label className="text-muted-foreground">{t("levelLabel")}</Label>
               <span
                 className={cn(
                   "text-sm font-medium px-3 py-1 rounded",
@@ -93,7 +92,7 @@ export function StressDialog({
                   getStressColor(level)
                 )}
               >
-                {STRESS_LEVEL_LABELS[level]} ({level}/10)
+                {getStressLevelLabel(level)} ({level}/10)
               </span>
             </div>
 
@@ -107,19 +106,19 @@ export function StressDialog({
             />
 
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Muy relajado</span>
-              <span>Normal</span>
-              <span>Muy estresado</span>
+              <span>{t("scaleLabels.min")}</span>
+              <span>{t("scaleLabels.mid")}</span>
+              <span>{t("scaleLabels.max")}</span>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="stress-notes" className="text-muted-foreground">
-              Que te esta causando estres? (opcional)
+              {t("notesLabel")}
             </Label>
             <Textarea
               id="stress-notes"
-              placeholder="Ej: Trabajo, familia, salud..."
+              placeholder={t("notesPlaceholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="resize-none h-20"
@@ -128,7 +127,7 @@ export function StressDialog({
           </div>
 
           <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
-            <p>El estres elevado puede aumentar la glucosa</p>
+            <p>{t("tip")}</p>
           </div>
         </div>
 
@@ -138,14 +137,13 @@ export function StressDialog({
             onClick={() => onOpenChange(false)}
             className="flex-1 sm:flex-none"
           >
-            Cancelar
+            {tActions("cancel")}
           </Button>
           <Button onClick={handleSubmit} className="flex-1 sm:flex-none">
-            Guardar
+            {tActions("save")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

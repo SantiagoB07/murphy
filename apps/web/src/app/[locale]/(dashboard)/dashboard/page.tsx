@@ -6,7 +6,7 @@ import { DashboardContent } from "./-components/DashboardContent"
 
 export default function DashboardPage() {
   const { user } = useUser()
-  const userName = user?.firstName || "Usuario"
+  const userName = user?.firstName ?? undefined
 
   return (
     <>

@@ -77,6 +77,89 @@
       "average30Days": "30-day average",
       "noRecords": "No records",
       "quality": "Quality"
+    },
+    "glucose": {
+      "chart": {
+        "title": "Glucose Trend",
+        "targetRange": "70-180 mg/dL",
+        "statsLabel": "Glucose statistics",
+        "average": "Average",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "inRange": "In range",
+        "chartLabel": "Glucose trend chart"
+      },
+      "emptyState": {
+        "title": "No glucose data",
+        "description": "Record your measurements to see the trend here"
+      },
+      "slots": {
+        "AD": "Before Breakfast",
+        "DD": "After Breakfast",
+        "AA": "Before Lunch",
+        "DA": "After Lunch",
+        "AC": "Before Dinner",
+        "DC": "After Dinner"
+      }
+    },
+    "wellnessDialogs": {
+      "sleep": {
+        "title": "Sleep Log",
+        "hoursLabel": "Hours slept",
+        "qualityLabel": "Sleep quality",
+        "quality": {
+          "bad": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "tip": "Sleeping 7-9 hours helps regulate glucose"
+      },
+      "stress": {
+        "title": "Stress Level",
+        "levelLabel": "How do you feel?",
+        "notesLabel": "What's causing you stress? (optional)",
+        "notesPlaceholder": "E.g: Work, family, health...",
+        "levels": {
+          "veryRelaxed": "Very relaxed",
+          "relaxed": "Relaxed",
+          "normal": "Normal",
+          "stressed": "Stressed",
+          "veryStressed": "Very stressed"
+        },
+        "scaleLabels": {
+          "min": "Very relaxed",
+          "mid": "Normal",
+          "max": "Very stressed"
+        },
+        "tip": "High stress can increase glucose levels"
+      },
+      "dizziness": {
+        "title": "Dizziness Log",
+        "questionLabel": "Did you experience dizziness today?",
+        "yes": "Yes",
+        "no": "No",
+        "severityLabel": "Dizziness intensity",
+        "notesLabel": "Notes (optional)",
+        "notesPlaceholder": "E.g: Occurred after standing up...",
+        "severity": {
+          "veryMild": "Very mild",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "strong": "Strong",
+          "severe": "Severe"
+        },
+        "scaleLabels": {
+          "min": "Very mild",
+          "mid": "Moderate",
+          "max": "Severe"
+        },
+        "tip": "Dizziness may indicate glucose changes"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save"
+      }
     }
   }
 }

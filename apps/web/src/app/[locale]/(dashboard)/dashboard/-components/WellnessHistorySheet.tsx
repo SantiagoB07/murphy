@@ -9,8 +9,9 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Moon, Brain, Sparkles } from "lucide-react"
 import { format } from "date-fns"
-import { es } from "date-fns/locale"
+import { es, enUS } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { useTranslations, useLocale } from "next-intl"
 import {
   STRESS_LEVEL_LABELS,
   DIZZINESS_SEVERITY_LABELS,
@@ -44,18 +45,22 @@ interface WellnessHistorySheetProps {
   data: SleepRecord[] | StressRecord[] | DizzinessRecord[]
 }
 
-const CONFIG = {
-  sleep: { icon: Moon, title: "Historial de Sueno", unit: "h", color: "text-indigo-400" },
-  stress: { icon: Brain, title: "Historial de Estres", unit: "/10", color: "text-rose-400" },
-  dizziness: { icon: Sparkles, title: "Historial de Mareos", unit: "/10", color: "text-pink-400" },
-}
-
 export function WellnessHistorySheet({
   open,
   onOpenChange,
   type,
   data,
 }: WellnessHistorySheetProps) {
+  const t = useTranslations("Dashboard.history")
+  const locale = useLocale()
+  const dateLocale = locale === "en" ? enUS : es
+
+  const CONFIG = {
+    sleep: { icon: Moon, title: t("sleep.title"), unit: "h", color: "text-indigo-400" },
+    stress: { icon: Brain, title: t("stress.title"), unit: "/10", color: "text-rose-400" },
+    dizziness: { icon: Sparkles, title: t("dizziness.title"), unit: "/10", color: "text-pink-400" },
+  }
+
   const { icon: Icon, title, unit, color } = CONFIG[type]
 
   const getValue = (record: SleepRecord | StressRecord | DizzinessRecord): number | string => {
@@ -93,10 +98,10 @@ export function WellnessHistorySheet({
   }
 
   const getQualityLabel = (quality: number): string => {
-    if (quality <= 3) return "Malo"
-    if (quality <= 5) return "Regular"
-    if (quality <= 7) return "Bueno"
-    return "Excelente"
+    if (quality <= 3) return t("sleep.quality.bad")
+    if (quality <= 5) return t("sleep.quality.fair")
+    if (quality <= 7) return t("sleep.quality.good")
+    return t("sleep.quality.excellent")
   }
 
   // Calculate average only for numeric values
@@ -128,7 +133,7 @@ export function WellnessHistorySheet({
         </SheetHeader>
 
         <div className="mb-4 p-3 rounded-xl bg-secondary/30 text-center">
-          <p className="text-sm text-muted-foreground">Promedio 30 dias</p>
+          <p className="text-sm text-muted-foreground">{t("average30Days")}</p>
           <p className="text-2xl font-semibold">
             {average}
             {unit}
@@ -137,7 +142,7 @@ export function WellnessHistorySheet({
 
         <ScrollArea className="h-[calc(100%-120px)]">
           {data.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Sin registros</p>
+            <p className="text-center text-muted-foreground py-8">{t("noRecords")}</p>
           ) : (
             <div className="space-y-2">
               {data.map((record, i) => {
@@ -152,7 +157,7 @@ export function WellnessHistorySheet({
                     className="flex justify-between items-center p-3 rounded-xl bg-muted/20"
                   >
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(getDate(record)), "dd MMM", { locale: es })}
+                      {format(new Date(getDate(record)), "dd MMM", { locale: dateLocale })}
                     </span>
                     <div className="text-right">
                       <span className="font-medium">
@@ -166,7 +171,7 @@ export function WellnessHistorySheet({
                       )}
                       {isSleep && sleepRecord.quality && (
                         <span className="ml-2 text-xs text-muted-foreground">
-                          Calidad: {getQualityLabel(sleepRecord.quality)}
+                          {t("quality")}: {getQualityLabel(sleepRecord.quality)}
                         </span>
                       )}
                     </div>

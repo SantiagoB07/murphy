@@ -13,6 +13,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts"
+import { useTranslations, useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Activity } from "lucide-react"
 
@@ -54,6 +55,9 @@ export function GlucoseChart({
   showTargetRange = true,
   className,
 }: GlucoseChartProps) {
+  const t = useTranslations("Dashboard.glucose")
+  const locale = useLocale()
+
   const chartData = useMemo(() => {
     return [...data]
       .sort(
@@ -61,17 +65,17 @@ export function GlucoseChart({
       )
       .map((reading) => ({
         ...reading,
-        time: new Date(reading.timestamp).toLocaleTimeString("es-ES", {
+        time: new Date(reading.timestamp).toLocaleTimeString(locale === "en" ? "en-US" : "es-ES", {
           hour: "2-digit",
           minute: "2-digit",
         }),
-        date: new Date(reading.timestamp).toLocaleDateString("es-ES", {
+        date: new Date(reading.timestamp).toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
           day: "numeric",
           month: "short",
         }),
         inRange: reading.value >= 70 && reading.value <= 180,
       }))
-  }, [data])
+  }, [data, locale])
 
   const stats = useMemo(() => {
     if (data.length === 0) return { avg: 0, min: 0, max: 0, inRange: 0 }
@@ -125,7 +129,7 @@ export function GlucoseChart({
             id="glucose-chart-title"
             className="font-semibold text-hig-lg text-foreground leading-hig-tight"
           >
-            Tendencia Glucémica
+            {t("chart.title")}
           </h3>
         </div>
         <div className="h-64 flex flex-col items-center justify-center text-center">
@@ -133,10 +137,10 @@ export function GlucoseChart({
             <Activity className="w-8 h-8 text-muted-foreground" aria-hidden="true" />
           </div>
           <p className="text-foreground font-medium text-hig-base">
-            Sin datos de glucosa
+            {t("emptyState.title")}
           </p>
           <p className="text-hig-sm text-muted-foreground mt-1 max-w-xs">
-            Registra tus mediciones para ver la tendencia aquí
+            {t("emptyState.description")}
           </p>
         </div>
       </section>
@@ -154,7 +158,7 @@ export function GlucoseChart({
           id="glucose-chart-title"
           className="font-semibold text-hig-lg text-foreground leading-hig-tight"
         >
-          Tendencia Glucémica
+          {t("chart.title")}
         </h3>
         <div className="flex items-center gap-4">
           {showTargetRange && (
@@ -164,7 +168,7 @@ export function GlucoseChart({
                 aria-hidden="true"
               />
               <span className="text-hig-xs text-muted-foreground">
-                70-180 mg/dL
+                {t("chart.targetRange")}
               </span>
             </div>
           )}
@@ -175,7 +179,7 @@ export function GlucoseChart({
       <div
         className="grid grid-cols-4 gap-3 mb-6"
         role="list"
-        aria-label="Estadísticas de glucosa"
+        aria-label={t("chart.statsLabel")}
       >
         <div
           className="text-center p-2 rounded-hig bg-secondary/30"
@@ -184,7 +188,7 @@ export function GlucoseChart({
           <p className="text-hig-2xl font-bold text-foreground leading-hig-tight">
             {stats.avg}
           </p>
-          <p className="text-hig-xs text-muted-foreground">Promedio</p>
+          <p className="text-hig-xs text-muted-foreground">{t("chart.average")}</p>
         </div>
         <div
           className="text-center p-2 rounded-hig bg-secondary/30"
@@ -193,7 +197,7 @@ export function GlucoseChart({
           <p className="text-hig-2xl font-bold text-warning leading-hig-tight">
             {stats.min}
           </p>
-          <p className="text-hig-xs text-muted-foreground">Mínimo</p>
+          <p className="text-hig-xs text-muted-foreground">{t("chart.minimum")}</p>
         </div>
         <div
           className="text-center p-2 rounded-hig bg-secondary/30"
@@ -202,7 +206,7 @@ export function GlucoseChart({
           <p className="text-hig-2xl font-bold text-destructive leading-hig-tight">
             {stats.max}
           </p>
-          <p className="text-hig-xs text-muted-foreground">Máximo</p>
+          <p className="text-hig-xs text-muted-foreground">{t("chart.maximum")}</p>
         </div>
         <div
           className="text-center p-2 rounded-hig bg-secondary/30"
@@ -211,12 +215,12 @@ export function GlucoseChart({
           <p className="text-hig-2xl font-bold text-success leading-hig-tight">
             {stats.inRange}%
           </p>
-          <p className="text-hig-xs text-muted-foreground">En rango</p>
+          <p className="text-hig-xs text-muted-foreground">{t("chart.inRange")}</p>
         </div>
       </div>
 
       {/* Chart */}
-      <div className="h-64" role="img" aria-label="Gráfico de tendencia de glucosa">
+      <div className="h-64" role="img" aria-label={t("chart.chartLabel")}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

@@ -9,6 +9,7 @@ import {
   History,
   type LucideIcon,
 } from "lucide-react"
+import { useTranslations, useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 import { STRESS_LEVEL_LABELS } from "@/types/diabetes"
 
@@ -33,20 +34,7 @@ interface HabitTrackerCardProps {
   onViewHistory?: (type: "sleep" | "stress" | "dizziness") => void
 }
 
-const getDizzinessDisplayValue = (
-  data: { experienced: boolean; severity?: number } | null | undefined
-): string | undefined => {
-  if (!data) return undefined
-  if (!data.experienced) return "Sin mareos hoy"
-  return data.severity ? `Intensidad ${data.severity}/10` : "Mareos registrados"
-}
-
 export function HabitTrackerCard({
-  date = new Date().toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }),
   sleepData,
   stressData,
   dizzinessData,
@@ -55,22 +43,40 @@ export function HabitTrackerCard({
   onDizzinessClick,
   onViewHistory,
 }: HabitTrackerCardProps) {
+  const t = useTranslations("Dashboard.wellness")
+  const tStats = useTranslations("Dashboard.stats")
+  const locale = useLocale()
+
+  const getDizzinessDisplayValue = (
+    data: { experienced: boolean; severity?: number } | null | undefined
+  ): string | undefined => {
+    if (!data) return undefined
+    if (!data.experienced) return t("dizziness.noToday")
+    return data.severity ? t("dizziness.withSeverity", { severity: data.severity }) : t("dizziness.recorded")
+  }
+
+  const date = new Date().toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
+
   // Build wellness items with current data
   const wellnessItems: WellnessItem[] = [
     {
       id: "sleep",
-      label: "Registro de sueño",
+      label: t("sleep.label"),
       icon: Moon,
       color: "text-indigo-400",
       bgColor: "bg-indigo-500/20",
       value: sleepData
-        ? `${sleepData.hours}h · Calidad ${sleepData.quality}/10`
+        ? t("sleep.value", { hours: sleepData.hours, quality: sleepData.quality })
         : undefined,
       status: sleepData ? "recorded" : "pending",
     },
     {
       id: "stress",
-      label: "Nivel de estrés",
+      label: t("stress.label"),
       icon: Brain,
       color: "text-rose-400",
       bgColor: "bg-rose-500/20",
@@ -79,7 +85,7 @@ export function HabitTrackerCard({
     },
     {
       id: "dizziness",
-      label: "Registro de mareos",
+      label: t("dizziness.label"),
       icon: Sparkles,
       color: "text-pink-400",
       bgColor: "bg-pink-500/20",
@@ -119,7 +125,7 @@ export function HabitTrackerCard({
               id="wellness-tracker-title"
               className="font-semibold text-lg text-foreground leading-tight"
             >
-              Bienestar Diario
+              {t("title")}
             </h3>
             <div className="flex items-center gap-2 mt-1">
               <Calendar
@@ -133,12 +139,12 @@ export function HabitTrackerCard({
           </div>
           <div
             className="text-right"
-            aria-label={`${recordedCount} de ${wellnessItems.length} registrados`}
+            aria-label={t("recordedCount", { count: recordedCount, total: wellnessItems.length })}
           >
             <p className="text-2xl font-bold text-foreground leading-tight">
               {recordedCount}/{wellnessItems.length}
             </p>
-            <p className="text-xs text-muted-foreground">registrados</p>
+            <p className="text-xs text-muted-foreground">{tStats("recorded")}</p>
           </div>
         </div>
 
@@ -160,7 +166,7 @@ export function HabitTrackerCard({
       <div
         className="p-5 grid grid-cols-1 md:grid-cols-3 gap-3"
         role="list"
-        aria-label="Lista de bienestar"
+        aria-label={t("listLabel")}
       >
         {wellnessItems.map((item, index) => {
           const Icon = item.icon
@@ -186,7 +192,7 @@ export function HabitTrackerCard({
                   : "bg-secondary/10 border border-transparent"
               )}
               style={{ animationDelay: `${index * 0.03}s` }}
-              aria-label={`${item.label}: ${item.value || "Sin registrar"}`}
+              aria-label={`${item.label}: ${item.value || t("tapToRecord")}`}
             >
               {/* Icon */}
               <div
@@ -223,7 +229,7 @@ export function HabitTrackerCard({
                       : "text-muted-foreground/60"
                   )}
                 >
-                  {item.value || "Toca para registrar"}
+                  {item.value || t("tapToRecord")}
                 </p>
               </div>
 
@@ -237,7 +243,7 @@ export function HabitTrackerCard({
                       onViewHistory(item.id as "sleep" | "stress" | "dizziness")
                     }}
                     className="p-2 rounded-xl hover:bg-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label={`Ver historial de ${item.label}`}
+                    aria-label={t("viewHistory", { type: item.label })}
                   >
                     <History
                       className="w-4 h-4 text-muted-foreground"

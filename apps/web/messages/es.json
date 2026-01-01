@@ -77,6 +77,89 @@
       "average30Days": "Promedio 30 días",
       "noRecords": "Sin registros",
       "quality": "Calidad"
+    },
+    "glucose": {
+      "chart": {
+        "title": "Tendencia Glucémica",
+        "targetRange": "70-180 mg/dL",
+        "statsLabel": "Estadísticas de glucosa",
+        "average": "Promedio",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "inRange": "En rango",
+        "chartLabel": "Gráfico de tendencia de glucosa"
+      },
+      "emptyState": {
+        "title": "Sin datos de glucosa",
+        "description": "Registra tus mediciones para ver la tendencia aquí"
+      },
+      "slots": {
+        "AD": "Antes Desayuno",
+        "DD": "Después Desayuno",
+        "AA": "Antes Almuerzo",
+        "DA": "Después Almuerzo",
+        "AC": "Antes Cena",
+        "DC": "Después Cena"
+      }
+    },
+    "wellnessDialogs": {
+      "sleep": {
+        "title": "Registro de Sueño",
+        "hoursLabel": "Horas dormidas",
+        "qualityLabel": "Calidad del sueño",
+        "quality": {
+          "bad": "Malo",
+          "fair": "Regular",
+          "good": "Bueno",
+          "excellent": "Excelente"
+        },
+        "tip": "Dormir 7-9 horas ayuda a regular la glucosa"
+      },
+      "stress": {
+        "title": "Nivel de Estrés",
+        "levelLabel": "¿Cómo te sientes?",
+        "notesLabel": "¿Qué te está causando estrés? (opcional)",
+        "notesPlaceholder": "Ej: Trabajo, familia, salud...",
+        "levels": {
+          "veryRelaxed": "Muy relajado",
+          "relaxed": "Relajado",
+          "normal": "Normal",
+          "stressed": "Estresado",
+          "veryStressed": "Muy estresado"
+        },
+        "scaleLabels": {
+          "min": "Muy relajado",
+          "mid": "Normal",
+          "max": "Muy estresado"
+        },
+        "tip": "El estrés elevado puede aumentar la glucosa"
+      },
+      "dizziness": {
+        "title": "Registro de Mareos",
+        "questionLabel": "¿Experimentaste mareos hoy?",
+        "yes": "Sí",
+        "no": "No",
+        "severityLabel": "Intensidad del mareo",
+        "notesLabel": "Notas (opcional)",
+        "notesPlaceholder": "Ej: Ocurrió después de levantarme...",
+        "severity": {
+          "veryMild": "Muy leve",
+          "mild": "Leve",
+          "moderate": "Moderado",
+          "strong": "Fuerte",
+          "severe": "Severo"
+        },
+        "scaleLabels": {
+          "min": "Muy leve",
+          "mid": "Moderado",
+          "max": "Severo"
+        },
+        "tip": "Los mareos pueden indicar cambios en glucosa"
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar"
+      }
     }
   }
 }
