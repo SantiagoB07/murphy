@@ -161,5 +161,138 @@
         "save": "Guardar"
       }
     }
+  },
+  "Glucometrias": {
+    "title": "Glucometrias",
+    "subtitle": {
+      "daily": "Registro y edicion",
+      "readOnly": "Seguimiento y tendencias"
+    },
+    "viewModeSelector": "Selector de vista",
+    "viewMode": {
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "quarterly": "Trimestral"
+    },
+    "header": {
+      "share": "Compartir registros"
+    },
+    "dialog": {
+      "editRecord": "Editar registro",
+      "newRecord": "Nuevo registro",
+      "glucoseValue": "Valor de glucosa",
+      "timeOfDay": "Momento del dia (opcional)",
+      "selectTime": "Selecciona un momento",
+      "note": "Nota (opcional)",
+      "notePlaceholder": "Ej: despues de ejercicio, me senti mareado...",
+      "referenceRanges": "Rangos de referencia:",
+      "low": "Bajo",
+      "normal": "Normal",
+      "delete": "Eliminar",
+      "update": "Actualizar",
+      "save": "Guardar"
+    },
+    "validation": {
+      "enterValue": "Ingresa un valor",
+      "valueRange": "El valor debe estar entre 20 y 600 mg/dL"
+    },
+    "status": {
+      "criticalLow": "Hipoglucemia severa - Busca atencion",
+      "low": "Glucosa baja",
+      "normal": "En rango normal",
+      "high": "Glucosa elevada",
+      "criticalHigh": "Hiperglucemia severa"
+    },
+    "slots": {
+      "before_breakfast": "Antes del desayuno",
+      "after_breakfast": "Despues del desayuno",
+      "before_lunch": "Antes del almuerzo",
+      "after_lunch": "Despues del almuerzo",
+      "before_dinner": "Antes de la cena",
+      "after_dinner": "Despues de la cena"
+    },
+    "statusLabels": {
+      "critical_low": "Muy bajo",
+      "low": "Bajo",
+      "normal": "Normal",
+      "high": "Alto",
+      "critical_high": "Muy alto"
+    },
+    "card": {
+      "editRecord": "Editar registro",
+      "deleteRecord": "Eliminar registro"
+    },
+    "navigation": {
+      "previousDay": "Dia anterior",
+      "nextDay": "Dia siguiente",
+      "previousWeek": "Semana anterior",
+      "nextWeek": "Semana siguiente",
+      "previousMonth": "Mes anterior",
+      "nextMonth": "Mes siguiente",
+      "previousQuarter": "Trimestre anterior",
+      "nextQuarter": "Trimestre siguiente"
+    },
+    "periodLabels": {
+      "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
+      "thisQuarter": "Este trimestre"
+    },
+    "dailyView": {
+      "records": "Registros",
+      "average": "Promedio",
+      "minimum": "Minimo",
+      "maximum": "Maximo",
+      "recordsTitle": "Registros del dia",
+      "noRecordsToday": "Sin registros este dia",
+      "tapToAddFirst": "Toca el boton + para agregar tu primer registro",
+      "noRecordsForDate": "No hay registros para esta fecha",
+      "addRecordAria": "Agregar registro de glucosa"
+    },
+    "emptyStates": {
+      "noRecordsWeek": "Sin registros esta semana",
+      "noRecordsPeriod": "No hay mediciones en este periodo",
+      "noRecordsMonth": "Sin registros este mes",
+      "noRecordsQuarter": "Sin registros este trimestre",
+      "noData": "Sin datos"
+    },
+    "weeklyView": {
+      "summaryByDay": "Resumen por dia"
+    },
+    "monthlyView": {
+      "weekDays": ["L", "M", "X", "J", "V", "S", "D"],
+      "calendar": "Calendario de registros",
+      "legend": {
+        "inRange": "En rango",
+        "lowHigh": "Bajo/Alto",
+        "critical": "Critico"
+      },
+      "summaryByWeek": "Resumen por semana",
+      "week": "Sem.",
+      "takes": "tomas"
+    },
+    "quarterlyView": {
+      "quarterTrend": "Tendencia del trimestre",
+      "trend": {
+        "improving": "Mejorando",
+        "stable": "Estable",
+        "deteriorating": "Empeorando"
+      },
+      "monthlyComparison": "Comparacion mensual",
+      "average": "prom."
+    },
+    "periodStats": {
+      "measurements": "Mediciones",
+      "average": "Promedio",
+      "deviation": "desv.",
+      "minimum": "Minimo",
+      "maximum": "Maximo",
+      "inRange": "En rango (70-180)",
+      "daysWithRecords": "Dias con registro",
+      "period": "Periodo",
+      "takesPerDay": "tomas/dia",
+      "of": "de"
+    }
   }
 }

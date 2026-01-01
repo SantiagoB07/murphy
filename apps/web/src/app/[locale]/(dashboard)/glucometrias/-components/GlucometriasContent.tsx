@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import { useState, useMemo } from "react"
 import {
   useGlucoseRecords,
@@ -41,6 +42,8 @@ import {
 } from "lucide-react"
 
 export function GlucometriasContent() {
+  const t = useTranslations("Glucometrias")
+  const locale = useLocale()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>("daily")
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -158,7 +161,7 @@ export function GlucometriasContent() {
             variant="outline"
             size="icon"
             onClick={handlePrevDay}
-            aria-label="Dia anterior"
+            aria-label={t("navigation.previousDay")}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
@@ -171,11 +174,11 @@ export function GlucometriasContent() {
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span className="capitalize">
-              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}
+              {format(selectedDate, "EEEE, d MMMM", { locale: locale === "es" ? es : undefined })}
             </span>
             {isToday && (
               <span className="ml-2 text-xs text-primary bg-primary/20 px-2 py-0.5 rounded-full">
-                Hoy
+                {t("periodLabels.today")}
               </span>
             )}
           </Button>
@@ -185,7 +188,7 @@ export function GlucometriasContent() {
             size="icon"
             onClick={handleNextDay}
             disabled={isToday}
-            aria-label="Dia siguiente"
+            aria-label={t("navigation.nextDay")}
           >
             <ChevronRight className="w-5 h-5" />
           </Button>
@@ -201,14 +204,14 @@ export function GlucometriasContent() {
               <article className="glass-card p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <Activity className="w-4 h-4 text-primary" />
-                  <span className="text-xs text-muted-foreground">Registros</span>
+                  <span className="text-xs text-muted-foreground">{t("dailyView.records")}</span>
                 </div>
                 <p className="text-xl font-bold text-foreground">{stats.count}</p>
               </article>
               <article className="glass-card p-4">
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="w-4 h-4 text-info" />
-                  <span className="text-xs text-muted-foreground">Promedio</span>
+                  <span className="text-xs text-muted-foreground">{t("dailyView.average")}</span>
                 </div>
                 <p className="text-xl font-bold text-foreground">
                   {stats.avg}{" "}
@@ -218,7 +221,7 @@ export function GlucometriasContent() {
                 </p>
               </article>
               <article className="glass-card p-4">
-                <span className="text-xs text-muted-foreground">Minimo</span>
+                <span className="text-xs text-muted-foreground">{t("dailyView.minimum")}</span>
                 <p className="text-xl font-bold text-warning">
                   {stats.min}{" "}
                   <span className="text-xs font-normal text-muted-foreground">
@@ -227,7 +230,7 @@ export function GlucometriasContent() {
                 </p>
               </article>
               <article className="glass-card p-4">
-                <span className="text-xs text-muted-foreground">Maximo</span>
+                <span className="text-xs text-muted-foreground">{t("dailyView.maximum")}</span>
                 <p className="text-xl font-bold text-destructive">
                   {stats.max}{" "}
                   <span className="text-xs font-normal text-muted-foreground">
@@ -240,7 +243,7 @@ export function GlucometriasContent() {
 
           <section className="space-y-3 pb-24">
             <h2 className="text-base font-semibold text-foreground mb-4">
-              Registros del dia
+              {t("dailyView.recordsTitle")}
             </h2>
 
             {dayRecords.map((record, index) => (
@@ -263,12 +266,12 @@ export function GlucometriasContent() {
                   <Droplets className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <p className="text-foreground font-medium">
-                  Sin registros este dia
+                  {t("dailyView.noRecordsToday")}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isToday
-                    ? "Toca el boton + para agregar tu primer registro"
-                    : "No hay registros para esta fecha"}
+                    ? t("dailyView.tapToAddFirst")
+                    : t("dailyView.noRecordsForDate")}
                 </p>
               </div>
             )}
@@ -280,7 +283,7 @@ export function GlucometriasContent() {
               onClick={handleOpenAddDialog}
               className="fixed bottom-24 right-6 w-14 h-14 rounded-full shadow-lg btn-neon z-50"
               size="icon"
-              aria-label="Agregar registro de glucosa"
+              aria-label={t("dailyView.addRecordAria")}
             >
               <Plus className="w-6 h-6" />
             </Button>

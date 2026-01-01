@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import { useMemo } from "react"
 import {
   calculatePeriodStats,
@@ -40,6 +41,8 @@ export function QuarterlyView({
   selectedDate,
   onDateChange,
 }: QuarterlyViewProps) {
+  const t = useTranslations("Glucometrias")
+  const locale = useLocale()
   const quarterStart = startOfQuarter(selectedDate)
   const quarterEnd = endOfQuarter(selectedDate)
 
@@ -78,7 +81,7 @@ export function QuarterlyView({
 
       return {
         month: monthDate,
-        label: format(monthDate, "MMMM", { locale: es }),
+        label: format(monthDate, "MMMM", { locale: locale === "es" ? es : undefined }),
         count: monthRecords.length,
         avg,
         inRangePercent,
@@ -120,12 +123,12 @@ export function QuarterlyView({
   const periodLabel = `Q${quarterNumber} ${format(selectedDate, "yyyy")}`
 
   const trendConfig = {
-    improving: { icon: TrendingDown, color: "text-success", label: "Mejorando" },
-    stable: { icon: Minus, color: "text-info", label: "Estable" },
+    improving: { icon: TrendingDown, color: "text-success", label: t("quarterlyView.trend.improving") },
+    stable: { icon: Minus, color: "text-info", label: t("quarterlyView.trend.stable") },
     deteriorating: {
       icon: TrendingUp,
       color: "text-destructive",
-      label: "Empeorando",
+      label: t("quarterlyView.trend.deteriorating"),
     },
   }
 
@@ -139,7 +142,7 @@ export function QuarterlyView({
           variant="outline"
           size="icon"
           onClick={handlePrevQuarter}
-          aria-label="Trimestre anterior"
+          aria-label={t("navigation.previousQuarter")}
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -147,11 +150,11 @@ export function QuarterlyView({
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground">{periodLabel}</p>
           <p className="text-xs text-muted-foreground capitalize">
-            {format(quarterStart, "MMMM", { locale: es })} -{" "}
-            {format(quarterEnd, "MMMM yyyy", { locale: es })}
+            {format(quarterStart, "MMMM", { locale: locale === "es" ? es : undefined })} -{" "}
+            {format(quarterEnd, "MMMM yyyy", { locale: locale === "es" ? es : undefined })}
           </p>
           {isCurrentQuarter && (
-            <span className="text-xs text-primary">Este trimestre</span>
+            <span className="text-xs text-primary">{t("periodLabels.thisQuarter")}</span>
           )}
         </div>
 
@@ -160,7 +163,7 @@ export function QuarterlyView({
           size="icon"
           onClick={handleNextQuarter}
           disabled={isCurrentQuarter}
-          aria-label="Trimestre siguiente"
+          aria-label={t("navigation.nextQuarter")}
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
@@ -179,7 +182,7 @@ export function QuarterlyView({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">
-                Tendencia del trimestre
+                {t("quarterlyView.quarterTrend")}
               </h3>
               <p
                 className={cn(
@@ -209,7 +212,7 @@ export function QuarterlyView({
       {/* Monthly Comparison */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-muted-foreground mb-4">
-          Comparacion mensual
+          {t("quarterlyView.monthlyComparison")}
         </h3>
 
         <div className="grid grid-cols-3 gap-3">
@@ -224,20 +227,20 @@ export function QuarterlyView({
                   <p className="text-xl font-bold text-foreground">
                     {month.avg}
                   </p>
-                  <p className="text-xs text-muted-foreground">mg/dL prom.</p>
+                  <p className="text-xs text-muted-foreground">mg/dL {t("quarterlyView.average")}</p>
 
                   <div className="mt-2 pt-2 border-t border-border/30">
                     <p className="text-sm font-medium text-success">
-                      {month.inRangePercent}% en rango
+                      {month.inRangePercent}% {t("periodStats.inRange").split(" ")[0]}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {month.count} mediciones
+                      {month.count} {t("periodStats.measurements").toLowerCase()}
                     </p>
                   </div>
                 </>
               ) : (
                 <div className="py-4">
-                  <p className="text-sm text-muted-foreground">Sin datos</p>
+                  <p className="text-sm text-muted-foreground">{t("emptyStates.noData")}</p>
                 </div>
               )}
             </div>
@@ -254,10 +257,10 @@ export function QuarterlyView({
             <Activity className="w-8 h-8 text-muted-foreground" />
           </div>
           <p className="text-foreground font-medium">
-            Sin registros este trimestre
+            {t("emptyStates.noRecordsQuarter")}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            No hay mediciones en este periodo
+            {t("emptyStates.noRecordsPeriod")}
           </p>
         </div>
       )}

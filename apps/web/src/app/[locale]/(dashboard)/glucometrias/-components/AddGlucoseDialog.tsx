@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useState, useEffect, useRef } from "react"
 import {
   Dialog,
@@ -25,7 +26,6 @@ import {
   getGlucoseStatus,
   GLUCOSE_RANGES,
   GLUCOSE_SLOTS,
-  GLUCOSE_SLOT_LABELS,
   type GlucoseSlot,
   type GlucoseRecord,
 } from "@/features/glucose"
@@ -45,6 +45,7 @@ export function AddGlucoseDialog({
   onSave,
   onDelete,
 }: AddGlucoseDialogProps) {
+  const t = useTranslations("Glucometrias")
   const [value, setValue] = useState<string>("")
   const [slot, setSlot] = useState<GlucoseSlot | undefined>(undefined)
   const [notes, setNotes] = useState("")
@@ -69,11 +70,11 @@ export function AddGlucoseDialog({
 
   const handleSubmit = () => {
     if (!value.trim()) {
-      setError("Ingresa un valor")
+      setError(t("validation.enterValue"))
       return
     }
     if (!isValid) {
-      setError("El valor debe estar entre 20 y 600 mg/dL")
+      setError(t("validation.valueRange"))
       return
     }
     onSave(numericValue, slot, notes.trim() || undefined)
@@ -96,11 +97,11 @@ export function AddGlucoseDialog({
   }
 
   const statusMessages = {
-    critical_low: "Hipoglucemia severa - Busca atencion",
-    low: "Glucosa baja",
-    normal: "En rango normal",
-    high: "Glucosa elevada",
-    critical_high: "Hiperglucemia severa",
+    critical_low: t("status.criticalLow"),
+    low: t("status.low"),
+    normal: t("status.normal"),
+    high: t("status.high"),
+    critical_high: t("status.criticalHigh"),
   }
 
   return (
@@ -109,14 +110,14 @@ export function AddGlucoseDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Droplets className="w-5 h-5 text-primary" />
-            {isEditing ? "Editar registro" : "Nuevo registro"}
+            {isEditing ? t("dialog.editRecord") : t("dialog.newRecord")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="glucose-value" className="text-muted-foreground">
-              Valor de glucosa
+              {t("dialog.glucoseValue")}
             </Label>
             <div className="relative">
               <Input
@@ -175,19 +176,19 @@ export function AddGlucoseDialog({
 
           <div className="space-y-2">
             <Label htmlFor="glucose-slot" className="text-muted-foreground">
-              Momento del dia (opcional)
+              {t("dialog.timeOfDay")}
             </Label>
             <Select
               value={slot || ""}
               onValueChange={(val) => setSlot(val as GlucoseSlot || undefined)}
             >
               <SelectTrigger id="glucose-slot" className="w-full">
-                <SelectValue placeholder="Selecciona un momento" />
+                <SelectValue placeholder={t("dialog.selectTime")} />
               </SelectTrigger>
               <SelectContent>
                 {GLUCOSE_SLOTS.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {GLUCOSE_SLOT_LABELS[s]}
+                    {t(`slots.${s}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -196,11 +197,11 @@ export function AddGlucoseDialog({
 
           <div className="space-y-2">
             <Label htmlFor="glucose-notes" className="text-muted-foreground">
-              Nota (opcional)
+              {t("dialog.note")}
             </Label>
             <Textarea
               id="glucose-notes"
-              placeholder="Ej: despues de ejercicio, me senti mareado..."
+              placeholder={t("dialog.notePlaceholder")}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="resize-none h-16"
@@ -209,16 +210,16 @@ export function AddGlucoseDialog({
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/30">
-            <p>Rangos de referencia:</p>
+            <p>{t("dialog.referenceRanges")}</p>
             <ul className="grid grid-cols-2 gap-1">
               <li className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-warning" />
-                <span>&lt;{GLUCOSE_RANGES.low} Bajo</span>
+                <span>&lt;{GLUCOSE_RANGES.low} {t("dialog.low")}</span>
               </li>
               <li className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-success" />
                 <span>
-                  {GLUCOSE_RANGES.low}-{GLUCOSE_RANGES.high} Normal
+                  {GLUCOSE_RANGES.low}-{GLUCOSE_RANGES.high} {t("dialog.normal")}
                 </span>
               </li>
             </ul>
@@ -232,7 +233,7 @@ export function AddGlucoseDialog({
               onClick={handleDelete}
               className="flex-1 sm:flex-none mr-auto"
             >
-              Eliminar
+              {t("dialog.delete")}
             </Button>
           )}
           <Button
@@ -240,7 +241,7 @@ export function AddGlucoseDialog({
             disabled={!value.trim()}
             className="flex-1 sm:flex-none"
           >
-            {isEditing ? "Actualizar" : "Guardar"}
+            {isEditing ? t("dialog.update") : t("dialog.save")}
           </Button>
         </DialogFooter>
       </DialogContent>

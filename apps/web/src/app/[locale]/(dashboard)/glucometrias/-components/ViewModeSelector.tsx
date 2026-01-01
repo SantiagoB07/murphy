@@ -1,6 +1,7 @@
 "use client"
 
-import { type ViewMode, VIEW_MODE_LABELS } from "@/features/glucose"
+import { useTranslations } from "next-intl"
+import { type ViewMode } from "@/features/glucose"
 import { cn } from "@/lib/utils"
 
 interface ViewModeSelectorProps {
@@ -16,11 +17,12 @@ export function ViewModeSelector({
   onChange,
   disabled,
 }: ViewModeSelectorProps) {
+  const t = useTranslations("Glucometrias")
   return (
     <div
       className="flex rounded-xl border border-border/50 overflow-hidden"
       role="tablist"
-      aria-label="Selector de periodo de vista"
+      aria-label={t("viewModeSelector")}
     >
       {VIEW_MODES.map((mode) => (
         <button
@@ -29,7 +31,7 @@ export function ViewModeSelector({
           disabled={disabled}
           role="tab"
           aria-selected={value === mode}
-          aria-label={`Ver ${VIEW_MODE_LABELS[mode]}`}
+          aria-label={`View ${mode}`}
           className={cn(
             "px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-w-[60px] sm:min-w-[80px]",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset active:scale-[0.98]",
@@ -39,7 +41,7 @@ export function ViewModeSelector({
             disabled && "opacity-50 cursor-not-allowed"
           )}
         >
-          {VIEW_MODE_LABELS[mode]}
+          {t(`viewMode.${mode}`)}
         </button>
       ))}
     </div>

@@ -161,5 +161,138 @@
         "save": "Save"
       }
     }
+  },
+  "Glucometrias": {
+    "title": "Glucose Records",
+    "subtitle": {
+      "daily": "Record & Edit",
+      "readOnly": "Tracking & Trends"
+    },
+    "viewModeSelector": "View mode selector",
+    "viewMode": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly"
+    },
+    "header": {
+      "share": "Share records"
+    },
+    "dialog": {
+      "editRecord": "Edit record",
+      "newRecord": "New record",
+      "glucoseValue": "Glucose value",
+      "timeOfDay": "Time of day (optional)",
+      "selectTime": "Select a time",
+      "note": "Note (optional)",
+      "notePlaceholder": "E.g: after exercise, I felt dizzy...",
+      "referenceRanges": "Reference ranges:",
+      "low": "Low",
+      "normal": "Normal",
+      "delete": "Delete",
+      "update": "Update",
+      "save": "Save"
+    },
+    "validation": {
+      "enterValue": "Enter a value",
+      "valueRange": "Value must be between 20 and 600 mg/dL"
+    },
+    "status": {
+      "criticalLow": "Severe hypoglycemia - Seek attention",
+      "low": "Low glucose",
+      "normal": "In normal range",
+      "high": "High glucose",
+      "criticalHigh": "Severe hyperglycemia"
+    },
+    "slots": {
+      "before_breakfast": "Before breakfast",
+      "after_breakfast": "After breakfast",
+      "before_lunch": "Before lunch",
+      "after_lunch": "After lunch",
+      "before_dinner": "Before dinner",
+      "after_dinner": "After dinner"
+    },
+    "statusLabels": {
+      "critical_low": "Very low",
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "critical_high": "Very high"
+    },
+    "card": {
+      "editRecord": "Edit record",
+      "deleteRecord": "Delete record"
+    },
+    "navigation": {
+      "previousDay": "Previous day",
+      "nextDay": "Next day",
+      "previousWeek": "Previous week",
+      "nextWeek": "Next week",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "previousQuarter": "Previous quarter",
+      "nextQuarter": "Next quarter"
+    },
+    "periodLabels": {
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "thisQuarter": "This quarter"
+    },
+    "dailyView": {
+      "records": "Records",
+      "average": "Average",
+      "minimum": "Minimum",
+      "maximum": "Maximum",
+      "recordsTitle": "Day's records",
+      "noRecordsToday": "No records this day",
+      "tapToAddFirst": "Tap the + button to add your first record",
+      "noRecordsForDate": "No records for this date",
+      "addRecordAria": "Add glucose record"
+    },
+    "emptyStates": {
+      "noRecordsWeek": "No records this week",
+      "noRecordsPeriod": "No measurements in this period",
+      "noRecordsMonth": "No records this month",
+      "noRecordsQuarter": "No records this quarter",
+      "noData": "No data"
+    },
+    "weeklyView": {
+      "summaryByDay": "Summary by day"
+    },
+    "monthlyView": {
+      "weekDays": ["M", "T", "W", "T", "F", "S", "S"],
+      "calendar": "Records calendar",
+      "legend": {
+        "inRange": "In range",
+        "lowHigh": "Low/High",
+        "critical": "Critical"
+      },
+      "summaryByWeek": "Summary by week",
+      "week": "Wk",
+      "takes": "readings"
+    },
+    "quarterlyView": {
+      "quarterTrend": "Quarterly trend",
+      "trend": {
+        "improving": "Improving",
+        "stable": "Stable",
+        "deteriorating": "Deteriorating"
+      },
+      "monthlyComparison": "Monthly comparison",
+      "average": "avg"
+    },
+    "periodStats": {
+      "measurements": "Measurements",
+      "average": "Average",
+      "deviation": "std dev",
+      "minimum": "Minimum",
+      "maximum": "Maximum",
+      "inRange": "In range (70-180)",
+      "daysWithRecords": "Days with records",
+      "period": "Period",
+      "takesPerDay": "readings/day",
+      "of": "of"
+    }
   }
 }

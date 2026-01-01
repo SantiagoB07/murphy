@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import { useMemo } from "react"
 import {
   calculatePeriodStats,
@@ -32,7 +33,9 @@ export function WeeklyView({
   selectedDate,
   onDateChange,
 }: WeeklyViewProps) {
-  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 }) // Monday
+  const t = useTranslations("Glucometrias")
+  const locale = useLocale()
+  const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 })
 
   const stats = useMemo(() => {
@@ -83,7 +86,7 @@ export function WeeklyView({
     startOfWeek(new Date(), { weekStartsOn: 1 })
   )
 
-  const periodLabel = `${format(weekStart, "d MMM", { locale: es })} - ${format(weekEnd, "d MMM yyyy", { locale: es })}`
+  const periodLabel = `${format(weekStart, "d MMM", { locale: locale === "es" ? es : undefined })} - ${format(weekEnd, "d MMM yyyy", { locale: locale === "es" ? es : undefined })}`
 
   const statusColors: Record<string, string> = {
     critical_low: "bg-destructive",
@@ -101,7 +104,7 @@ export function WeeklyView({
           variant="outline"
           size="icon"
           onClick={handlePrevWeek}
-          aria-label="Semana anterior"
+          aria-label={t("navigation.previousWeek")}
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -111,7 +114,7 @@ export function WeeklyView({
             {periodLabel}
           </p>
           {isCurrentWeek && (
-            <span className="text-xs text-primary">Esta semana</span>
+            <span className="text-xs text-primary">{t("periodLabels.thisWeek")}</span>
           )}
         </div>
 
@@ -120,7 +123,7 @@ export function WeeklyView({
           size="icon"
           onClick={handleNextWeek}
           disabled={isCurrentWeek}
-          aria-label="Semana siguiente"
+          aria-label={t("navigation.nextWeek")}
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
@@ -136,13 +139,13 @@ export function WeeklyView({
       {/* Week Days Mini Calendar */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-muted-foreground mb-3">
-          Resumen por dia
+          {t("weeklyView.summaryByDay")}
         </h3>
         <div className="grid grid-cols-7 gap-2">
           {dailySummary.map((day, index) => (
             <div key={index} className="text-center">
               <p className="text-xs text-muted-foreground mb-1">
-                {format(day.date, "EEE", { locale: es })}
+                {format(day.date, "EEE", { locale: locale === "es" ? es : undefined })}
               </p>
               <div
                 className={cn(
@@ -181,10 +184,10 @@ export function WeeklyView({
             <Activity className="w-8 h-8 text-muted-foreground" />
           </div>
           <p className="text-foreground font-medium">
-            Sin registros esta semana
+            {t("emptyStates.noRecordsWeek")}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            No hay mediciones en este periodo
+            {t("emptyStates.noRecordsPeriod")}
           </p>
         </div>
       )}

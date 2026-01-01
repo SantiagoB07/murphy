@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import { useMemo } from "react"
 import {
   calculatePeriodStats,
@@ -36,6 +37,8 @@ export function MonthlyView({
   selectedDate,
   onDateChange,
 }: MonthlyViewProps) {
+  const t = useTranslations("Glucometrias")
+  const locale = useLocale()
   const monthStart = startOfMonth(selectedDate)
   const monthEnd = endOfMonth(selectedDate)
 
@@ -129,7 +132,9 @@ export function MonthlyView({
     monthStart.getMonth() === new Date().getMonth() &&
     monthStart.getFullYear() === new Date().getFullYear()
 
-  const periodLabel = format(selectedDate, "MMMM yyyy", { locale: es })
+  const periodLabel = format(selectedDate, "MMMM yyyy", { locale: locale === "es" ? es : undefined })
+
+  const weekDaysHeader = t.raw("monthlyView.weekDays") as string[]
 
   const statusColors: Record<string, string> = {
     critical_low: "bg-destructive",
@@ -138,9 +143,6 @@ export function MonthlyView({
     high: "bg-warning",
     critical_high: "bg-destructive",
   }
-
-  // Calendar grid with week days header
-  const weekDaysHeader = ["L", "M", "X", "J", "V", "S", "D"]
 
   // Calculate padding for first week
   const firstDayOfWeek = (monthStart.getDay() + 6) % 7 // Monday = 0
@@ -153,7 +155,7 @@ export function MonthlyView({
           variant="outline"
           size="icon"
           onClick={handlePrevMonth}
-          aria-label="Mes anterior"
+          aria-label={t("navigation.previousMonth")}
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -163,7 +165,7 @@ export function MonthlyView({
             {periodLabel}
           </p>
           {isCurrentMonth && (
-            <span className="text-xs text-primary">Este mes</span>
+            <span className="text-xs text-primary">{t("periodLabels.thisMonth")}</span>
           )}
         </div>
 
@@ -172,7 +174,7 @@ export function MonthlyView({
           size="icon"
           onClick={handleNextMonth}
           disabled={isCurrentMonth}
-          aria-label="Mes siguiente"
+          aria-label={t("navigation.nextMonth")}
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
@@ -188,7 +190,7 @@ export function MonthlyView({
       {/* Calendar View */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-muted-foreground mb-3">
-          Calendario de registros
+          {t("monthlyView.calendar")}
         </h3>
 
         {/* Week days header */}
@@ -238,15 +240,15 @@ export function MonthlyView({
         <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/30">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-success" />
-            <span className="text-xs text-muted-foreground">En rango</span>
+            <span className="text-xs text-muted-foreground">{t("monthlyView.legend.inRange")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-warning" />
-            <span className="text-xs text-muted-foreground">Bajo/Alto</span>
+            <span className="text-xs text-muted-foreground">{t("monthlyView.legend.lowHigh")}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-destructive" />
-            <span className="text-xs text-muted-foreground">Critico</span>
+            <span className="text-xs text-muted-foreground">{t("monthlyView.legend.critical")}</span>
           </div>
         </div>
       </div>
@@ -254,7 +256,7 @@ export function MonthlyView({
       {/* Week Summaries */}
       <div className="glass-card p-4">
         <h3 className="text-sm font-medium text-muted-foreground mb-3">
-          Resumen por semana
+          {t("monthlyView.summaryByWeek")}
         </h3>
         <div className="space-y-2">
           {weekSummaries.map((week, i) => (
@@ -263,11 +265,11 @@ export function MonthlyView({
               className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/10"
             >
               <span className="text-sm text-foreground">
-                Sem. {week.weekNum}
+                {t("monthlyView.week")} {week.weekNum}
               </span>
               <div className="flex items-center gap-4">
                 <span className="text-xs text-muted-foreground">
-                  {week.count} tomas
+                  {week.count} {t("monthlyView.takes")}
                 </span>
                 {week.avg !== null && (
                   <span className="text-sm font-medium text-foreground">
@@ -288,9 +290,9 @@ export function MonthlyView({
           <div className="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center mb-4">
             <Activity className="w-8 h-8 text-muted-foreground" />
           </div>
-          <p className="text-foreground font-medium">Sin registros este mes</p>
+          <p className="text-foreground font-medium">{t("emptyStates.noRecordsMonth")}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            No hay mediciones en este periodo
+            {t("emptyStates.noRecordsPeriod")}
           </p>
         </div>
       )}
