@@ -294,5 +294,81 @@
       "takesPerDay": "tomas/dia",
       "of": "de"
     }
+  },
+  "Insulina": {
+    "header": {
+      "title": "Insulina",
+      "subtitle": "Gestiona tu regimen de insulina rapida y basal"
+    },
+    "summaryCard": {
+      "dailySummary": "Resumen diario",
+      "applications": "aplicaciones",
+      "totalUnits": "unidades totales"
+    },
+    "messages": {
+      "rapidUpdated": "Insulina rapida actualizada",
+      "basalUpdated": "Insulina basal actualizada",
+      "saveError": "Error al guardar",
+      "doseRecorded": "Dosis registrada correctamente",
+      "recordError": "Error al registrar",
+      "recordDeleted": "Registro eliminado",
+      "deleteError": "Error al eliminar"
+    },
+    "todoList": {
+      "configureRegimen": "Configura tu regimen de insulina",
+      "toSeeApplications": "para ver tus aplicaciones del dia",
+      "applicationsToday": "Aplicaciones de hoy",
+      "completedOf": "{completed} de {total}",
+      "rapidInsulin": "Insulina Rapida #{number}",
+      "basalInsulin": "Insulina Basal #{number}",
+      "units": "unidades",
+      "rapid": "Rapida",
+      "basal": "Basal",
+      "undoRecord": "Deshacer registro",
+      "wantToDelete": "¿Quieres eliminar el registro de {dose} unidades de insulina {type}?",
+      "registeredAt": "registrado a las {time}",
+      "cancel": "Cancelar",
+      "deleting": "Eliminando...",
+      "delete": "Eliminar"
+    },
+    "configCard": {
+      "rapid": "Insulina Rapida",
+      "basal": "Insulina Basal",
+      "perApplication": "Por aplicacion",
+      "frequency": "Frecuencia",
+      "timesPerDay": "{times}x/dia",
+      "dailyTotal": "Total diario",
+      "unitsLabel": "unidades",
+      "noConfig": "Sin configuracion",
+      "configureDose": "Configura tu dosis de {type}",
+      "updateDose": "Actualizar dosis",
+      "configureDoseButton": "Configurar dosis"
+    },
+    "updateDialog": {
+      "updateTitle": "Actualizar {type}",
+      "currentDose": "Dosis actual: {units}U x {times}/dia",
+      "configureFirst": "Configura tu primera dosis",
+      "unitsPerDose": "Unidades por aplicacion",
+      "dailyFrequency": "Frecuencia diaria",
+      "noApplications": "Sin aplicaciones",
+      "oncePerDay": "1 vez al dia",
+      "timesPerDay": "{value} veces al dia",
+      "estimatedDailyTotal": "Total diario estimado",
+      "saving": "Guardando...",
+      "saveChanges": "Guardar cambios",
+      "validation": {
+        "minUnits": "Minimo 0.5 U",
+        "maxUnits": "Maximo 100 U"
+      }
+    },
+    "logDialog": {
+      "logDoseTitle": "Registrar dosis",
+      "confirmData": "Confirma los datos de tu aplicacion de insulina",
+      "type": "Tipo:",
+      "dose": "Dosis (unidades)",
+      "datetime": "Fecha y hora",
+      "defaultTime": "Por defecto: hora actual",
+      "confirm": "Confirmar"
+    }
   }
 }

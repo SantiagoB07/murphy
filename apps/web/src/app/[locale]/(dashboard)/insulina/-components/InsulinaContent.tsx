@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import {
   InsulinConfigCard,
   InsulinUpdateDialog,
@@ -15,6 +16,7 @@ import { Activity } from "lucide-react"
 import { toast } from "sonner"
 
 export function InsulinaContent() {
+  const t = useTranslations("Insulina")
   const {
     rapidSchedule,
     basalSchedule,
@@ -45,12 +47,14 @@ export function InsulinaContent() {
       {
         onSuccess: () => {
           toast.success(
-            `${selectedType === "rapid" ? "Insulina rapida" : "Insulina basal"} actualizada`
+            selectedType === "rapid"
+              ? t("messages.rapidUpdated")
+              : t("messages.basalUpdated")
           )
           setUpdateDialogOpen(false)
         },
         onError: (error) => {
-          toast.error("Error al guardar: " + error.message)
+          toast.error(t("messages.saveError") + ": " + error.message)
         },
       }
     )
@@ -97,10 +101,12 @@ export function InsulinaContent() {
                 <Activity className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Resumen diario</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("summaryCard.dailySummary")}
+                </p>
                 <p className="font-medium">
-                  {totalApplications} aplicaciones - {totalDailyUnits} unidades
-                  totales
+                  {totalApplications} {t("summaryCard.applications")} - {totalDailyUnits}{" "}
+                  {t("summaryCard.totalUnits")}
                 </p>
               </div>
             </div>
@@ -123,10 +129,10 @@ export function InsulinaContent() {
               },
               {
                 onSuccess: () => {
-                  toast.success("Dosis registrada correctamente")
+                  toast.success(t("messages.doseRecorded"))
                 },
                 onError: (error) => {
-                  toast.error("Error al registrar: " + error.message)
+                  toast.error(t("messages.recordError") + ": " + error.message)
                 },
               }
             )
@@ -134,10 +140,10 @@ export function InsulinaContent() {
           onUndoDose={(recordId) => {
             deleteDoseRecord(recordId, {
               onSuccess: () => {
-                toast.success("Registro eliminado")
+                toast.success(t("messages.recordDeleted"))
               },
               onError: (error) => {
-                toast.error("Error al eliminar: " + error.message)
+                toast.error(t("messages.deleteError") + ": " + error.message)
               },
             })
           }}

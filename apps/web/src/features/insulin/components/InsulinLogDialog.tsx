@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 import { Syringe, Calendar, Clock } from "lucide-react"
 import {
   Dialog,
@@ -33,6 +34,7 @@ export function InsulinLogDialog({
   onConfirm,
   isLoading = false,
 }: InsulinLogDialogProps) {
+  const t = useTranslations("Insulina")
   const [dose, setDose] = useState(defaultDose)
   const [dateTime, setDateTime] = useState(() => {
     const now = new Date()
@@ -54,7 +56,7 @@ export function InsulinLogDialog({
     onConfirm({ dose, administeredAt })
   }
 
-  const typeLabel = insulinType === "rapid" ? "Rapida" : "Basal"
+  const typeLabel = insulinType === "rapid" ? t("todoList.rapid") : t("todoList.basal")
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -62,17 +64,17 @@ export function InsulinLogDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Syringe className="h-5 w-5 text-primary" />
-            Registrar dosis
+            {t("logDialog.logDoseTitle")}
           </DialogTitle>
           <DialogDescription>
-            Confirma los datos de tu aplicacion de insulina
+            {t("logDialog.confirmData")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Insulin type badge */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Tipo:</span>
+            <span className="text-sm text-muted-foreground">{t("logDialog.type")}</span>
             <Badge variant={insulinType === "rapid" ? "default" : "secondary"}>
               {typeLabel}
             </Badge>
@@ -82,7 +84,7 @@ export function InsulinLogDialog({
           <div className="space-y-2">
             <Label htmlFor="dose" className="flex items-center gap-2">
               <Syringe className="h-4 w-4" />
-              Dosis (unidades)
+              {t("logDialog.dose")}
             </Label>
             <Input
               id="dose"
@@ -100,7 +102,7 @@ export function InsulinLogDialog({
           <div className="space-y-2">
             <Label htmlFor="datetime" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Fecha y hora
+              {t("logDialog.datetime")}
             </Label>
             <Input
               id="datetime"
@@ -112,7 +114,7 @@ export function InsulinLogDialog({
             />
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              Por defecto: hora actual
+              {t("logDialog.defaultTime")}
             </p>
           </div>
         </div>
@@ -123,10 +125,10 @@ export function InsulinLogDialog({
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
-            Cancelar
+            {t("todoList.cancel")}
           </Button>
           <Button onClick={handleConfirm} disabled={isLoading || dose <= 0}>
-            {isLoading ? "Guardando..." : "Confirmar"}
+            {isLoading ? t("updateDialog.saving") : t("logDialog.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

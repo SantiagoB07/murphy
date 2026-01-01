@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Check, Circle, Syringe } from "lucide-react"
+import { useTranslations, useLocale } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   AlertDialog,
@@ -51,7 +52,8 @@ interface InsulinTodoListProps {
 function generateTodoItems(
   rapidSchedule: InsulinSchedule | null,
   basalSchedule: InsulinSchedule | null,
-  todayRecords: InsulinDoseRecord[]
+  todayRecords: InsulinDoseRecord[],
+  t: (key: string, params?: Record<string, string | number | Date>) => string
 ): TodoItem[] {
   const items: TodoItem[] = []
 
@@ -70,7 +72,7 @@ function generateTodoItems(
       items.push({
         id: `rapid-${i}`,
         insulinType: "rapid",
-        label: `Insulina Rapida #${i + 1}`,
+        label: t("todoList.rapidInsulin", { number: i + 1 }),
         dose: record?.dose ?? rapidSchedule.unitsPerDose,
         completed: !!record,
         recordId: record?._id,
@@ -86,7 +88,7 @@ function generateTodoItems(
       items.push({
         id: `basal-${i}`,
         insulinType: "basal",
-        label: `Insulina Basal #${i + 1}`,
+        label: t("todoList.basalInsulin", { number: i + 1 }),
         dose: record?.dose ?? basalSchedule.unitsPerDose,
         completed: !!record,
         recordId: record?._id,
@@ -99,8 +101,8 @@ function generateTodoItems(
 }
 
 // Format time from timestamp
-function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("es-ES", {
+function formatTime(timestamp: number, locale: string): string {
+  return new Date(timestamp).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   })
@@ -115,11 +117,13 @@ export function InsulinTodoList({
   isLogging = false,
   isDeleting = false,
 }: InsulinTodoListProps) {
+  const t = useTranslations("Insulina")
+  const locale = useLocale()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [undoDialogOpen, setUndoDialogOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null)
 
-  const todoItems = generateTodoItems(rapidSchedule, basalSchedule, todayRecords)
+  const todoItems = generateTodoItems(rapidSchedule, basalSchedule, todayRecords, t)
   const completedCount = todoItems.filter((t) => t.completed).length
   const totalCount = todoItems.length
 
@@ -162,8 +166,8 @@ export function InsulinTodoList({
       <Card className="bg-card/50 border-border/50">
         <CardContent className="py-8 text-center text-muted-foreground">
           <Syringe className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>Configura tu regimen de insulina</p>
-          <p className="text-xs">para ver tus aplicaciones del dia</p>
+          <p>{t("todoList.configureRegimen")}</p>
+          <p className="text-xs">{t("todoList.toSeeApplications")}</p>
         </CardContent>
       </Card>
     )
@@ -176,7 +180,7 @@ export function InsulinTodoList({
           <CardTitle className="flex items-center justify-between text-lg">
             <span className="flex items-center gap-2">
               <Syringe className="h-5 w-5 text-primary" />
-              Aplicaciones de hoy
+              {t("todoList.applicationsToday")}
             </span>
             <span className="text-sm font-normal text-muted-foreground">
               {completedCount}/{totalCount}
@@ -224,10 +228,10 @@ export function InsulinTodoList({
                   {item.label}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {item.dose} unidades
+                  {item.dose} {t("todoList.units")}
                   {item.completed && item.administeredAt && (
                     <span className="ml-2">
-                      · {formatTime(item.administeredAt)}
+                      · {formatTime(item.administeredAt, locale)}
                     </span>
                   )}
                 </p>
@@ -242,7 +246,7 @@ export function InsulinTodoList({
                     : "bg-purple-500/20 text-purple-400"
                 )}
               >
-                {item.insulinType === "rapid" ? "Rapida" : "Basal"}
+                {item.insulinType === "rapid" ? t("todoList.rapid") : t("todoList.basal")}
               </span>
             </button>
           ))}
@@ -275,15 +279,16 @@ export function InsulinTodoList({
       <AlertDialog open={undoDialogOpen} onOpenChange={setUndoDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Deshacer registro</AlertDialogTitle>
+            <AlertDialogTitle>{t("todoList.undoRecord")}</AlertDialogTitle>
             <AlertDialogDescription>
               {selectedItem && (
                 <>
-                  ¿Quieres eliminar el registro de{" "}
-                  <strong>{selectedItem.dose} unidades</strong> de insulina{" "}
-                  {selectedItem.insulinType === "rapid" ? "rapida" : "basal"}
+                  {t("todoList.wantToDelete", {
+                    dose: selectedItem.dose,
+                    type: selectedItem.insulinType === "rapid" ? "rapida" : "basal",
+                  })}
                   {selectedItem.administeredAt && (
-                    <> registrado a las {formatTime(selectedItem.administeredAt)}</>
+                    <> {t("todoList.registeredAt", { time: formatTime(selectedItem.administeredAt, locale) })}</>
                   )}
                   ?
                 </>
@@ -291,13 +296,13 @@ export function InsulinTodoList({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t("todoList.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleUndoConfirm}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Eliminando..." : "Eliminar"}
+              {isDeleting ? t("todoList.deleting") : t("todoList.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

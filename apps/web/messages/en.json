@@ -294,5 +294,81 @@
       "takesPerDay": "readings/day",
       "of": "of"
     }
+  },
+  "Insulina": {
+    "header": {
+      "title": "Insulin",
+      "subtitle": "Manage your rapid and basal insulin regimen"
+    },
+    "summaryCard": {
+      "dailySummary": "Daily summary",
+      "applications": "applications",
+      "totalUnits": "total units"
+    },
+    "messages": {
+      "rapidUpdated": "Rapid insulin updated",
+      "basalUpdated": "Basal insulin updated",
+      "saveError": "Error saving",
+      "doseRecorded": "Dose recorded successfully",
+      "recordError": "Error recording",
+      "recordDeleted": "Record deleted",
+      "deleteError": "Error deleting"
+    },
+    "todoList": {
+      "configureRegimen": "Configure your insulin regimen",
+      "toSeeApplications": "to see today's applications",
+      "applicationsToday": "Today's applications",
+      "completedOf": "{completed} of {total}",
+      "rapidInsulin": "Rapid Insulin #{number}",
+      "basalInsulin": "Basal Insulin #{number}",
+      "units": "units",
+      "rapid": "Rapid",
+      "basal": "Basal",
+      "undoRecord": "Undo record",
+      "wantToDelete": "Do you want to delete the record of {dose} units of {type} insulin?",
+      "registeredAt": "registered at {time}",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "delete": "Delete"
+    },
+    "configCard": {
+      "rapid": "Rapid Insulin",
+      "basal": "Basal Insulin",
+      "perApplication": "Per application",
+      "frequency": "Frequency",
+      "timesPerDay": "{times}x/day",
+      "dailyTotal": "Daily total",
+      "unitsLabel": "units",
+      "noConfig": "No configuration",
+      "configureDose": "Configure your {type} dose",
+      "updateDose": "Update dose",
+      "configureDoseButton": "Configure dose"
+    },
+    "updateDialog": {
+      "updateTitle": "Update {type}",
+      "currentDose": "Current dose: {units}U x {times}/day",
+      "configureFirst": "Configure your first dose",
+      "unitsPerDose": "Units per application",
+      "dailyFrequency": "Daily frequency",
+      "noApplications": "No applications",
+      "oncePerDay": "1 time per day",
+      "timesPerDay": "{value} times per day",
+      "estimatedDailyTotal": "Estimated daily total",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "validation": {
+        "minUnits": "Minimum 0.5 U",
+        "maxUnits": "Maximum 100 U"
+      }
+    },
+    "logDialog": {
+      "logDoseTitle": "Log dose",
+      "confirmData": "Confirm your insulin application data",
+      "type": "Type:",
+      "dose": "Dose (units)",
+      "datetime": "Date and time",
+      "defaultTime": "Default: current time",
+      "confirm": "Confirm"
+    }
   }
 }
