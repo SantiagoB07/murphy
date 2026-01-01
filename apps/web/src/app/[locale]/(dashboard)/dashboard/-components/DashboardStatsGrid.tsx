@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { type LucideIcon } from "lucide-react"
 
@@ -16,11 +17,13 @@ interface DashboardStatsGridProps {
 }
 
 export function DashboardStatsGrid({ stats }: DashboardStatsGridProps) {
+  const t = useTranslations("Dashboard.stats")
+
   return (
     <section
       className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
       role="list"
-      aria-label="Estadísticas principales"
+      aria-label={t("mainLabel")}
     >
       {stats.map((stat, index) => (
         <article

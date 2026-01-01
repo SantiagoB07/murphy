@@ -1,11 +1,13 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { Activity, TrendingUp, Flame, AlertTriangle } from "lucide-react"
 import { DashboardStatsGrid } from "./DashboardStatsGrid"
 import { useGlucoseRecords } from "@/features/glucose"
 
 export function StatsSection() {
+  const t = useTranslations("Dashboard.stats")
   const { records, todayRecords } = useGlucoseRecords()
 
   // Calculate streak from glucose records
@@ -44,28 +46,28 @@ export function StatsSection() {
 
   const stats = [
     {
-      label: "Última glucosa",
+      label: t("lastGlucose"),
       value: lastGlucoseValue ? `${lastGlucoseValue} mg/dL` : "-",
       icon: Activity,
       color: "text-purple-400",
       bgColor: "bg-purple-500/20",
     },
     {
-      label: "Tendencia semanal",
+      label: t("weeklyTrend"),
       value: "-5.2%",
       icon: TrendingUp,
       color: "text-success",
       bgColor: "bg-success/20",
     },
     {
-      label: "Días en racha",
+      label: t("streakDays"),
       value: `${streakDays}`,
       icon: Flame,
       color: "text-warning",
       bgColor: "bg-warning/20",
     },
     {
-      label: "Alertas activas",
+      label: t("activeAlerts"),
       value: "0",
       icon: AlertTriangle,
       color: "text-destructive",

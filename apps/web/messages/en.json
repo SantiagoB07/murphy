@@ -23,5 +23,60 @@
     "footer": {
       "copyright": "© 2025 MurphyIA"
     }
+  },
+  "Dashboard": {
+    "header": {
+      "title": "My Dashboard",
+      "welcomeBack": "Welcome back",
+      "summary": "Here's your daily summary."
+    },
+    "stats": {
+      "mainLabel": "Main statistics",
+      "lastGlucose": "Last glucose",
+      "weeklyTrend": "Weekly trend",
+      "streakDays": "Streak days",
+      "activeAlerts": "Active alerts",
+      "recorded": "recorded"
+    },
+    "wellness": {
+      "title": "Daily Wellness",
+      "recordedCount": "{count} of {total} recorded",
+      "sleep": {
+        "label": "Sleep log",
+        "value": "{hours}h · Quality {quality}/10"
+      },
+      "stress": {
+        "label": "Stress level"
+      },
+      "dizziness": {
+        "label": "Dizziness log",
+        "noToday": "No dizziness today",
+        "withSeverity": "Severity {severity}/10",
+        "recorded": "Dizziness recorded"
+      },
+      "tapToRecord": "Tap to record",
+      "viewHistory": "View {type} history",
+      "listLabel": "Wellness list"
+    },
+    "history": {
+      "sleep": {
+        "title": "Sleep History",
+        "quality": {
+          "bad": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        }
+      },
+      "stress": {
+        "title": "Stress History"
+      },
+      "dizziness": {
+        "title": "Dizziness History"
+      },
+      "average30Days": "30-day average",
+      "noRecords": "No records",
+      "quality": "Quality"
+    }
   }
 }

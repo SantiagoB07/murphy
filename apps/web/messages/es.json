@@ -23,5 +23,60 @@
     "footer": {
       "copyright": "© 2025 MurphyIA"
     }
+  },
+  "Dashboard": {
+    "header": {
+      "title": "Mi Dashboard",
+      "welcomeBack": "Bienvenido de vuelta",
+      "summary": "Aquí tienes tu resumen del día."
+    },
+    "stats": {
+      "mainLabel": "Estadísticas principales",
+      "lastGlucose": "Última glucosa",
+      "weeklyTrend": "Tendencia semanal",
+      "streakDays": "Días en racha",
+      "activeAlerts": "Alertas activas",
+      "recorded": "registrados"
+    },
+    "wellness": {
+      "title": "Bienestar Diario",
+      "recordedCount": "{count} de {total} registrados",
+      "sleep": {
+        "label": "Registro de sueño",
+        "value": "{hours}h · Calidad {quality}/10"
+      },
+      "stress": {
+        "label": "Nivel de estrés"
+      },
+      "dizziness": {
+        "label": "Registro de mareos",
+        "noToday": "Sin mareos hoy",
+        "withSeverity": "Intensidad {severity}/10",
+        "recorded": "Mareos registrados"
+      },
+      "tapToRecord": "Toca para registrar",
+      "viewHistory": "Ver historial de {type}",
+      "listLabel": "Lista de bienestar"
+    },
+    "history": {
+      "sleep": {
+        "title": "Historial de Sueño",
+        "quality": {
+          "bad": "Malo",
+          "fair": "Regular",
+          "good": "Bueno",
+          "excellent": "Excelente"
+        }
+      },
+      "stress": {
+        "title": "Historial de Estrés"
+      },
+      "dizziness": {
+        "title": "Historial de Mareos"
+      },
+      "average30Days": "Promedio 30 días",
+      "noRecords": "Sin registros",
+      "quality": "Calidad"
+    }
   }
 }
