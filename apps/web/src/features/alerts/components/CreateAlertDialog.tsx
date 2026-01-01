@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import {
   Dialog,
   DialogContent,
@@ -38,65 +39,66 @@ interface CreateAlertDialogProps {
   ) => Promise<void>
 }
 
-const ALERT_TYPES = [
-  {
-    value: "glucometry" as const,
-    label: "Glucometría",
-    description: "Medición de glucosa",
-    icon: Droplet,
-    color: "red-500",
-  },
-  {
-    value: "insulin" as const,
-    label: "Insulina",
-    description: "Aplicación de insulina",
-    icon: Syringe,
-    color: "purple-500",
-  },
-  {
-    value: "wellness" as const,
-    label: "Bienestar",
-    description: "Sueño, estrés o mareos",
-    icon: Heart,
-    color: "emerald-500",
-  },
-  {
-    value: "general" as const,
-    label: "General",
-    description: "Recordatorio general",
-    icon: Bell,
-    color: "sky-500",
-  },
-]
-
-const CHANNELS = [
-  {
-    value: "whatsapp" as const,
-    label: "WhatsApp",
-    description: "Mensaje de texto",
-    icon: MessageCircle,
-    color: "green-500",
-  },
-  {
-    value: "call" as const,
-    label: "Llamada",
-    description: "Llamada telefónica",
-    icon: Phone,
-    color: "blue-500",
-  },
-]
-
 export function CreateAlertDialog({
   open,
   onOpenChange,
   onSubmit,
 }: CreateAlertDialogProps) {
+  const t = useTranslations("Alertas")
   const [step, setStep] = useState<1 | 2>(1)
   const [selectedType, setSelectedType] = useState<AlertScheduleType | null>(null)
   const [time, setTime] = useState("08:00")
   const [channel, setChannel] = useState<AlertChannel>("whatsapp")
   const [frequency, setFrequency] = useState<ScheduleFrequency>("daily")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const ALERT_TYPES = [
+    {
+      value: "glucometry" as const,
+      label: t("alertTypes.glucometry"),
+      description: t("alertTypesDescriptions.glucometry"),
+      icon: Droplet,
+      color: "red-500",
+    },
+    {
+      value: "insulin" as const,
+      label: t("alertTypes.insulin"),
+      description: t("alertTypesDescriptions.insulin"),
+      icon: Syringe,
+      color: "purple-500",
+    },
+    {
+      value: "wellness" as const,
+      label: t("alertTypes.wellness"),
+      description: t("alertTypesDescriptions.wellness"),
+      icon: Heart,
+      color: "emerald-500",
+    },
+    {
+      value: "general" as const,
+      label: t("alertTypes.general"),
+      description: t("alertTypesDescriptions.general"),
+      icon: Bell,
+      color: "sky-500",
+    },
+  ]
+
+  const CHANNELS = [
+    {
+      value: "whatsapp" as const,
+      label: t("channels.whatsapp"),
+      description: t("channelsDescriptions.whatsapp"),
+      icon: MessageCircle,
+      color: "green-500",
+    },
+    {
+      value: "call" as const,
+      label: t("channels.call"),
+      description: t("channelsDescriptions.call"),
+      icon: Phone,
+      color: "blue-500",
+    },
+  ]
 
   const handleSelectType = (type: AlertScheduleType) => {
     setSelectedType(type)
@@ -156,12 +158,12 @@ export function CreateAlertDialog({
               </button>
             )}
             <Bell className="w-5 h-5 text-primary" />
-            {step === 1 ? "Nueva alerta" : `Alerta de ${selectedTypeConfig?.label}`}
+            {step === 1 ? t("createDialog.step1.title") : t("createDialog.step2.title", { type: selectedTypeConfig?.label || "" })}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             {step === 1
-              ? "¿Qué tipo de recordatorio necesitas?"
-              : "Configura tu recordatorio"}
+              ? t("createDialog.step1.description")
+              : t("createDialog.step2.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -197,7 +199,7 @@ export function CreateAlertDialog({
             {/* Time picker */}
             <div className="space-y-2">
               <Label htmlFor="time" className="text-sm font-medium text-foreground">
-                Hora
+                {t("createDialog.step2.time")}
               </Label>
               <Input
                 id="time"
@@ -211,7 +213,7 @@ export function CreateAlertDialog({
             {/* Frequency selector */}
             <div className="space-y-3">
               <Label className="text-sm font-medium text-foreground">
-                ¿Cuándo?
+                {t("createDialog.step2.when")}
               </Label>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -225,7 +227,7 @@ export function CreateAlertDialog({
                 >
                   <Repeat className={`w-4 h-4 ${frequency === "daily" ? "text-primary" : "text-muted-foreground"}`} />
                   <span className={`text-sm font-medium ${frequency === "daily" ? "text-primary" : "text-foreground"}`}>
-                    Todos los días
+                    {t("frequency.daily")}
                   </span>
                 </button>
                 <button
@@ -239,7 +241,7 @@ export function CreateAlertDialog({
                 >
                   <Calendar className={`w-4 h-4 ${frequency === "once" ? "text-primary" : "text-muted-foreground"}`} />
                   <span className={`text-sm font-medium ${frequency === "once" ? "text-primary" : "text-foreground"}`}>
-                    Solo hoy
+                    {t("frequency.once")}
                   </span>
                 </button>
               </div>
@@ -248,7 +250,7 @@ export function CreateAlertDialog({
             {/* Channel selector */}
             <div className="space-y-3">
               <Label className="text-sm font-medium text-foreground">
-                Notificarme por
+                {t("createDialog.step2.notifyBy")}
               </Label>
               <RadioGroup
                 value={channel}
@@ -296,7 +298,7 @@ export function CreateAlertDialog({
               className="flex-1 sm:flex-none"
               disabled={isSubmitting}
             >
-              Atrás
+              {t("createDialog.step2.back")}
             </Button>
             <Button
               onClick={handleSubmit}
@@ -306,10 +308,10 @@ export function CreateAlertDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creando...
+                  {t("createDialog.step2.creating")}
                 </>
               ) : (
-                "Crear alerta"
+                t("createDialog.step2.create")
               )}
             </Button>
           </DialogFooter>

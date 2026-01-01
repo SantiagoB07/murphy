@@ -370,5 +370,78 @@
       "defaultTime": "Por defecto: hora actual",
       "confirm": "Confirmar"
     }
+  },
+  "Alertas": {
+    "header": {
+      "title": "Alertas",
+      "subtitle": "Historial de notificaciones",
+      "unread": "({count} sin leer)",
+      "markAllRead": "Marcar todas como leídas"
+    },
+    "myAlerts": {
+      "title": "Mis alertas",
+      "add": "Agregar",
+      "loading": "Cargando alertas...",
+      "noAlerts": "No tienes alertas configuradas"
+    },
+    "alertTypes": {
+      "glucometry": "Glucometría",
+      "insulin": "Insulina",
+      "wellness": "Bienestar",
+      "general": "General"
+    },
+    "alertTypesDescriptions": {
+      "glucometry": "Medición de glucosa",
+      "insulin": "Aplicación de insulina",
+      "wellness": "Sueño, estrés o mareos",
+      "general": "Recordatorio general"
+    },
+    "channels": {
+      "whatsapp": "WhatsApp",
+      "call": "Llamada"
+    },
+    "channelsDescriptions": {
+      "whatsapp": "Mensaje de texto",
+      "call": "Llamada telefónica"
+    },
+    "frequency": {
+      "daily": "Todos los días",
+      "once": "Solo hoy"
+    },
+    "history": {
+      "title": "Historial",
+      "noAlerts": "No tienes alertas"
+    },
+    "messages": {
+      "allMarkedRead": "Todas las alertas marcadas como leidas"
+    },
+    "createDialog": {
+      "step1": {
+        "title": "Nueva alerta",
+        "description": "¿Qué tipo de recordatorio necesitas?"
+      },
+      "step2": {
+        "title": "Alerta de {type}",
+        "description": "Configura tu recordatorio",
+        "time": "Hora",
+        "when": "¿Cuándo?",
+        "notifyBy": "Notificarme por",
+        "back": "Atrás",
+        "create": "Crear alerta",
+        "creating": "Creando..."
+      }
+    },
+    "sampleAlerts": {
+      "highGlucose": "Glucosa alta detectada",
+      "measurementReminder": "Recordatorio de medicion",
+      "weeklyGoalMet": "Meta semanal cumplida",
+      "hypoglycemiaDetected": "Hipoglucemia detectada",
+      "time2Hours": "Hace 2 horas",
+      "time4Hours": "Hace 4 horas",
+      "yesterday": "Ayer",
+      "time3Days": "Hace 3 dias",
+      "beforeLunch": "Antes de almuerzo",
+      "inRange": "85% en rango"
+    }
   }
 }

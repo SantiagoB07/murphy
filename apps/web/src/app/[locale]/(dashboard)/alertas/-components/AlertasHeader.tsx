@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 interface AlertasHeaderProps {
@@ -8,15 +9,17 @@ interface AlertasHeaderProps {
 }
 
 export function AlertasHeader({ unreadCount, onMarkAllRead }: AlertasHeaderProps) {
+  const t = useTranslations("Alertas")
+
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Alertas</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("header.title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Historial de notificaciones
+          {t("header.subtitle")}
           {unreadCount > 0 && (
             <span className="ml-2 text-primary font-medium">
-              ({unreadCount} sin leer)
+              {t("header.unread", { count: unreadCount })}
             </span>
           )}
         </p>
@@ -28,7 +31,7 @@ export function AlertasHeader({ unreadCount, onMarkAllRead }: AlertasHeaderProps
           className="text-primary hover:text-primary"
           onClick={onMarkAllRead}
         >
-          Marcar todas como leídas
+          {t("header.markAllRead")}
         </Button>
       )}
     </div>

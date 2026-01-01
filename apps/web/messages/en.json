@@ -370,5 +370,78 @@
       "defaultTime": "Default: current time",
       "confirm": "Confirm"
     }
+  },
+  "Alertas": {
+    "header": {
+      "title": "Alerts",
+      "subtitle": "Notification history",
+      "unread": "({count} unread)",
+      "markAllRead": "Mark all as read"
+    },
+    "myAlerts": {
+      "title": "My alerts",
+      "add": "Add",
+      "loading": "Loading alerts...",
+      "noAlerts": "No alerts configured"
+    },
+    "alertTypes": {
+      "glucometry": "Glucose",
+      "insulin": "Insulin",
+      "wellness": "Wellness",
+      "general": "General"
+    },
+    "alertTypesDescriptions": {
+      "glucometry": "Glucose measurement",
+      "insulin": "Insulin application",
+      "wellness": "Sleep, stress or dizziness",
+      "general": "General reminder"
+    },
+    "channels": {
+      "whatsapp": "WhatsApp",
+      "call": "Call"
+    },
+    "channelsDescriptions": {
+      "whatsapp": "Text message",
+      "call": "Phone call"
+    },
+    "frequency": {
+      "daily": "Every day",
+      "once": "Today only"
+    },
+    "history": {
+      "title": "History",
+      "noAlerts": "No alerts"
+    },
+    "messages": {
+      "allMarkedRead": "All alerts marked as read"
+    },
+    "createDialog": {
+      "step1": {
+        "title": "New alert",
+        "description": "What type of reminder do you need?"
+      },
+      "step2": {
+        "title": "{type} alert",
+        "description": "Configure your reminder",
+        "time": "Time",
+        "when": "When?",
+        "notifyBy": "Notify me via",
+        "back": "Back",
+        "create": "Create alert",
+        "creating": "Creating..."
+      }
+    },
+    "sampleAlerts": {
+      "highGlucose": "High glucose detected",
+      "measurementReminder": "Measurement reminder",
+      "weeklyGoalMet": "Weekly goal met",
+      "hypoglycemiaDetected": "Hypoglycemia detected",
+      "time2Hours": "2 hours ago",
+      "time4Hours": "4 hours ago",
+      "yesterday": "Yesterday",
+      "time3Days": "3 days ago",
+      "beforeLunch": "Before lunch",
+      "inRange": "85% in range"
+    }
   }
 }

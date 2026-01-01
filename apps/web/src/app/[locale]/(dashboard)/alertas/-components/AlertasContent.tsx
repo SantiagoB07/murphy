@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { AlertasHeader } from "./AlertasHeader"
 import {
   Bell,
@@ -37,41 +38,6 @@ interface AlertHistoryItem {
   read: boolean
 }
 
-const initialAlerts: AlertHistoryItem[] = [
-  {
-    id: 1,
-    type: "warning",
-    title: "Glucosa alta detectada",
-    time: "Hace 2 horas",
-    value: "185 mg/dL",
-    read: false,
-  },
-  {
-    id: 2,
-    type: "info",
-    title: "Recordatorio de medicion",
-    time: "Hace 4 horas",
-    value: "Antes de almuerzo",
-    read: false,
-  },
-  {
-    id: 3,
-    type: "success",
-    title: "Meta semanal cumplida",
-    time: "Ayer",
-    value: "85% en rango",
-    read: true,
-  },
-  {
-    id: 4,
-    type: "critical",
-    title: "Hipoglucemia detectada",
-    time: "Hace 3 dias",
-    value: "62 mg/dL",
-    read: true,
-  },
-]
-
 const getAlertIcon = (type: AlertSeverity) => {
   switch (type) {
     case "warning":
@@ -100,25 +66,61 @@ const getAlertBgColor = (type: AlertSeverity) => {
   }
 }
 
-// Alert type config for icons and colors
-const ALERT_TYPE_CONFIG = {
-  glucometry: { label: "Glucometria", icon: Droplet, color: "red-500" },
-  insulin: { label: "Insulina", icon: Syringe, color: "purple-500" },
-  wellness: { label: "Bienestar", icon: Heart, color: "emerald-500" },
-  general: { label: "General", icon: Bell, color: "sky-500" },
-}
-
-const ALERT_CHANNEL_CONFIG = {
-  whatsapp: { label: "WhatsApp", icon: MessageCircle, color: "green-500" },
-  call: { label: "Llamada", icon: Phone, color: "blue-500" },
-}
-
-const FREQUENCY_LABELS = {
-  daily: "Todos los dias",
-  once: "Solo hoy",
-}
-
 export function AlertasContent() {
+  const t = useTranslations("Alertas")
+
+  const initialAlerts: AlertHistoryItem[] = [
+    {
+      id: 1,
+      type: "warning",
+      title: t("sampleAlerts.highGlucose"),
+      time: t("sampleAlerts.time2Hours"),
+      value: "185 mg/dL",
+      read: false,
+    },
+    {
+      id: 2,
+      type: "info",
+      title: t("sampleAlerts.measurementReminder"),
+      time: t("sampleAlerts.time4Hours"),
+      value: t("sampleAlerts.beforeLunch"),
+      read: false,
+    },
+    {
+      id: 3,
+      type: "success",
+      title: t("sampleAlerts.weeklyGoalMet"),
+      time: t("sampleAlerts.yesterday"),
+      value: t("sampleAlerts.inRange"),
+      read: true,
+    },
+    {
+      id: 4,
+      type: "critical",
+      title: t("sampleAlerts.hypoglycemiaDetected"),
+      time: t("sampleAlerts.time3Days"),
+      value: "62 mg/dL",
+      read: true,
+    },
+  ]
+
+  const ALERT_TYPE_CONFIG = {
+    glucometry: { label: t("alertTypes.glucometry"), icon: Droplet, color: "red-500" },
+    insulin: { label: t("alertTypes.insulin"), icon: Syringe, color: "purple-500" },
+    wellness: { label: t("alertTypes.wellness"), icon: Heart, color: "emerald-500" },
+    general: { label: t("alertTypes.general"), icon: Bell, color: "sky-500" },
+  }
+
+  const ALERT_CHANNEL_CONFIG = {
+    whatsapp: { label: t("channels.whatsapp"), icon: MessageCircle, color: "green-500" },
+    call: { label: t("channels.call"), icon: Phone, color: "blue-500" },
+  }
+
+  const FREQUENCY_LABELS = {
+    daily: t("frequency.daily"),
+    once: t("frequency.once"),
+  }
+
   const [alerts, setAlerts] = useState<AlertHistoryItem[]>(initialAlerts)
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
 
@@ -135,7 +137,7 @@ export function AlertasContent() {
 
   const handleMarkAllRead = () => {
     setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))
-    toast.success("Todas las alertas marcadas como leidas")
+    toast.success(t("messages.allMarkedRead"))
   }
 
   const handleMarkRead = (id: number) => {
@@ -166,7 +168,7 @@ export function AlertasContent() {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
             <Bell className="w-5 h-5" />
-            Mis alertas
+            {t("myAlerts.title")}
           </h2>
           <Button
             variant="outline"
@@ -175,7 +177,7 @@ export function AlertasContent() {
             className="gap-1"
           >
             <Plus className="w-4 h-4" />
-            Agregar
+            {t("myAlerts.add")}
           </Button>
         </div>
 
@@ -183,14 +185,14 @@ export function AlertasContent() {
           <div className="text-center py-6 glass-card">
             <Loader2 className="w-8 h-8 mx-auto text-muted-foreground mb-2 animate-spin" />
             <p className="text-sm text-muted-foreground">
-              Cargando alertas...
+              {t("myAlerts.loading")}
             </p>
           </div>
         ) : alertSchedules.length === 0 ? (
           <div className="text-center py-6 glass-card">
             <Bell className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">
-              No tienes alertas configuradas
+              {t("myAlerts.noAlerts")}
             </p>
           </div>
         ) : (
@@ -245,13 +247,13 @@ export function AlertasContent() {
       <div className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <Bell className="w-5 h-5" />
-          Historial
+          {t("history.title")}
         </h2>
 
         {alerts.length === 0 ? (
           <div className="glass-card p-8 text-center">
             <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">No tienes alertas</p>
+            <p className="text-muted-foreground">{t("history.noAlerts")}</p>
           </div>
         ) : (
           <div className="space-y-3">
