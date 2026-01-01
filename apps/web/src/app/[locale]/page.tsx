@@ -1,8 +1,11 @@
 import { Suspense } from "react"
 import { Activity, Zap, Shield } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { LandingCTA } from "@/components/landing-cta"
+import { LocaleSwitcher } from "@/components/LocaleSwitcher"
 
 export default async function HomePage() {
+  const t = await getTranslations("Landing")
 
   return (
     <div className="min-h-screen flex flex-col safe-area-inset">
@@ -18,7 +21,7 @@ export default async function HomePage() {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-hig"
       >
-        Saltar al contenido principal
+        {t("skipToContent")}
       </a>
 
       {/* Header */}
@@ -29,10 +32,11 @@ export default async function HomePage() {
               <Activity className="w-[var(--icon-lg)] h-[var(--icon-lg)] text-foreground" aria-hidden="true" />
             </div>
             <div>
-              <h1 className="font-bold text-hig-lg text-foreground leading-hig-tight">MurphyIA</h1>
-              <span className="text-hig-xs text-muted-foreground">Pro Edition</span>
+              <h1 className="font-bold text-hig-lg text-foreground leading-hig-tight">{t("brand.name")}</h1>
+              <span className="text-hig-xs text-muted-foreground">{t("brand.edition")}</span>
             </div>
           </div>
+          <LocaleSwitcher />
         </div>
       </header>
 
@@ -41,32 +45,31 @@ export default async function HomePage() {
         <div className="max-w-4xl mx-auto text-center mb-12">
           {/* Title */}
           <h2 className="text-hig-3xl md:text-[clamp(2.5rem,5vw,4rem)] font-bold text-foreground mb-4 animate-fade-up leading-hig-tight">
-            Tu salud,{' '}
+            {t("hero.title")}{" "}
             <span className="bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
-              bajo control
+              {t("hero.titleHighlight")}
             </span>
           </h2>
 
           <p className="text-hig-lg md:text-hig-xl text-muted-foreground max-w-2xl mx-auto mb-8 animate-fade-up stagger-1 leading-hig-normal">
-            Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp
-            y análisis personalizado.
+            {t("hero.description")}
           </p>
 
           {/* Features */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-up stagger-2" role="list" aria-label="Características">
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-12 animate-fade-up stagger-2" role="list" aria-label={t("features.label")}>
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
               <Zap className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-warning" aria-hidden="true" />
-              <span className="text-hig-sm text-muted-foreground">Tiempo real</span>
+              <span className="text-hig-sm text-muted-foreground">{t("features.realTime")}</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border/50" role="listitem">
               <Shield className="w-[var(--icon-sm)] h-[var(--icon-sm)] text-success" aria-hidden="true" />
-              <span className="text-hig-sm text-muted-foreground">Datos seguros</span>
+              <span className="text-hig-sm text-muted-foreground">{t("features.secureData")}</span>
             </div>
           </div>
         </div>
 
         {/* CTA Section - Suspense Boundary */}
-        <Suspense >
+        <Suspense>
           <LandingCTA />
         </Suspense>
       </main>
@@ -74,8 +77,7 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="relative z-10 px-6 py-4 border-t border-border/50">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-hig-sm text-muted-foreground">
-          <p>© 2025 MurphyIA</p>
-          {/* <p>Versión 1.0.0 - Beta</p> */}
+          <p>{t("footer.copyright")}</p>
         </div>
       </footer>
     </div>

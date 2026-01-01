@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import { useClerk } from "@clerk/nextjs"
 import { toast } from "sonner"
 import { User, Bell, Shield, Smartphone, ChevronRight, LogOut, Users } from "lucide-react"

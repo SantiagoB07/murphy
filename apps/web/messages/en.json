@@ -1,0 +1,27 @@
+{
+  "Landing": {
+    "skipToContent": "Skip to main content",
+    "brand": {
+      "name": "MurphyIA",
+      "edition": "Pro Edition"
+    },
+    "hero": {
+      "title": "Your health,",
+      "titleHighlight": "under control",
+      "description": "Intelligent platform for diabetes tracking with WhatsApp integration and personalized analytics."
+    },
+    "features": {
+      "label": "Features",
+      "realTime": "Real-time",
+      "secureData": "Secure data"
+    },
+    "cta": {
+      "goToDashboard": "Go to Dashboard",
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "footer": {
+      "copyright": "© 2025 MurphyIA"
+    }
+  }
+}

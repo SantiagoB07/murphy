@@ -1,11 +1,11 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
 import { Settings, Activity } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
 import { getNavItems, getHomeRoute, getSettingsRoute } from "@/lib/navigation"
+import { LocaleSwitcher } from "@/components/LocaleSwitcher"
 
 interface TopNavbarProps {
   userName: string
@@ -81,7 +81,10 @@ export function TopNavbar({ userName }: TopNavbarProps) {
         </nav>
 
         {/* User & Settings */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Locale Switcher */}
+          <LocaleSwitcher />
+
           {/* Settings Button */}
           <Link
             href={settingsRoute as "/configuracion"}
