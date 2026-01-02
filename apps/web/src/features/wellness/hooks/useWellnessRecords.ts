@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
 import { api } from "@murphy/backend/convex/_generated/api"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import type { SleepFormData, StressFormData, DizzinessFormData } from "../wellness.types"
 
 interface SleepData {
@@ -58,6 +59,7 @@ function getTodayRange() {
 
 export function useWellnessRecords(): UseWellnessRecordsReturn {
   const queryClient = useQueryClient()
+  const t = useTranslations("Dashboard.toasts")
   const today = useMemo(() => new Date().toISOString().split("T")[0], [])
   const { start: todayStart, end: todayEnd } = useMemo(() => getTodayRange(), [])
 
@@ -106,27 +108,27 @@ export function useWellnessRecords(): UseWellnessRecordsReturn {
     mutationFn: useConvexMutation(api.sleepRecords.upsert),
     onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["sleepRecords"] })
-      toast.success(result.updated ? "Sueno actualizado" : "Sueno registrado")
+      toast.success(result.updated ? t("sleepUpdated") : t("sleepRecorded"))
     },
-    onError: () => toast.error("Error al guardar sueno"),
+    onError: () => toast.error(t("sleepError")),
   })
 
   const stressMutation = useMutation({
     mutationFn: useConvexMutation(api.stressRecords.upsert),
     onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["stressRecords"] })
-      toast.success(result.updated ? "Estres actualizado" : "Estres registrado")
+      toast.success(result.updated ? t("stressUpdated") : t("stressRecorded"))
     },
-    onError: () => toast.error("Error al guardar estres"),
+    onError: () => toast.error(t("stressError")),
   })
 
   const dizzinessMutation = useMutation({
     mutationFn: useConvexMutation(api.dizzinessRecords.upsert),
     onSuccess: (result: { updated: boolean }) => {
       queryClient.invalidateQueries({ queryKey: ["dizzinessRecords"] })
-      toast.success(result.updated ? "Mareo actualizado" : "Mareo registrado")
+      toast.success(result.updated ? t("dizzinessUpdated") : t("dizzinessRecorded"))
     },
-    onError: () => toast.error("Error al guardar mareo"),
+    onError: () => toast.error(t("dizzinessError")),
   })
 
   // History data (simple transformation)

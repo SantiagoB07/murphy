@@ -163,6 +163,17 @@
         "cancel": "Cancelar",
         "save": "Guardar"
       }
+    },
+    "toasts": {
+      "sleepRecorded": "Sueño registrado",
+      "sleepUpdated": "Sueño actualizado",
+      "sleepError": "Error al guardar sueño",
+      "stressRecorded": "Estrés registrado",
+      "stressUpdated": "Estrés actualizado",
+      "stressError": "Error al guardar estrés",
+      "dizzinessRecorded": "Mareo registrado",
+      "dizzinessUpdated": "Mareo actualizado",
+      "dizzinessError": "Error al guardar mareo"
     }
   },
   "Glucometrias": {

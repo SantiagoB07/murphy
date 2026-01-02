@@ -163,6 +163,17 @@
         "cancel": "Cancel",
         "save": "Save"
       }
+    },
+    "toasts": {
+      "sleepRecorded": "Sleep recorded",
+      "sleepUpdated": "Sleep updated",
+      "sleepError": "Error saving sleep",
+      "stressRecorded": "Stress recorded",
+      "stressUpdated": "Stress updated",
+      "stressError": "Error saving stress",
+      "dizzinessRecorded": "Dizziness recorded",
+      "dizzinessUpdated": "Dizziness updated",
+      "dizzinessError": "Error saving dizziness"
     }
   },
   "Glucometrias": {
