@@ -2,6 +2,14 @@
   "Common": {
     "changeLanguage": "Change language"
   },
+  "Navigation": {
+    "mainNavigation": "Main navigation",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "glucometrias": "Glucose Records",
+    "insulina": "Insulin",
+    "alertas": "Alerts"
+  },
   "Landing": {
     "skipToContent": "Skip to main content",
     "brand": {

@@ -23,20 +23,22 @@ export interface NavItem {
 }
 
 // Navigation items for patient
+// Labels are translation keys - use with t(`Navigation.${item.label}`)
 const patientNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Glucometrias", href: "/glucometrias", icon: Activity },
-  { label: "Insulina", href: "/insulina", icon: Syringe },
-  { label: "Alertas", href: "/alertas", icon: Bell },
+  { label: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "glucometrias", href: "/glucometrias", icon: Activity },
+  { label: "insulina", href: "/insulina", icon: Syringe },
+  { label: "alertas", href: "/alertas", icon: Bell },
 ]
 
 // Mobile navigation for patient (different order with center button)
+// Labels are translation keys - use with t(`Navigation.${item.label}`)
 const patientMobileNavItems: NavItem[] = [
-  { label: "Alertas", href: "/alertas", icon: Bell },
-  { label: "Insulina", href: "/insulina", icon: Syringe },
-  { label: "Glucometrias", href: "/glucometrias", icon: Activity, isCenter: true },
-  { label: "Ajustes", href: "/configuracion", icon: Settings },
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "alertas", href: "/alertas", icon: Bell },
+  { label: "insulina", href: "/insulina", icon: Syringe },
+  { label: "glucometrias", href: "/glucometrias", icon: Activity, isCenter: true },
+  { label: "settings", href: "/configuracion", icon: Settings },
+  { label: "dashboard", href: "/dashboard", icon: LayoutDashboard },
 ]
 
 export function getNavItems(): NavItem[] {
