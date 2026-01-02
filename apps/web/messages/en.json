@@ -308,11 +308,11 @@
     "messages": {
       "rapidUpdated": "Rapid insulin updated",
       "basalUpdated": "Basal insulin updated",
-      "saveError": "Error saving",
+      "saveError": "Error saving: {error}",
       "doseRecorded": "Dose recorded successfully",
-      "recordError": "Error recording",
+      "recordError": "Error recording: {error}",
       "recordDeleted": "Record deleted",
-      "deleteError": "Error deleting"
+      "deleteError": "Error deleting: {error}"
     },
     "todoList": {
       "configureRegimen": "Configure your insulin regimen",

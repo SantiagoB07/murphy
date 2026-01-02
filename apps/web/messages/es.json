@@ -308,11 +308,11 @@
     "messages": {
        "rapidUpdated": "Insulina rápida actualizada",
        "basalUpdated": "Insulina basal actualizada",
-      "saveError": "Error al guardar",
+      "saveError": "Error al guardar: {error}",
       "doseRecorded": "Dosis registrada correctamente",
-      "recordError": "Error al registrar",
+      "recordError": "Error al registrar: {error}",
       "recordDeleted": "Registro eliminado",
-      "deleteError": "Error al eliminar"
+      "deleteError": "Error al eliminar: {error}"
     },
     "todoList": {
        "configureRegimen": "Configura tu régimen de insulina",

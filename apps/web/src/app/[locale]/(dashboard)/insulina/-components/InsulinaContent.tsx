@@ -54,7 +54,7 @@ export function InsulinaContent() {
           setUpdateDialogOpen(false)
         },
         onError: (error) => {
-          toast.error(t("messages.saveError") + ": " + error.message)
+          toast.error(t("messages.saveError", { error: error.message }))
         },
       }
     )
@@ -132,7 +132,7 @@ export function InsulinaContent() {
                   toast.success(t("messages.doseRecorded"))
                 },
                 onError: (error) => {
-                  toast.error(t("messages.recordError") + ": " + error.message)
+                  toast.error(t("messages.recordError", { error: error.message }))
                 },
               }
             )
@@ -143,7 +143,7 @@ export function InsulinaContent() {
                 toast.success(t("messages.recordDeleted"))
               },
               onError: (error) => {
-                toast.error(t("messages.deleteError") + ": " + error.message)
+                toast.error(t("messages.deleteError", { error: error.message }))
               },
             })
           }}
