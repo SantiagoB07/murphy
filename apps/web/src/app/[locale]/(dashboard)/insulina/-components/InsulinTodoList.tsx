@@ -285,7 +285,7 @@ export function InsulinTodoList({
                 <>
                   {t("todoList.wantToDelete", {
                     dose: selectedItem.dose,
-                    type: selectedItem.insulinType === "rapid" ? "rapida" : "basal",
+                    type: selectedItem.insulinType === "rapid" ? t("todoList.rapid") : t("todoList.basal"),
                   })}
                   {selectedItem.administeredAt && (
                     <> {t("todoList.registeredAt", { time: formatTime(selectedItem.administeredAt, locale) })}</>

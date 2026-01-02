@@ -1,4 +1,7 @@
 {
+  "Common": {
+    "changeLanguage": "Change language"
+  },
   "Landing": {
     "skipToContent": "Skip to main content",
     "brand": {

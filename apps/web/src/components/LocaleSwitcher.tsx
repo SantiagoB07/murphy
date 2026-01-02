@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { routing } from "@/i18n/routing"
 import { Globe } from "lucide-react"
@@ -24,6 +24,7 @@ const localeFlags: Record<string, string> = {
 
 export function LocaleSwitcher() {
   const locale = useLocale()
+  const t = useTranslations("Common")
   const router = useRouter()
   const pathname = usePathname()
 
@@ -38,7 +39,7 @@ export function LocaleSwitcher() {
           variant="ghost"
           size="icon"
           className="h-9 w-9"
-          aria-label="Cambiar idioma"
+          aria-label={t("changeLanguage")}
         >
           <Globe className="h-4 w-4" />
         </Button>
