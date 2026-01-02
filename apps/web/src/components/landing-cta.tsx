@@ -1,13 +1,12 @@
-import Link from "next/link"
+import { Link } from "@/i18n/navigation"
 import { ArrowRight, LogIn, UserPlus } from "lucide-react"
 import { SignInButton, SignUpButton } from "@clerk/nextjs"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@/components/ui/button"
-
 import { auth } from "@clerk/nextjs/server"
 
-
 export async function LandingCTA() {
-
+  const t = await getTranslations("Landing.cta")
   const session = await auth()
   const isAuthenticated = !!session.userId
 
@@ -17,7 +16,7 @@ export async function LandingCTA() {
         <Link href="/dashboard">
           <Button size="lg" className="w-full sm:w-auto">
             <ArrowRight className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
-            Ir al Dashboard
+            {t("goToDashboard")}
           </Button>
         </Link>
       </div>
@@ -32,7 +31,7 @@ export async function LandingCTA() {
           className="w-full sm:w-auto"
         >
           <LogIn className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
-          Iniciar Sesión
+          {t("signIn")}
         </Button>
       </SignInButton>
       <SignUpButton mode="redirect">
@@ -42,7 +41,7 @@ export async function LandingCTA() {
           className="w-full sm:w-auto"
         >
           <UserPlus className="w-[var(--icon-sm)] h-[var(--icon-sm)]" />
-          Registrarte
+          {t("signUp")}
         </Button>
       </SignUpButton>
     </div>

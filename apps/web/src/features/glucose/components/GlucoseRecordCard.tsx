@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations, useLocale } from "next-intl"
 import type { Doc, Id } from "@murphy/backend/convex/_generated/dataModel"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
@@ -29,15 +30,6 @@ const GLUCOSE_RANGES = {
   critical_high: 250,
 }
 
-const GLUCOSE_SLOT_LABELS: Record<string, string> = {
-  before_breakfast: "Antes del desayuno",
-  after_breakfast: "Despues del desayuno",
-  before_lunch: "Antes del almuerzo",
-  after_lunch: "Despues del almuerzo",
-  before_dinner: "Antes de la cena",
-  after_dinner: "Despues de la cena",
-}
-
 const statusColors: Record<GlucoseStatus, string> = {
   critical_low: "text-destructive",
   low: "text-warning",
@@ -52,14 +44,6 @@ const statusBgColors: Record<GlucoseStatus, string> = {
   normal: "bg-success/20 border-success/30",
   high: "bg-warning/20 border-warning/30",
   critical_high: "bg-destructive/20 border-destructive/30",
-}
-
-const statusLabels: Record<GlucoseStatus, string> = {
-  critical_low: "Muy bajo",
-  low: "Bajo",
-  normal: "Normal",
-  high: "Alto",
-  critical_high: "Muy alto",
 }
 
 // ============================================================================
@@ -83,8 +67,17 @@ export function GlucoseRecordCard({
   onEdit,
   onDelete,
 }: GlucoseRecordCardProps) {
+  const t = useTranslations("Glucometrias")
+  const locale = useLocale()
   const status = getGlucoseStatus(record.value)
-  const time = format(new Date(record.recordedAt), "HH:mm", { locale: es })
+  const time = format(new Date(record.recordedAt), "HH:mm", { locale: locale === "es" ? es : undefined })
+  const statusLabels: Record<GlucoseStatus, string> = {
+    critical_low: t("statusLabels.critical_low"),
+    low: t("statusLabels.low"),
+    normal: t("statusLabels.normal"),
+    high: t("statusLabels.high"),
+    critical_high: t("statusLabels.critical_high"),
+  }
 
   return (
     <article
@@ -130,7 +123,7 @@ export function GlucoseRecordCard({
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={() => onEdit(record)}
-              aria-label="Editar registro"
+              aria-label={t("card.editRecord")}
             >
               <Pencil className="w-4 h-4" />
             </Button>
@@ -141,7 +134,7 @@ export function GlucoseRecordCard({
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-destructive"
               onClick={() => onDelete(record._id)}
-              aria-label="Eliminar registro"
+              aria-label={t("card.deleteRecord")}
             >
               <Trash2 className="w-4 h-4" />
             </Button>
@@ -152,7 +145,7 @@ export function GlucoseRecordCard({
       {/* Slot label (if any) */}
       {record.slot && (
         <p className="mt-2 text-sm text-muted-foreground pl-1 border-l-2 border-border/50 ml-1">
-          {GLUCOSE_SLOT_LABELS[record.slot] || record.slot}
+          {t(`slots.${record.slot}`)}
         </p>
       )}
     </article>

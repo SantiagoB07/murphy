@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -50,10 +51,16 @@ export function InsulinUpdateDialog({
   onSave,
   isLoading,
 }: InsulinUpdateDialogProps) {
-  const title = type === "rapid" ? "Insulina Rapida" : "Insulina Basal"
+  const t = useTranslations("Insulina")
+
+  const title = type === "rapid" ? t("configCard.rapid") : t("configCard.basal")
+
+  const schemaWithTranslations = insulinUpdateSchema.extend({
+    unitsPerDose: z.number().min(0.5, t("updateDialog.validation.minUnits")).max(100, t("updateDialog.validation.maxUnits")),
+  })
 
   const form = useForm<FormData>({
-    resolver: zodResolver(insulinUpdateSchema),
+    resolver: zodResolver(schemaWithTranslations),
     defaultValues: {
       unitsPerDose: currentSchedule?.unitsPerDose ?? 0,
       timesPerDay: currentSchedule?.timesPerDay ?? 1,
@@ -74,17 +81,17 @@ export function InsulinUpdateDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Syringe className="h-5 w-5 text-primary" />
-            Actualizar {title}
-          </DialogTitle>
-          <DialogDescription>
-            {currentSchedule
-              ? `Dosis actual: ${currentSchedule.unitsPerDose}U x ${currentSchedule.timesPerDay}/dia`
-              : "Configura tu primera dosis"}
-          </DialogDescription>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Syringe className="h-5 w-5 text-primary" />
+              {t("updateDialog.updateTitle", { type: title })}
+            </DialogTitle>
+            <DialogDescription>
+              {currentSchedule
+                ? t("updateDialog.currentDose", { units: currentSchedule.unitsPerDose, times: currentSchedule.timesPerDay })
+                : t("updateDialog.configureFirst")}
+            </DialogDescription>
+          </DialogHeader>
 
         <Form {...form}>
           <form
@@ -97,7 +104,7 @@ export function InsulinUpdateDialog({
               name="unitsPerDose"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Unidades por aplicacion</FormLabel>
+                  <FormLabel>{t("updateDialog.unitsPerDose")}</FormLabel>
                   <FormControl>
                     <div className="flex items-center gap-2">
                       <Input
@@ -127,7 +134,7 @@ export function InsulinUpdateDialog({
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Frecuencia diaria</FormLabel>
+                    <FormLabel>{t("updateDialog.dailyFrequency")}</FormLabel>
                     <span className="text-lg font-bold text-primary">
                       {field.value}x
                     </span>
@@ -144,10 +151,10 @@ export function InsulinUpdateDialog({
                   </FormControl>
                   <FormDescription>
                     {field.value === 0
-                      ? "Sin aplicaciones"
+                      ? t("updateDialog.noApplications")
                       : field.value === 1
-                        ? "1 vez al dia"
-                        : `${field.value} veces al dia`}
+                        ? t("updateDialog.oncePerDay")
+                        : t("updateDialog.timesPerDay", { value: field.value })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -158,11 +165,11 @@ export function InsulinUpdateDialog({
             {dailyTotal > 0 && (
               <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                 <p className="text-sm text-muted-foreground">
-                  Total diario estimado
+                  {t("updateDialog.estimatedDailyTotal")}
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   {dailyTotal}{" "}
-                  <span className="text-base font-normal">unidades</span>
+                  <span className="text-base font-normal">{t("configCard.unitsLabel")}</span>
                 </p>
               </div>
             )}
@@ -172,7 +179,7 @@ export function InsulinUpdateDialog({
               className="w-full h-[44px]"
               disabled={isLoading}
             >
-              {isLoading ? "Guardando..." : "Guardar cambios"}
+              {isLoading ? t("updateDialog.saving") : t("updateDialog.saveChanges")}
             </Button>
           </form>
         </Form>

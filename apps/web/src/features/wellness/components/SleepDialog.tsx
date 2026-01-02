@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import { Moon } from "lucide-react"
 import type { SleepFormData } from "../wellness.types"
 
@@ -22,19 +23,15 @@ interface SleepDialogProps {
   onSave: (data: SleepFormData) => void
 }
 
-function getSleepQualityLabel(quality: number): string {
-  if (quality <= 3) return "Malo"
-  if (quality <= 5) return "Regular"
-  if (quality <= 7) return "Bueno"
-  return "Excelente"
-}
-
 export function SleepDialog({
   open,
   onOpenChange,
   initialData,
   onSave,
 }: SleepDialogProps) {
+  const t = useTranslations("Dashboard.wellnessDialogs.sleep")
+  const tActions = useTranslations("Dashboard.wellnessDialogs.actions")
+  
   const [hours, setHours] = useState<number>(initialData?.hours ?? 7)
   const [quality, setQuality] = useState<number>(initialData?.quality ?? 5)
 
@@ -50,13 +47,20 @@ export function SleepDialog({
     onOpenChange(false)
   }
 
+  const getSleepQualityLabel = (quality: number): string => {
+    if (quality <= 3) return t("quality.bad")
+    if (quality <= 5) return t("quality.fair")
+    if (quality <= 7) return t("quality.good")
+    return t("quality.excellent")
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[360px] bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Moon className="w-5 h-5 text-indigo-400" />
-            Registro de Sueno
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -64,7 +68,7 @@ export function SleepDialog({
           {/* Hours slider */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <Label className="text-muted-foreground">Horas dormidas</Label>
+              <Label className="text-muted-foreground">{t("hoursLabel")}</Label>
               <span className="text-2xl font-bold text-foreground">{hours}h</span>
             </div>
             <Slider
@@ -85,7 +89,7 @@ export function SleepDialog({
           {/* Quality slider */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <Label className="text-muted-foreground">Calidad del sueno</Label>
+              <Label className="text-muted-foreground">{t("qualityLabel")}</Label>
               <span
                 className={cn(
                   "text-sm font-medium px-2 py-1 rounded",
@@ -112,7 +116,7 @@ export function SleepDialog({
           </div>
 
           <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
-            <p>Dormir 7-9 horas ayuda a regular la glucosa</p>
+            <p>{t("tip")}</p>
           </div>
         </div>
 
@@ -122,14 +126,13 @@ export function SleepDialog({
             onClick={() => onOpenChange(false)}
             className="flex-1 sm:flex-none"
           >
-            Cancelar
+            {tActions("cancel")}
           </Button>
           <Button onClick={handleSubmit} className="flex-1 sm:flex-none">
-            Guardar
+            {tActions("save")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import { Sparkles } from "lucide-react"
 import type { DizzinessFormData } from "../wellness.types"
 
@@ -21,19 +22,6 @@ interface DizzinessDialogProps {
   onOpenChange: (open: boolean) => void
   initialData?: DizzinessFormData | null
   onSave: (data: DizzinessFormData) => void
-}
-
-const DIZZINESS_SEVERITY_LABELS: Record<number, string> = {
-  1: "Muy leve",
-  2: "Muy leve",
-  3: "Leve",
-  4: "Leve",
-  5: "Moderado",
-  6: "Moderado",
-  7: "Fuerte",
-  8: "Fuerte",
-  9: "Severo",
-  10: "Severo",
 }
 
 function getSeverityColor(severity: number): string {
@@ -56,6 +44,9 @@ export function DizzinessDialog({
   initialData,
   onSave,
 }: DizzinessDialogProps) {
+  const t = useTranslations("Dashboard.wellnessDialogs.dizziness")
+  const tActions = useTranslations("Dashboard.wellnessDialogs.actions")
+  
   const [experienced, setExperienced] = useState<boolean | null>(
     initialData?.experienced ?? null
   )
@@ -81,13 +72,21 @@ export function DizzinessDialog({
     onOpenChange(false)
   }
 
+  const getSeverityLabel = (severity: number): string => {
+    if (severity <= 2) return t("severity.veryMild")
+    if (severity <= 4) return t("severity.mild")
+    if (severity <= 6) return t("severity.moderate")
+    if (severity <= 8) return t("severity.strong")
+    return t("severity.severe")
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Sparkles className="w-5 h-5 text-pink-400" />
-            Registro de Mareos
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -95,7 +94,7 @@ export function DizzinessDialog({
           {/* Yes/No question */}
           <div className="space-y-3">
             <Label className="text-muted-foreground">
-              Experimentaste mareos hoy?
+              {t("questionLabel")}
             </Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -107,7 +106,7 @@ export function DizzinessDialog({
                   experienced === true && "ring-2 ring-primary"
                 )}
               >
-                Si
+                {t("yes")}
               </Button>
               <Button
                 type="button"
@@ -118,7 +117,7 @@ export function DizzinessDialog({
                   experienced === false && "ring-2 ring-primary"
                 )}
               >
-                No
+                {t("no")}
               </Button>
             </div>
           </div>
@@ -129,7 +128,7 @@ export function DizzinessDialog({
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-muted-foreground">
-                    Intensidad del mareo
+                    {t("severityLabel")}
                   </Label>
                   <span
                     className={cn(
@@ -138,7 +137,7 @@ export function DizzinessDialog({
                       getSeverityColor(severity)
                     )}
                   >
-                    {DIZZINESS_SEVERITY_LABELS[severity]} ({severity}/10)
+                    {getSeverityLabel(severity)} ({severity}/10)
                   </span>
                 </div>
 
@@ -152,19 +151,19 @@ export function DizzinessDialog({
                 />
 
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Muy leve</span>
-                  <span>Moderado</span>
-                  <span>Severo</span>
+                  <span>{t("scaleLabels.min")}</span>
+                  <span>{t("scaleLabels.mid")}</span>
+                  <span>{t("scaleLabels.max")}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dizziness-notes" className="text-muted-foreground">
-                  Notas (opcional)
+                  {t("notesLabel")}
                 </Label>
                 <Textarea
                   id="dizziness-notes"
-                  placeholder="Ej: Ocurrio despues de levantarme..."
+                  placeholder={t("notesPlaceholder")}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="resize-none h-16"
@@ -175,7 +174,7 @@ export function DizzinessDialog({
           )}
 
           <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
-            <p>Los mareos pueden indicar cambios en glucosa</p>
+            <p>{t("tip")}</p>
           </div>
         </div>
 
@@ -185,18 +184,17 @@ export function DizzinessDialog({
             onClick={() => onOpenChange(false)}
             className="flex-1 sm:flex-none"
           >
-            Cancelar
+            {tActions("cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={experienced === null}
             className="flex-1 sm:flex-none"
           >
-            Guardar
+            {tActions("save")}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-
