@@ -34,11 +34,11 @@ const patientNavItems: NavItem[] = [
 // Mobile navigation for patient (different order with center button)
 // Labels are translation keys - use with t(`Navigation.${item.label}`)
 const patientMobileNavItems: NavItem[] = [
-  { label: "alertas", href: "/alertas", icon: Bell },
+  { label: "dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "insulina", href: "/insulina", icon: Syringe },
   { label: "glucometrias", href: "/glucometrias", icon: Activity, isCenter: true },
+  { label: "alertas", href: "/alertas", icon: Bell },
   { label: "settings", href: "/configuracion", icon: Settings },
-  { label: "dashboard", href: "/dashboard", icon: LayoutDashboard },
 ]
 
 export function getNavItems(): NavItem[] {
