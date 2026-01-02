@@ -48,7 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
-          <BaseProviders>
+          <BaseProviders locale={locale}>
             <div className="grid grid-rows-[auto_1fr] h-svh">
               {children}
             </div>

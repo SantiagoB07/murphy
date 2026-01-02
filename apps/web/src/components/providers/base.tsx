@@ -1,19 +1,18 @@
-"use client";
+"use client"
 
-import { ThemeProvider } from "./theme-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { ClerkProvider, useAuth } from "@clerk/nextjs"
+import { ConvexReactClient } from "convex/react"
+import { ConvexProviderWithClerk } from "convex/react-clerk"
+import { ConvexQueryClient } from "@convex-dev/react-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
-import { ClerkProvider } from "@clerk/nextjs";
-import { clerkAppearance } from "@/lib/clerkAppearance";
+import { ThemeProvider } from "./theme-provider"
+import { Toaster } from "@/components/ui/sonner"
+import { clerkAppearance } from "@/lib/clerkAppearance"
+import { getClerkLocalization } from "@/lib/clerkLocalization"
 
-import { useAuth } from "@clerk/nextjs";
-import { ConvexReactClient } from "convex/react";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { ConvexQueryClient } from "@convex-dev/react-query";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-const convexQueryClient = new ConvexQueryClient(convex);
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+const convexQueryClient = new ConvexQueryClient(convex)
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -21,9 +20,17 @@ const queryClient = new QueryClient({
       queryFn: convexQueryClient.queryFn(),
     },
   },
-});
-convexQueryClient.connect(queryClient);
-export default function BaseProviders({ children }: { children: React.ReactNode }) {
+})
+convexQueryClient.connect(queryClient)
+
+interface BaseProvidersProps {
+  children: React.ReactNode
+  locale: string
+}
+
+export default function BaseProviders({ children, locale }: BaseProvidersProps) {
+  const localization = getClerkLocalization(locale)
+
   return (
     <ThemeProvider
       attribute="class"
@@ -31,7 +38,7 @@ export default function BaseProviders({ children }: { children: React.ReactNode 
       enableSystem
       disableTransitionOnChange
     >
-      <ClerkProvider appearance={clerkAppearance}>
+      <ClerkProvider appearance={clerkAppearance} localization={localization}>
         <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
           <QueryClientProvider client={queryClient}>
             {children}
@@ -40,5 +47,5 @@ export default function BaseProviders({ children }: { children: React.ReactNode 
       </ClerkProvider>
       <Toaster richColors />
     </ThemeProvider>
-  );
+  )
 }
