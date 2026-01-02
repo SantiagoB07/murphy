@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { format } from "date-fns"
-import { es } from "date-fns/locale"
+import { es, enUS } from "date-fns/locale"
 import { CalendarIcon } from "lucide-react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useTranslations, useLocale } from "next-intl"
 import {
   Sheet,
   SheetContent,
@@ -41,22 +42,10 @@ import { cn } from "@/lib/utils"
 import type { DiabetesType } from "@/types/diabetes"
 import { toast } from "sonner"
 
-const formSchema = z.object({
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z.string().email("Ingresa un email valido"),
-  phone: z.string().optional(),
-  birthDate: z.date({ error: "Selecciona tu fecha de nacimiento" }),
-  diabetesType: z.enum(["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"]),
-})
-
-type FormValues = z.infer<typeof formSchema>
-
 interface PersonalDataSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
-
-const DIABETES_TYPES: DiabetesType[] = ["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"]
 
 // Mock user data - will be replaced with Convex data
 const mockUserData = {
@@ -68,7 +57,22 @@ const mockUserData = {
 }
 
 export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps) {
+  const t = useTranslations("Configuracion")
+  const locale = useLocale()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const dateFnsLocale = locale === "es" ? es : enUS
+
+  const DIABETES_TYPES: DiabetesType[] = ["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"]
+
+  const formSchema = z.object({
+    name: z.string().min(2, t("personalData.validation.nameMinLength")),
+    email: z.string().email(t("personalData.validation.emailInvalid")),
+    phone: z.string().optional(),
+    birthDate: z.date({ error: t("personalData.validation.birthDateRequired") }),
+    diabetesType: z.enum(["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"]),
+  })
+
+  type FormValues = z.infer<typeof formSchema>
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -84,17 +88,16 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     try {
-      // Mock save - will be replaced with Convex mutation
       await new Promise((resolve) => setTimeout(resolve, 1000))
       console.log("Saving personal data:", data)
-      toast.success("Datos actualizados", {
-        description: "Tus datos personales se han guardado correctamente.",
+      toast.success(t("personalData.toast.successTitle"), {
+        description: t("personalData.toast.successMessage"),
       })
       onOpenChange(false)
     } catch (error) {
       console.error("Error updating profile:", error)
-      toast.error("Error", {
-        description: "No se pudieron guardar los cambios",
+      toast.error(t("personalData.toast.errorTitle"), {
+        description: t("personalData.toast.errorMessage"),
       })
     } finally {
       setIsSubmitting(false)
@@ -105,9 +108,9 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Datos personales</SheetTitle>
+          <SheetTitle>{t("personalData.sheet.title")}</SheetTitle>
           <SheetDescription>
-            Actualiza tu informacion personal
+            {t("personalData.sheet.description")}
           </SheetDescription>
         </SheetHeader>
 
@@ -118,9 +121,9 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre completo</FormLabel>
+                  <FormLabel>{t("personalData.form.nameLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Tu nombre" {...field} />
+                    <Input placeholder={t("personalData.form.namePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,18 +135,18 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Correo electronico</FormLabel>
+                  <FormLabel>{t("personalData.form.emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="tu@email.com"
+                      placeholder={t("personalData.form.emailPlaceholder")}
                       {...field}
                       disabled
                       className="bg-muted"
                     />
                   </FormControl>
                   <p className="text-xs text-muted-foreground">
-                    El email no puede modificarse
+                    {t("personalData.form.emailDisabled")}
                   </p>
                   <FormMessage />
                 </FormItem>
@@ -155,9 +158,9 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Telefono (opcional)</FormLabel>
+                  <FormLabel>{t("personalData.form.phoneLabel")}</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+52 555 000 0000" {...field} />
+                    <Input type="tel" placeholder={t("personalData.form.phonePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -169,7 +172,7 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
               name="birthDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de nacimiento</FormLabel>
+                  <FormLabel>{t("personalData.form.birthDateLabel")}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -181,9 +184,9 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP", { locale: es })
+                            format(field.value, "PPP", { locale: dateFnsLocale })
                           ) : (
-                            <span>Seleccionar fecha</span>
+                            <span>{t("personalData.form.selectDate")}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -212,11 +215,11 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
               name="diabetesType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de diabetes</FormLabel>
+                  <FormLabel>{t("personalData.form.diabetesTypeLabel")}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona el tipo" />
+                        <SelectValue placeholder={t("personalData.form.selectType")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -239,10 +242,10 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
                 className="flex-1"
                 onClick={() => onOpenChange(false)}
               >
-                Cancelar
+                {t("personalData.form.cancel")}
               </Button>
               <Button type="submit" className="flex-1" disabled={isSubmitting}>
-                {isSubmitting ? "Guardando..." : "Guardar cambios"}
+                {isSubmitting ? t("personalData.form.saving") : t("personalData.form.save")}
               </Button>
             </div>
           </form>

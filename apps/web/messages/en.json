@@ -443,5 +443,99 @@
       "beforeLunch": "Before lunch",
       "inRange": "85% in range"
     }
+  },
+  "Configuracion": {
+    "settings": {
+      "title": "General settings",
+      "openAria": "Open {label}"
+    },
+    "settingsItems": {
+      "personal": {
+        "label": "Personal data",
+        "description": "Name, email, date of birth"
+      },
+      "coadmin": {
+        "label": "Co-administrators",
+        "description": "Family members with account access"
+      }
+    },
+    "personalData": {
+      "sheet": {
+        "title": "Personal data",
+        "description": "Update your personal information"
+      },
+      "form": {
+        "nameLabel": "Full name",
+        "namePlaceholder": "Your name",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "you@email.com",
+        "emailDisabled": "Email cannot be modified",
+        "phoneLabel": "Phone (optional)",
+        "phonePlaceholder": "+1 555 000 0000",
+        "birthDateLabel": "Date of birth",
+        "selectDate": "Select date",
+        "diabetesTypeLabel": "Diabetes type",
+        "selectType": "Select type",
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving..."
+      },
+      "validation": {
+        "nameMinLength": "Name must be at least 2 characters",
+        "emailInvalid": "Enter a valid email",
+        "birthDateRequired": "Select your date of birth"
+      },
+      "toast": {
+        "successTitle": "Data updated",
+        "successMessage": "Your personal data has been saved successfully.",
+        "errorTitle": "Error",
+        "errorMessage": "Could not save changes"
+      }
+    },
+    "coadmin": {
+      "sheet": {
+        "title": "Co-administrators",
+        "description": "Invite family members or caregivers to view and manage your health data"
+      },
+      "invite": {
+        "title": "Invite new co-administrator",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "family@example.com"
+      },
+      "pending": {
+        "title": "Pending invitations",
+        "expires": "Expires:"
+      },
+      "active": {
+        "title": "Active co-administrators",
+        "none": "No active co-administrators",
+        "inviteHint": "Invite a family member to help manage your health"
+      },
+      "toast": {
+        "inviteSentTitle": "Invitation sent",
+        "inviteSentMessage": "An invitation has been sent to {email}",
+        "inviteErrorTitle": "Error",
+        "inviteErrorMessage": "Could not send invitation",
+        "revokeSuccessTitle": "Access revoked",
+        "revokeSuccessMessage": "The co-administrator no longer has access to your account",
+        "revokeErrorTitle": "Error",
+        "revokeErrorMessage": "Could not revoke access",
+        "cancelInvitationTitle": "Invitation canceled",
+        "cancelInvitationErrorTitle": "Error",
+        "cancelInvitationErrorMessage": "Could not cancel invitation"
+      },
+      "dialogs": {
+        "revokeAccessTitle": "Revoke access?",
+        "revokeAccessDescription": "This person will no longer be able to view or manage your health data. You can invite them again at any time.",
+        "revokeButton": "Revoke access",
+        "cancelInvitationTitle": "Cancel invitation?",
+        "cancelInvitationDescription": "The invitation will be canceled and the link will no longer work.",
+        "keepButton": "No, keep it",
+        "cancelInvitationButton": "Cancel invitation"
+      },
+      "validation": {
+        "emailInvalid": "Enter a valid email address"
+      }
+    }
   }
 }

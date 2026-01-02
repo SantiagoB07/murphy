@@ -443,5 +443,99 @@
       "beforeLunch": "Antes de almuerzo",
       "inRange": "85% en rango"
     }
+  },
+  "Configuracion": {
+    "settings": {
+      "title": "Ajustes generales",
+      "openAria": "Abrir {label}"
+    },
+    "settingsItems": {
+      "personal": {
+        "label": "Datos personales",
+        "description": "Nombre, email, fecha de nacimiento"
+      },
+      "coadmin": {
+        "label": "Coadministradores",
+        "description": "Familiares con acceso a tu cuenta"
+      }
+    },
+    "personalData": {
+      "sheet": {
+        "title": "Datos personales",
+        "description": "Actualiza tu informacion personal"
+      },
+      "form": {
+        "nameLabel": "Nombre completo",
+        "namePlaceholder": "Tu nombre",
+        "emailLabel": "Correo electronico",
+        "emailPlaceholder": "tu@email.com",
+        "emailDisabled": "El email no puede modificarse",
+        "phoneLabel": "Telefono (opcional)",
+        "phonePlaceholder": "+52 555 000 0000",
+        "birthDateLabel": "Fecha de nacimiento",
+        "selectDate": "Seleccionar fecha",
+        "diabetesTypeLabel": "Tipo de diabetes",
+        "selectType": "Selecciona el tipo",
+        "cancel": "Cancelar",
+        "save": "Guardar cambios",
+        "saving": "Guardando..."
+      },
+      "validation": {
+        "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+        "emailInvalid": "Ingresa un email valido",
+        "birthDateRequired": "Selecciona tu fecha de nacimiento"
+      },
+      "toast": {
+        "successTitle": "Datos actualizados",
+        "successMessage": "Tus datos personales se han guardado correctamente.",
+        "errorTitle": "Error",
+        "errorMessage": "No se pudieron guardar los cambios"
+      }
+    },
+    "coadmin": {
+      "sheet": {
+        "title": "Coadministradores",
+        "description": "Invita a familiares o cuidadores para que puedan ver y administrar tus datos de salud"
+      },
+      "invite": {
+        "title": "Invitar nuevo coadministrador",
+        "emailLabel": "Correo electronico",
+        "emailPlaceholder": "familiar@ejemplo.com"
+      },
+      "pending": {
+        "title": "Invitaciones pendientes",
+        "expires": "Expira:"
+      },
+      "active": {
+        "title": "Coadministradores activos",
+        "none": "No tienes coadministradores activos",
+        "inviteHint": "Invita a un familiar para que pueda ayudarte a gestionar tu salud"
+      },
+      "toast": {
+        "inviteSentTitle": "Invitación enviada",
+        "inviteSentMessage": "Se ha enviado una invitación a {email}",
+        "inviteErrorTitle": "Error",
+        "inviteErrorMessage": "No se pudo enviar la invitación",
+        "revokeSuccessTitle": "Acceso revocado",
+        "revokeSuccessMessage": "El coadministrador ya no tiene acceso a tu cuenta",
+        "revokeErrorTitle": "Error",
+        "revokeErrorMessage": "No se pudo revocar el acceso",
+        "cancelInvitationTitle": "Invitación cancelada",
+        "cancelInvitationErrorTitle": "Error",
+        "cancelInvitationErrorMessage": "No se pudo cancelar la invitación"
+      },
+      "dialogs": {
+        "revokeAccessTitle": "¿Revocar acceso?",
+        "revokeAccessDescription": "Esta persona ya no podrá ver ni administrar tus datos de salud. Puedes volver a invitarla en cualquier momento.",
+        "revokeButton": "Revocar acceso",
+        "cancelInvitationTitle": "¿Cancelar invitación?",
+        "cancelInvitationDescription": "La invitación será cancelada y el enlace dejará de funcionar.",
+        "keepButton": "No, mantener",
+        "cancelInvitationButton": "Cancelar invitación"
+      },
+      "validation": {
+        "emailInvalid": "Ingresa un correo electrónico válido"
+      }
+    }
   }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations, useLocale } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -37,11 +38,9 @@ import { toast } from "sonner"
 import { api } from "@murphy/backend/convex/_generated/api"
 import type { Id } from "@murphy/backend/convex/_generated/dataModel"
 
-const inviteFormSchema = z.object({
-  email: z.string().email("Ingresa un correo electrónico válido"),
-})
-
-type InviteFormValues = z.infer<typeof inviteFormSchema>
+type InviteFormValues = {
+  email: string
+}
 
 interface CoadminSheetProps {
   open: boolean
@@ -49,9 +48,15 @@ interface CoadminSheetProps {
 }
 
 export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
+  const t = useTranslations("Configuracion")
+  const locale = useLocale()
   const [isInviting, setIsInviting] = useState(false)
   const [coadminToRevoke, setCoadminToRevoke] = useState<Id<"coadminProfiles"> | null>(null)
   const [invitationToRevoke, setInvitationToRevoke] = useState<string | null>(null)
+
+  const inviteFormSchema = z.object({
+    email: z.string().min(1, t("coadmin.validation.emailInvalid")).email(t("coadmin.validation.emailInvalid")),
+  })
 
   // Queries and mutations
   const coadmins = useQuery(api.coadmins.getPatientCoadmins)
@@ -101,15 +106,15 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
     setIsInviting(true)
     try {
       await inviteCoadmin({ email: data.email })
-      toast.success("Invitación enviada", {
-        description: `Se ha enviado una invitación a ${data.email}`,
+      toast.success(t("coadmin.toast.inviteSentTitle"), {
+        description: t("coadmin.toast.inviteSentMessage", { email: data.email }),
       })
       form.reset()
       loadInvitations()
     } catch (error) {
       console.error("Error sending invitation:", error)
-      const message = error instanceof Error ? error.message : "No se pudo enviar la invitación"
-      toast.error("Error", { description: message })
+      const message = error instanceof Error ? error.message : t("coadmin.toast.inviteErrorMessage")
+      toast.error(t("coadmin.toast.inviteErrorTitle"), { description: message })
     } finally {
       setIsInviting(false)
     }
@@ -119,12 +124,12 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
     if (!coadminToRevoke) return
     try {
       await revokeCoadmin({ coadminId: coadminToRevoke })
-      toast.success("Acceso revocado", {
-        description: "El coadministrador ya no tiene acceso a tu cuenta",
+      toast.success(t("coadmin.toast.revokeSuccessTitle"), {
+        description: t("coadmin.toast.revokeSuccessMessage"),
       })
     } catch (error) {
       console.error("Error revoking coadmin:", error)
-      toast.error("Error", { description: "No se pudo revocar el acceso" })
+      toast.error(t("coadmin.toast.inviteErrorTitle"), { description: t("coadmin.toast.revokeErrorMessage") })
     } finally {
       setCoadminToRevoke(null)
     }
@@ -134,18 +139,18 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
     if (!invitationToRevoke) return
     try {
       await revokeInvitation({ invitationId: invitationToRevoke })
-      toast.success("Invitación cancelada")
+      toast.success(t("coadmin.toast.cancelInvitationTitle"))
       loadInvitations()
     } catch (error) {
       console.error("Error revoking invitation:", error)
-      toast.error("Error", { description: "No se pudo cancelar la invitación" })
+      toast.error(t("coadmin.toast.inviteErrorTitle"), { description: t("coadmin.toast.cancelInvitationErrorMessage") })
     } finally {
       setInvitationToRevoke(null)
     }
   }
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString("es-CO", {
+    return new Date(timestamp).toLocaleDateString(locale, {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -159,17 +164,17 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Coadministradores
+              {t("coadmin.sheet.title")}
             </SheetTitle>
             <SheetDescription>
-              Invita a familiares o cuidadores para que puedan ver y administrar tus datos de salud
+              {t("coadmin.sheet.description")}
             </SheetDescription>
           </SheetHeader>
 
           <div className="space-y-6 mt-6">
             {/* Invite Form */}
             <div className="space-y-4">
-              <h3 className="font-medium text-sm text-foreground">Invitar nuevo coadministrador</h3>
+              <h3 className="font-medium text-sm text-foreground">{t("coadmin.invite.title")}</h3>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
@@ -177,12 +182,12 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Correo electrónico</FormLabel>
+                        <FormLabel>{t("coadmin.invite.emailLabel")}</FormLabel>
                         <FormControl>
                           <div className="flex gap-2">
                             <Input
                               type="email"
-                              placeholder="familiar@ejemplo.com"
+                              placeholder={t("coadmin.invite.emailPlaceholder")}
                               {...field}
                               disabled={isInviting}
                             />
@@ -208,7 +213,7 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
               <div className="space-y-3">
                 <h3 className="font-medium text-sm text-foreground flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  Invitaciones pendientes
+                  {t("coadmin.pending.title")}
                 </h3>
                 <div className="space-y-2">
                   {invitations.map((invitation) => (
@@ -223,7 +228,7 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
                         <div>
                           <p className="text-sm font-medium">{invitation.emailAddress}</p>
                           <p className="text-xs text-muted-foreground">
-                            Expira: {formatDate(invitation.expiresAt)}
+                            {t("coadmin.pending.expires")} {formatDate(invitation.expiresAt)}
                           </p>
                         </div>
                       </div>
@@ -243,7 +248,7 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
 
             {/* Active Coadmins */}
             <div className="space-y-3">
-              <h3 className="font-medium text-sm text-foreground">Coadministradores activos</h3>
+              <h3 className="font-medium text-sm text-foreground">{t("coadmin.active.title")}</h3>
               {!coadmins ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -251,9 +256,9 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
               ) : coadmins.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">No tienes coadministradores activos</p>
+                  <p className="text-sm">{t("coadmin.active.none")}</p>
                   <p className="text-xs mt-1">
-                    Invita a un familiar para que pueda ayudarte a gestionar tu salud
+                    {t("coadmin.active.inviteHint")}
                   </p>
                 </div>
               ) : (
@@ -295,18 +300,18 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
       <AlertDialog open={!!coadminToRevoke} onOpenChange={() => setCoadminToRevoke(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Revocar acceso?</AlertDialogTitle>
+            <AlertDialogTitle>{t("coadmin.dialogs.revokeAccessTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta persona ya no podrá ver ni administrar tus datos de salud. Puedes volver a invitarla en cualquier momento.
+              {t("coadmin.dialogs.revokeAccessDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("coadmin.dialogs.keepButton")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevokeCoadmin}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Revocar acceso
+              {t("coadmin.dialogs.revokeButton")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -316,18 +321,18 @@ export function CoadminSheet({ open, onOpenChange }: CoadminSheetProps) {
       <AlertDialog open={!!invitationToRevoke} onOpenChange={() => setInvitationToRevoke(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Cancelar invitación?</AlertDialogTitle>
+            <AlertDialogTitle>{t("coadmin.dialogs.cancelInvitationTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              La invitación será cancelada y el enlace dejará de funcionar.
+              {t("coadmin.dialogs.cancelInvitationDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, mantener</AlertDialogCancel>
+            <AlertDialogCancel>{t("coadmin.dialogs.keepButton")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevokeInvitation}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Cancelar invitación
+              {t("coadmin.dialogs.cancelInvitationButton")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
