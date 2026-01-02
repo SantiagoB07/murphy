@@ -31,7 +31,7 @@ export function ViewModeSelector({
           disabled={disabled}
           role="tab"
           aria-selected={value === mode}
-          aria-label={`View ${mode}`}
+          aria-label={t(`viewMode.${mode}`)}
           className={cn(
             "px-3 py-2 text-xs sm:text-sm font-medium transition-colors min-w-[60px] sm:min-w-[80px]",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset active:scale-[0.98]",

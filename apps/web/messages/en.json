@@ -284,11 +284,13 @@
     },
     "periodStats": {
       "measurements": "Measurements",
+      "measurementsShort": "measurements",
       "average": "Average",
       "deviation": "std dev",
       "minimum": "Minimum",
       "maximum": "Maximum",
       "inRange": "In range (70-180)",
+      "inRangeShort": "In",
       "daysWithRecords": "Days with records",
       "period": "Period",
       "takesPerDay": "readings/day",
@@ -485,6 +487,13 @@
         "nameMinLength": "Name must be at least 2 characters",
         "emailInvalid": "Enter a valid email",
         "birthDateRequired": "Select your date of birth"
+      },
+      "diabetesTypes": {
+        "Tipo 1": "Type 1",
+        "Tipo 2": "Type 2",
+        "Gestacional": "Gestational",
+        "LADA": "LADA",
+        "MODY": "MODY"
       },
       "toast": {
         "successTitle": "Data updated",

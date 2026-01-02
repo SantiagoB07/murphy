@@ -284,16 +284,18 @@
     },
     "periodStats": {
        "measurements": "Mediciones",
+       "measurementsShort": "mediciones",
        "average": "Promedio",
        "deviation": "desv.",
        "minimum": "Mínimo",
        "maximum": "Máximo",
-      "inRange": "En rango (70-180)",
-       "daysWithRecords": "Días con registro",
-      "period": "Periodo",
-      "takesPerDay": "tomas/día",
-      "of": "de",
-      "days": "días"
+       "inRange": "En rango (70-180)",
+       "inRangeShort": "En",
+        "daysWithRecords": "Días con registro",
+       "period": "Periodo",
+       "takesPerDay": "tomas/día",
+       "of": "de",
+       "days": "días"
     }
   },
   "Insulina": {
@@ -484,7 +486,14 @@
       "validation": {
          "nameMinLength": "El nombre debe tener al menos 2 caracteres",
          "emailInvalid": "Ingresa un email válido",
-        "birthDateRequired": "Selecciona tu fecha de nacimiento"
+         "birthDateRequired": "Selecciona tu fecha de nacimiento"
+      },
+      "diabetesTypes": {
+        "Tipo 1": "Tipo 1",
+        "Tipo 2": "Tipo 2",
+        "Gestacional": "Gestacional",
+        "LADA": "LADA",
+        "MODY": "MODY"
       },
       "toast": {
         "successTitle": "Datos actualizados",

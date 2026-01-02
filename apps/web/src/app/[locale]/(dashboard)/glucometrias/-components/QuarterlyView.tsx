@@ -231,10 +231,10 @@ export function QuarterlyView({
 
                   <div className="mt-2 pt-2 border-t border-border/30">
                     <p className="text-sm font-medium text-success">
-                      {month.inRangePercent}% {t("periodStats.inRange").split(" ")[0]}
+                      {month.inRangePercent}% {t("periodStats.inRangeShort")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {month.count} {t("periodStats.measurements").toLowerCase()}
+                      {month.count} {t("periodStats.measurementsShort")}
                     </p>
                   </div>
                 </>

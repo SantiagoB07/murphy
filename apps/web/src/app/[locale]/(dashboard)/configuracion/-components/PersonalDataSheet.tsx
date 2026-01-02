@@ -225,7 +225,7 @@ export function PersonalDataSheet({ open, onOpenChange }: PersonalDataSheetProps
                     <SelectContent>
                       {DIABETES_TYPES.map((type) => (
                         <SelectItem key={type} value={type}>
-                          {type}
+                          {t(`personalData.diabetesTypes.${type}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
