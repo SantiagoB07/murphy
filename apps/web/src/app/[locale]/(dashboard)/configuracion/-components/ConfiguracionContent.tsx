@@ -2,21 +2,12 @@
 
 import { useState } from "react"
 
-import { useRouter } from "@/i18n/navigation"
-import { useClerk } from "@clerk/nextjs"
-import { toast } from "sonner"
-import { User, Bell, Shield, Smartphone, ChevronRight, LogOut, Users } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import { User, ChevronRight, Users } from "lucide-react"
 
 import { CoadminSheet } from "./CoadminSheet"
-import { ConfiguracionHeader } from "./ConfiguracionHeader"
-import { DevicesSheet } from "./DevicesSheet"
-import { NotificationsSheet } from "./NotificationsSheet"
 import { PersonalDataSheet } from "./PersonalDataSheet"
-import { SecuritySheet } from "./SecuritySheet"
 
-type SettingsSection = "personal" | "security" | "notifications" | "devices" | "coadmin"
+type SettingsSection = "personal" | "coadmin"
 
 const settingsItems = [
   {
@@ -24,24 +15,6 @@ const settingsItems = [
     icon: User,
     label: "Datos personales",
     description: "Nombre, email, fecha de nacimiento",
-  },
-  {
-    key: "security" as SettingsSection,
-    icon: Shield,
-    label: "Seguridad",
-    description: "Contrasena y autenticacion",
-  },
-  {
-    key: "notifications" as SettingsSection,
-    icon: Bell,
-    label: "Notificaciones",
-    description: "Alertas y recordatorios",
-  },
-  {
-    key: "devices" as SettingsSection,
-    icon: Smartphone,
-    label: "Dispositivos",
-    description: "Glucometros conectados",
   },
   {
     key: "coadmin" as SettingsSection,
@@ -52,8 +25,6 @@ const settingsItems = [
 ]
 
 export function ConfiguracionContent() {
-  const router = useRouter()
-  const { signOut } = useClerk()
   const [openSheet, setOpenSheet] = useState<SettingsSection | null>(null)
 
   const handleOpenSheet = (section: SettingsSection) => {
@@ -64,27 +35,9 @@ export function ConfiguracionContent() {
     setOpenSheet(null)
   }
 
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      toast.success("Sesion cerrada", {
-        description: "Has cerrado sesion correctamente",
-      })
-      router.push("/")
-    } catch (error) {
-      console.error("Error signing out:", error)
-      toast.error("Error", {
-        description: "No se pudo cerrar la sesion",
-      })
-    }
-  }
-
   return (
     <>
       <div className="space-y-8">
-        <ConfiguracionHeader />
-
-        {/* General Settings */}
         <section className="space-y-4">
           <h2 className="font-semibold text-foreground">Ajustes generales</h2>
           <div className="grid gap-3">
@@ -107,36 +60,10 @@ export function ConfiguracionContent() {
             ))}
           </div>
         </section>
-
-        {/* Logout Section */}
-        <section className="space-y-4">
-          <h2 className="font-semibold text-foreground">Sesion</h2>
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3 h-auto py-4 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5" />
-            <span>Cerrar sesion</span>
-          </Button>
-        </section>
       </div>
 
-      {/* Sheets */}
       <PersonalDataSheet
         open={openSheet === "personal"}
-        onOpenChange={(open) => !open && handleCloseSheet()}
-      />
-      <SecuritySheet
-        open={openSheet === "security"}
-        onOpenChange={(open) => !open && handleCloseSheet()}
-      />
-      <NotificationsSheet
-        open={openSheet === "notifications"}
-        onOpenChange={(open) => !open && handleCloseSheet()}
-      />
-      <DevicesSheet
-        open={openSheet === "devices"}
         onOpenChange={(open) => !open && handleCloseSheet()}
       />
       <CoadminSheet
