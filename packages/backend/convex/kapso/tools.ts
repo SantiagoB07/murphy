@@ -17,17 +17,17 @@ export type KapsoToolCtx = ToolCtx & {
 // ============================================
 
 /**
- * Guarda una medición de glucosa del paciente
+ * Saves a patient's blood glucose measurement
  */
 export const saveGlucose = createTool({
   description:
-    "Guarda una nueva medición de glucosa en sangre del paciente. Usa esta herramienta cuando el paciente te diga su nivel de glucosa.",
+    "Saves a new blood glucose measurement for the patient. Use this tool when the patient tells you their glucose level.",
   args: z.object({
     value: z
       .number()
       .min(20)
       .max(600)
-      .describe("Valor de glucosa en mg/dL (entre 20 y 600)"),
+      .describe("Glucose value in mg/dL (between 20 and 600)"),
     slot: z
       .enum([
         "before_breakfast",
@@ -39,12 +39,12 @@ export const saveGlucose = createTool({
       ])
       .optional()
       .describe(
-        "Momento del día en que se tomó la medición. before_breakfast = antes del desayuno, after_breakfast = después del desayuno, etc."
+        "Time of day when the measurement was taken. before_breakfast = before breakfast, after_breakfast = after breakfast, etc."
       ),
     notes: z
       .string()
       .optional()
-      .describe("Notas adicionales sobre la medición"),
+      .describe("Additional notes about the measurement"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -68,31 +68,31 @@ export const saveGlucose = createTool({
     });
 
     const slotMessages: Record<string, string> = {
-      before_breakfast: "antes del desayuno",
-      after_breakfast: "después del desayuno",
-      before_lunch: "antes del almuerzo",
-      after_lunch: "después del almuerzo",
-      before_dinner: "antes de la cena",
-      after_dinner: "después de la cena",
+      before_breakfast: "before breakfast",
+      after_breakfast: "after breakfast",
+      before_lunch: "before lunch",
+      after_lunch: "after lunch",
+      before_dinner: "before dinner",
+      after_dinner: "after dinner",
     };
 
     const slotText = args.slot ? ` (${slotMessages[args.slot]})` : "";
-    return `Glucosa de ${args.value} mg/dL guardada exitosamente${slotText}.`;
+    return `Glucose of ${args.value} mg/dL saved successfully${slotText}.`;
   },
 });
 
 /**
- * Actualiza la última medición de glucosa del paciente
+ * Updates the patient's last glucose measurement
  */
 export const updateGlucose = createTool({
   description:
-    "Corrige la última medición de glucosa del paciente. Usa esta herramienta cuando el paciente quiera corregir su última glucosa registrada.",
+    "Corrects the patient's last glucose measurement. Use this tool when the patient wants to correct their last recorded glucose.",
   args: z.object({
     value: z
       .number()
       .min(20)
       .max(600)
-      .describe("Nuevo valor de glucosa en mg/dL"),
+      .describe("New glucose value in mg/dL"),
     slot: z
       .enum([
         "before_breakfast",
@@ -103,7 +103,7 @@ export const updateGlucose = createTool({
         "after_dinner",
       ])
       .optional()
-      .describe("Momento del día (opcional)"),
+      .describe("Time of day (optional)"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -115,7 +115,7 @@ export const updateGlucose = createTool({
     );
 
     if (!latest) {
-      return "No hay registros de glucosa para actualizar.";
+      return "No glucose records to update.";
     }
 
     const oldValue = latest.value;
@@ -133,7 +133,7 @@ export const updateGlucose = createTool({
         | undefined,
     });
 
-    return `Glucosa actualizada de ${oldValue} a ${args.value} mg/dL.`;
+    return `Glucose updated from ${oldValue} to ${args.value} mg/dL.`;
   },
 });
 
@@ -142,17 +142,17 @@ export const updateGlucose = createTool({
 // ============================================
 
 /**
- * Guarda una dosis de insulina del paciente
+ * Saves a patient's insulin dose
  */
 export const saveInsulin = createTool({
   description:
-    "Guarda una nueva dosis de insulina del paciente. IMPORTANTE: Siempre pregunta qué tipo de insulina (rápida o basal) si el paciente no lo menciona.",
+    "Saves a new insulin dose for the patient. IMPORTANT: Always ask what type of insulin (rapid or basal) if the patient doesn't mention it.",
   args: z.object({
-    dose: z.number().min(1).max(100).describe("Dosis en unidades de insulina"),
+    dose: z.number().min(1).max(100).describe("Dose in insulin units"),
     insulinType: z
       .enum(["rapid", "basal"])
-      .describe("Tipo de insulina: 'rapid' para rápida, 'basal' para basal"),
-    notes: z.string().optional().describe("Notas adicionales"),
+      .describe("Type of insulin: 'rapid' for rapid-acting, 'basal' for basal"),
+    notes: z.string().optional().describe("Additional notes"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -166,34 +166,34 @@ export const saveInsulin = createTool({
         notes: args.notes,
       });
 
-      const typeLabel = args.insulinType === "rapid" ? "rápida" : "basal";
-      return `Dosis de ${args.dose} unidades de insulina ${typeLabel} registrada.`;
+      const typeLabel = args.insulinType === "rapid" ? "rapid" : "basal";
+      return `${args.dose} units of ${typeLabel} insulin recorded.`;
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
       if (errorMessage.includes("Ya registraste las")) {
-        return errorMessage;
+        return "You've already recorded all your insulin doses for today.";
       }
       if (errorMessage.includes("No hay configuración de insulina")) {
-        return "No tienes configurada tu insulina. Por favor configura tu régimen primero en la aplicación Murphy.";
+        return "You don't have insulin configured. Please set up your regimen first in the Murphy app.";
       }
-      return `Error al guardar insulina: ${errorMessage}`;
+      return `Error saving insulin: ${errorMessage}`;
     }
   },
 });
 
 /**
- * Actualiza la última dosis de insulina del paciente
+ * Updates the patient's last insulin dose
  */
 export const updateInsulin = createTool({
   description:
-    "Corrige la última dosis de insulina del paciente. Usa esta herramienta cuando el paciente quiera corregir su última dosis.",
+    "Corrects the patient's last insulin dose. Use this tool when the patient wants to correct their last dose.",
   args: z.object({
-    dose: z.number().min(1).max(100).describe("Nueva dosis en unidades"),
+    dose: z.number().min(1).max(100).describe("New dose in units"),
     insulinType: z
       .enum(["rapid", "basal"])
-      .describe("Tipo de insulina de la dosis a corregir"),
+      .describe("Type of insulin of the dose to correct"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -205,7 +205,7 @@ export const updateInsulin = createTool({
     );
 
     if (!latest) {
-      return "No hay registros de insulina para actualizar.";
+      return "No insulin records to update.";
     }
 
     const oldDose = latest.dose;
@@ -216,7 +216,7 @@ export const updateInsulin = createTool({
       insulinType: args.insulinType,
     });
 
-    return `Insulina actualizada de ${oldDose} a ${args.dose} unidades.`;
+    return `Insulin updated from ${oldDose} to ${args.dose} units.`;
   },
 });
 
@@ -225,19 +225,19 @@ export const updateInsulin = createTool({
 // ============================================
 
 /**
- * Guarda las horas de sueño del paciente
+ * Saves the patient's sleep hours
  */
 export const saveSleep = createTool({
   description:
-    "Guarda las horas de sueño del paciente. Usa esta herramienta cuando el paciente te diga cuántas horas durmió y la calidad.",
+    "Saves the patient's sleep hours. Use this tool when the patient tells you how many hours they slept and the quality.",
   args: z.object({
-    hours: z.number().min(0).max(24).describe("Horas de sueño"),
+    hours: z.number().min(0).max(24).describe("Hours of sleep"),
     quality: z
       .number()
       .min(1)
       .max(10)
       .optional()
-      .describe("Calidad del sueño del 1 al 10 (opcional)"),
+      .describe("Sleep quality from 1 to 10 (optional)"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -249,24 +249,24 @@ export const saveSleep = createTool({
       quality: args.quality ?? 5,
     });
 
-    return `Registrado: dormiste ${args.hours} horas.`;
+    return `Recorded: you slept ${args.hours} hours.`;
   },
 });
 
 /**
- * Actualiza el último registro de sueño del paciente
+ * Updates the patient's last sleep record
  */
 export const updateSleep = createTool({
   description:
-    "Corrige el último registro de sueño del paciente. Usa esta herramienta cuando el paciente quiera corregir sus horas de sueño.",
+    "Corrects the patient's last sleep record. Use this tool when the patient wants to correct their sleep hours.",
   args: z.object({
-    hours: z.number().min(0).max(24).describe("Nuevas horas de sueño"),
+    hours: z.number().min(0).max(24).describe("New hours of sleep"),
     quality: z
       .number()
       .min(1)
       .max(10)
       .optional()
-      .describe("Nueva calidad del sueño"),
+      .describe("New sleep quality"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -278,7 +278,7 @@ export const updateSleep = createTool({
     );
 
     if (!latest) {
-      return "No hay registros de sueño para actualizar.";
+      return "No sleep records to update.";
     }
 
     const oldHours = latest.hours;
@@ -289,7 +289,7 @@ export const updateSleep = createTool({
       quality: args.quality ?? latest.quality,
     });
 
-    return `Horas de sueño actualizadas de ${oldHours} a ${args.hours}.`;
+    return `Sleep hours updated from ${oldHours} to ${args.hours}.`;
   },
 });
 
@@ -298,21 +298,21 @@ export const updateSleep = createTool({
 // ============================================
 
 /**
- * Guarda un registro de estrés/ansiedad del paciente
+ * Saves a patient's stress/anxiety record
  */
 export const saveStress = createTool({
   description:
-    "Guarda si el paciente tuvo estrés o ansiedad. Usa esta herramienta cuando el paciente mencione que tuvo estrés o ansiedad durante el día. ANTES de guardar, pregunta brevemente por el contexto.",
+    "Saves if the patient had stress or anxiety. Use this tool when the patient mentions they had stress or anxiety during the day. BEFORE saving, briefly ask for context.",
   args: z.object({
     level: z
       .number()
       .min(1)
       .max(10)
-      .describe("Nivel de estrés del 1 al 10 (1=bajo, 10=muy alto)"),
+      .describe("Stress level from 1 to 10 (1=low, 10=very high)"),
     notes: z
       .string()
       .optional()
-      .describe("Notas sobre qué causó el estrés"),
+      .describe("Notes about what caused the stress"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -324,19 +324,19 @@ export const saveStress = createTool({
       notes: args.notes,
     });
 
-    return `Registrado: nivel de estrés ${args.level}/10.`;
+    return `Recorded: stress level ${args.level}/10.`;
   },
 });
 
 /**
- * Actualiza el último registro de estrés del paciente
+ * Updates the patient's last stress record
  */
 export const updateStress = createTool({
   description:
-    "Corrige el último registro de estrés del paciente.",
+    "Corrects the patient's last stress record.",
   args: z.object({
-    level: z.number().min(1).max(10).describe("Nuevo nivel de estrés"),
-    notes: z.string().optional().describe("Nuevas notas"),
+    level: z.number().min(1).max(10).describe("New stress level"),
+    notes: z.string().optional().describe("New notes"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -348,7 +348,7 @@ export const updateStress = createTool({
     );
 
     if (!latest) {
-      return "No hay registros de estrés para actualizar.";
+      return "No stress records to update.";
     }
 
     const oldLevel = latest.level;
@@ -359,7 +359,7 @@ export const updateStress = createTool({
       notes: args.notes,
     });
 
-    return `Estrés actualizado de ${oldLevel} a ${args.level}/10.`;
+    return `Stress updated from ${oldLevel} to ${args.level}/10.`;
   },
 });
 
@@ -368,22 +368,22 @@ export const updateStress = createTool({
 // ============================================
 
 /**
- * Guarda un registro de mareos del paciente
+ * Saves a patient's dizziness record
  */
 export const saveDizziness = createTool({
   description:
-    "Guarda si el paciente tuvo mareos. Usa esta herramienta cuando el paciente mencione que tuvo mareos durante el día. ANTES de guardar, pregunta brevemente por el contexto.",
+    "Saves if the patient had dizziness. Use this tool when the patient mentions they had dizziness during the day. BEFORE saving, briefly ask for context.",
   args: z.object({
     severity: z
       .number()
       .min(1)
       .max(10)
-      .describe("Severidad del mareo del 1 al 10"),
+      .describe("Dizziness severity from 1 to 10"),
     durationMinutes: z
       .number()
       .optional()
-      .describe("Duración del mareo en minutos"),
-    notes: z.string().optional().describe("Notas adicionales"),
+      .describe("Duration of dizziness in minutes"),
+    notes: z.string().optional().describe("Additional notes"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -396,20 +396,20 @@ export const saveDizziness = createTool({
       notes: args.notes,
     });
 
-    return `Registrado: mareo con severidad ${args.severity}/10.`;
+    return `Recorded: dizziness with severity ${args.severity}/10.`;
   },
 });
 
 /**
- * Actualiza el último registro de mareos del paciente
+ * Updates the patient's last dizziness record
  */
 export const updateDizziness = createTool({
   description:
-    "Corrige el último registro de mareos del paciente.",
+    "Corrects the patient's last dizziness record.",
   args: z.object({
-    severity: z.number().min(1).max(10).describe("Nueva severidad"),
-    durationMinutes: z.number().optional().describe("Nueva duración en minutos"),
-    notes: z.string().optional().describe("Nuevas notas"),
+    severity: z.number().min(1).max(10).describe("New severity"),
+    durationMinutes: z.number().optional().describe("New duration in minutes"),
+    notes: z.string().optional().describe("New notes"),
   }),
   handler: async (
     ctx: KapsoToolCtx,
@@ -421,7 +421,7 @@ export const updateDizziness = createTool({
     );
 
     if (!latest) {
-      return "No hay registros de mareos para actualizar.";
+      return "No dizziness records to update.";
     }
 
     const oldSeverity = latest.severity;
@@ -433,7 +433,7 @@ export const updateDizziness = createTool({
       notes: args.notes,
     });
 
-    return `Mareo actualizado de severidad ${oldSeverity} a ${args.severity}/10.`;
+    return `Dizziness updated from severity ${oldSeverity} to ${args.severity}/10.`;
   },
 });
 
