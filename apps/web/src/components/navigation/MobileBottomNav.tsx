@@ -1,11 +1,13 @@
 "use client"
 
 import { Link, usePathname } from "@/i18n/navigation"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { getMobileNavItems } from "@/lib/navigation"
 
 export function MobileBottomNav() {
   const pathname = usePathname()
+  const t = useTranslations("Navigation")
   const navItems = getMobileNavItems()
 
   const isActive = (path: string) => pathname === path
@@ -14,7 +16,7 @@ export function MobileBottomNav() {
     <nav
       className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-t border-border/50 pb-[env(safe-area-inset-bottom)]"
       role="navigation"
-      aria-label="Navegacion principal"
+      aria-label={t("mainNavigation")}
     >
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
@@ -26,7 +28,7 @@ export function MobileBottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                aria-label={item.label}
+                aria-label={t(item.label)}
                 aria-current={active ? "page" : undefined}
                 className="flex items-center justify-center -mt-4"
               >
@@ -43,7 +45,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              aria-label={item.label}
+              aria-label={t(item.label)}
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 min-w-[56px] py-2 px-1",
@@ -67,7 +69,7 @@ export function MobileBottomNav() {
                   active && "text-primary"
                 )}
               >
-                {item.label}
+                {t(item.label)}
               </span>
             </Link>
           )

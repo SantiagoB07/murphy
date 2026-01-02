@@ -3,6 +3,7 @@
 import { Link, usePathname } from "@/i18n/navigation"
 import { Settings, Activity } from "lucide-react"
 import { UserButton } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { getNavItems, getHomeRoute, getSettingsRoute } from "@/lib/navigation"
 import { LocaleSwitcher } from "@/components/LocaleSwitcher"
@@ -13,6 +14,7 @@ interface TopNavbarProps {
 
 export function TopNavbar({ userName }: TopNavbarProps) {
   const pathname = usePathname()
+  const t = useTranslations("Navigation")
   const navItems = getNavItems()
   const homeRoute = getHomeRoute()
   const settingsRoute = getSettingsRoute()
@@ -42,7 +44,7 @@ export function TopNavbar({ userName }: TopNavbarProps) {
         <nav
           className="flex items-center gap-1"
           role="navigation"
-          aria-label="Navegacion principal"
+          aria-label={t("mainNavigation")}
         >
           {navItems.map((item) => {
             const Icon = item.icon
@@ -73,7 +75,7 @@ export function TopNavbar({ userName }: TopNavbarProps) {
                     active && "text-foreground"
                   )}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </span>
               </Link>
             )
@@ -88,7 +90,7 @@ export function TopNavbar({ userName }: TopNavbarProps) {
           {/* Settings Button */}
           <Link
             href={settingsRoute as "/configuracion"}
-            aria-label="Configuracion"
+            aria-label={t("settings")}
             className={cn(
               "flex items-center justify-center w-11 h-11 rounded-xl",
               "transition-colors duration-150",
