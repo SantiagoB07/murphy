@@ -96,7 +96,7 @@ export function PeriodStatsCard({ stats, periodLabel }: PeriodStatsCardProps) {
             {stats.daysWithRecordsPercent}%
           </p>
           <p className="text-xs text-muted-foreground">
-            {stats.daysWithRecords} {t("of")} {stats.totalDays} dias
+            {stats.daysWithRecords} {t("of")} {stats.totalDays} {t("days")}
           </p>
         </article>
 

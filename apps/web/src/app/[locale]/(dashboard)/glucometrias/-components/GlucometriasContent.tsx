@@ -174,7 +174,11 @@ export function GlucometriasContent() {
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             <span className="capitalize">
-              {format(selectedDate, "EEEE, d MMMM", { locale: locale === "es" ? es : undefined })}
+              {format(
+                selectedDate,
+                locale === "es" ? "EEEE, d 'de' MMMM" : "EEEE, d MMMM",
+                { locale: locale === "es" ? es : undefined }
+              )}
             </span>
             {isToday && (
               <span className="ml-2 text-xs text-primary bg-primary/20 px-2 py-0.5 rounded-full">

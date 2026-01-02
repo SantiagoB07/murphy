@@ -292,7 +292,8 @@
       "daysWithRecords": "Days with records",
       "period": "Period",
       "takesPerDay": "readings/day",
-      "of": "of"
+      "of": "of",
+      "days": "days"
     }
   },
   "Insulina": {

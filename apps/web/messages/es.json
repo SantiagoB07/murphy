@@ -291,8 +291,9 @@
       "inRange": "En rango (70-180)",
        "daysWithRecords": "Días con registro",
       "period": "Periodo",
-       "takesPerDay": "tomas/día",
-      "of": "de"
+      "takesPerDay": "tomas/día",
+      "of": "de",
+      "days": "días"
     }
   },
   "Insulina": {
