@@ -13,13 +13,19 @@
   "Landing": {
     "skipToContent": "Saltar al contenido principal",
     "brand": {
-      "name": "MurphyIA",
-      "edition": "Pro Edition"
+      "name": "Murphy",
+      "tagline": "Acompañamiento integral para el control de la diabetes en pro de una mejor calidad de vida"
+    },
+    "nav": {
+      "problema": "Problema",
+      "solucion": "Solución",
+      "beneficios": "Beneficios",
+      "contacto": "Contacto"
     },
     "hero": {
       "title": "Tu salud,",
       "titleHighlight": "bajo control",
-      "description": "Plataforma inteligente para el seguimiento de diabetes con integración WhatsApp y análisis personalizado."
+      "description": "Sistema integrado con IA que permite el seguimiento de las glucometrías y mejora la vida de los pacientes con diabetes."
     },
     "features": {
       "label": "Características",
@@ -29,10 +35,179 @@
     "cta": {
       "goToDashboard": "Ir al Dashboard",
       "signIn": "Iniciar Sesión",
-      "signUp": "Registrarte"
+      "signUp": "Registrarte",
+      "scheduleDemo": "Agendar Demo"
+    },
+    "video": {
+      "badge": "Murphy acompaña la diabetes día a día",
+      "title": "Murphy es más que tecnología",
+      "titleHighlight": "es acompañamiento que salva vidas",
+      "description": "Murphy conecta a pacientes con diabetes y sus médicos a través de IA conversacional, convirtiendo cada lectura de glucosa, insulina y bienestar en datos clínicos accionables."
+    },
+    "stats": {
+      "population": "3M+",
+      "populationLabel": "Personas con diabetes en Colombia",
+      "patients": "Pacientes",
+      "patientsLabel": "Control estable de glucosa",
+      "support": "24/7",
+      "supportLabel": "Acompañamiento inteligente"
+    },
+    "problem": {
+      "badge": "El problema real",
+      "title": "El seguimiento de las glucometrías no debería depender de cuadernos.",
+      "story": "Esta idea nació por experiencia de uno de los cofundadores, quien observó a su abuela luchar cada día con su diabetes avanzada: anotando glucometrías en cuadernos, olvidando lecturas, y esperando semanas para que su médico entendiera lo que pasaba.",
+      "question": "¿Cómo puede ser que en plena era digital el seguimiento dependa aún de una libreta?",
+      "items": {
+        "tracking": {
+          "title": "Falta de seguimiento continuo",
+          "description": "Los pacientes registran datos de forma inconsistente y en papel"
+        },
+        "communication": {
+          "title": "Comunicación fragmentada",
+          "description": "Meses de espera entre citas sin visibilidad del estado del paciente"
+        },
+        "decisions": {
+          "title": "Decisiones tardías",
+          "description": "Complicaciones costosas y pérdida de calidad de vida"
+        }
+      }
+    },
+    "solution": {
+      "badge": "Cómo funciona Murphy",
+      "title": "Un agente de IA que te acompaña",
+      "steps": {
+        "register": {
+          "title": "Registro Natural",
+          "description": "Registra tu glucometría, insulina, estrés, horas de sueño y mareos por WhatsApp, llamada telefónica o dashboard web"
+        },
+        "analysis": {
+          "title": "Análisis Inteligente",
+          "description": "Murphy analiza patrones, identifica riesgos y genera insights clínicos automáticamente"
+        },
+        "integration": {
+          "title": "Integración Médica",
+          "description": "Reportes automáticos para los médicos especialistas en base a la información diaria del paciente"
+        }
+      },
+      "channels": {
+        "title": "Múltiples canales, cero fricción",
+        "calls": "Llamadas",
+        "whatsapp": "WhatsApp",
+        "dashboard": "Dashboard"
+      }
+    },
+    "benefits": {
+      "title": "Beneficios para todos",
+      "tabs": {
+        "pacientes": "Pacientes",
+        "medicos": "Médicos",
+        "clinicas": "Clínicas"
+      },
+      "pacientes": {
+        "support": {
+          "title": "Acompañamiento continuo",
+          "description": "Nunca más sentirse solo frente a la enfermedad"
+        },
+        "education": {
+          "title": "Educación personalizada",
+          "description": "Murphy es un copiloto en la educación y motivación del paciente y sus coadministradores"
+        },
+        "alerts": {
+          "title": "Alertas tempranas",
+          "description": "Detección proactiva de situaciones de riesgo"
+        },
+        "simple": {
+          "title": "Sin complicaciones técnicas",
+          "description": "Usa los canales que ya conoces y confías"
+        }
+      },
+      "medicos": {
+        "visibility": {
+          "title": "Visibilidad completa",
+          "description": "Ve la evolución real entre consultas"
+        },
+        "decisions": {
+          "title": "Decisiones precisas",
+          "description": "Datos estructurados y análisis de tendencias"
+        },
+        "alerts": {
+          "title": "Alertas inteligentes",
+          "description": "Notificaciones solo cuando realmente importa"
+        },
+        "professional": {
+          "title": "Profesionalismo",
+          "description": "Refleje su inversión en tecnología de vanguardia"
+        }
+      },
+      "clinicas": {
+        "indicators": {
+          "title": "Mejores indicadores",
+          "description": "Información de los pacientes en tiempo real"
+        },
+        "costs": {
+          "title": "Reducción de costos",
+          "description": "Menos urgencias y hospitalizaciones"
+        },
+        "data": {
+          "title": "Datos valiosos",
+          "description": "Métricas clínicas y económicas en tiempo real"
+        },
+        "scalability": {
+          "title": "Escalabilidad",
+          "description": "Atiende más pacientes con mejor calidad"
+        }
+      }
+    },
+    "demoForm": {
+      "title": "Agendar Demo",
+      "description": "Déjanos tus datos y te contactaremos para mostrarte cómo Murphy puede transformar el seguimiento de diabetes.",
+      "fields": {
+        "nombre": "Nombre completo",
+        "nombrePlaceholder": "Tu nombre completo",
+        "tipoUsuario": "Tipo de usuario",
+        "tipoUsuarioPlaceholder": "Selecciona tu rol",
+        "tipoUsuarioOptions": {
+          "paciente": "Paciente",
+          "coadministrador": "Coadministrador",
+          "medico": "Médico"
+        },
+        "celular": "Número de celular",
+        "celularPlaceholder": "+57 300 123 4567",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "tu@correo.com",
+        "fechaContacto": "Día de contacto",
+        "fechaContactoPlaceholder": "Selecciona un día",
+        "horaContacto": "Hora de contacto",
+        "horaContactoPlaceholder": "Selecciona una hora",
+        "horaOptions": {
+          "09:00": "9:00 AM",
+          "10:00": "10:00 AM",
+          "11:00": "11:00 AM",
+          "12:00": "12:00 PM",
+          "14:00": "2:00 PM",
+          "15:00": "3:00 PM",
+          "16:00": "4:00 PM",
+          "17:00": "5:00 PM"
+        }
+      },
+      "validation": {
+        "nombreRequired": "El nombre es requerido",
+        "tipoUsuarioRequired": "Selecciona un tipo de usuario",
+        "celularRequired": "El número de celular es requerido",
+        "emailRequired": "El correo electrónico es requerido",
+        "emailInvalid": "Ingresa un correo electrónico válido"
+      },
+      "submit": "Enviar solicitud",
+      "submitting": "Enviando...",
+      "success": {
+        "title": "¡Gracias por tu interés!",
+        "message": "Hemos recibido tu solicitud. Te contactaremos pronto para agendar tu demo.",
+        "whatsappButton": "Contactar por WhatsApp"
+      },
+      "error": "Error al enviar la solicitud. Por favor intenta de nuevo."
     },
     "footer": {
-      "copyright": "© 2025 MurphyIA"
+      "copyright": "© 2025 Murphy Health. Todos los derechos reservados."
     }
   },
   "Dashboard": {

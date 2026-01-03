@@ -53,6 +53,12 @@ const callStatus = v.union(
   v.literal("too_short")    // Llamada muy corta (< 20 segundos)
 );
 
+const demoLeadUserTypes = v.union(
+  v.literal("paciente"),
+  v.literal("coadministrador"),
+  v.literal("medico")
+);
+
 const glucoseSlots = v.union(
   v.literal("before_breakfast"),
   v.literal("after_breakfast"),
@@ -202,4 +208,15 @@ export default defineSchema({
     .index("by_conversation", ["conversationId"])
     .index("by_patient", ["patientId"])
     .index("by_status", ["status"]),
+
+  // Demo leads from landing page
+  demoLeads: defineTable({
+    nombre: v.string(),
+    tipoUsuario: demoLeadUserTypes,
+    celular: v.string(),
+    email: v.string(),
+    fechaContacto: v.optional(v.string()), // "YYYY-MM-DD"
+    horaContacto: v.optional(v.string()),  // "HH:MM"
+    createdAt: v.number(),
+  }).index("by_email", ["email"]),
 });
