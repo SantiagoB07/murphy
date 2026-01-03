@@ -1,8 +1,9 @@
 "use client"
 
-import { Activity } from "lucide-react"
+import { Activity, ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { SignInButton } from "@clerk/nextjs"
+import { SignInButton, useAuth } from "@clerk/nextjs"
+import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { LocaleSwitcher } from "@/components/LocaleSwitcher"
 
@@ -12,6 +13,7 @@ interface LandingHeaderProps {
 
 export function LandingHeader({ onScrollToSection }: LandingHeaderProps) {
   const t = useTranslations("Landing")
+  const { isSignedIn } = useAuth()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -50,14 +52,25 @@ export function LandingHeader({ onScrollToSection }: LandingHeaderProps) {
 
         <div className="flex items-center gap-3">
           <LocaleSwitcher />
-          <SignInButton mode="redirect">
-            <Button variant="ghost" className="hidden sm:inline-flex">
-              {t("cta.signIn")}
-            </Button>
-          </SignInButton>
-          <Button onClick={() => onScrollToSection("contacto")} className="btn-neon">
-            {t("cta.scheduleDemo")}
-          </Button>
+          {isSignedIn ? (
+            <Link href="/dashboard">
+              <Button className="btn-neon">
+                <ArrowRight className="mr-2 h-4 w-4" />
+                {t("cta.goToDashboard")}
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <SignInButton mode="redirect">
+                <Button variant="ghost" className="hidden sm:inline-flex">
+                  {t("cta.signIn")}
+                </Button>
+              </SignInButton>
+              <Button onClick={() => onScrollToSection("contacto")} className="btn-neon">
+                {t("cta.scheduleDemo")}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>

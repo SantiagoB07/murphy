@@ -1,8 +1,9 @@
 "use client"
 
-import { Zap, Shield, LogIn, Calendar as CalendarIcon } from "lucide-react"
+import { Zap, Shield, LogIn, Calendar as CalendarIcon, ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { SignInButton } from "@clerk/nextjs"
+import { SignInButton, useAuth } from "@clerk/nextjs"
+import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 
 interface HeroSectionProps {
@@ -11,6 +12,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ onScrollToContact }: HeroSectionProps) {
   const t = useTranslations("Landing")
+  const { isSignedIn } = useAuth()
 
   return (
     <section className="min-h-screen flex items-center justify-center px-4 pt-20">
@@ -35,20 +37,31 @@ export function HeroSection({ onScrollToContact }: HeroSectionProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <SignInButton mode="redirect">
-            <Button variant="outline" size="lg" className="w-full sm:w-auto min-w-[160px]">
-              <LogIn className="mr-2 h-4 w-4" />
-              {t("cta.signIn")}
-            </Button>
-          </SignInButton>
-          <Button
-            onClick={onScrollToContact}
-            size="lg"
-            className="btn-neon w-full sm:w-auto min-w-[160px]"
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {t("cta.scheduleDemo")}
-          </Button>
+          {isSignedIn ? (
+            <Link href="/dashboard">
+              <Button size="lg" className="btn-neon w-full sm:w-auto min-w-[200px]">
+                <ArrowRight className="mr-2 h-4 w-4" />
+                {t("cta.goToDashboard")}
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <SignInButton mode="redirect">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto min-w-[160px]">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  {t("cta.signIn")}
+                </Button>
+              </SignInButton>
+              <Button
+                onClick={onScrollToContact}
+                size="lg"
+                className="btn-neon w-full sm:w-auto min-w-[160px]"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {t("cta.scheduleDemo")}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </section>
