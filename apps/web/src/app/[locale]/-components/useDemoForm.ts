@@ -2,21 +2,18 @@
 
 import { useForm } from "@tanstack/react-form"
 import { useState } from "react"
-import { z } from "zod"
 import { useMutation } from "convex/react"
 import { api } from "@murphy/backend/convex/_generated/api"
 import { toast } from "sonner"
 
-export const demoFormSchema = z.object({
-  nombre: z.string().min(1, "El nombre es requerido"),
-  tipoUsuario: z.enum(["paciente", "coadministrador", "medico"]),
-  celular: z.string().min(1, "El número de celular es requerido"),
-  email: z.string().email("Ingresa un correo electrónico válido"),
-  fechaContacto: z.string().optional(),
-  horaContacto: z.string().optional(),
-})
-
-export type DemoFormValues = z.infer<typeof demoFormSchema>
+export interface DemoFormValues {
+  nombre: string
+  tipoUsuario: "paciente" | "coadministrador" | "medico"
+  celular: string
+  email: string
+  fechaContacto?: string
+  horaContacto?: string
+}
 
 export function useDemoForm(translations: {
   validation: {

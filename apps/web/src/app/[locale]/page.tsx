@@ -18,7 +18,9 @@ export default async function HomePage() {
       <Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="animate-pulse text-primary">Cargando...</div>
+            <div className="animate-pulse text-primary" aria-busy="true">
+              <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            </div>
           </div>
         }
       >

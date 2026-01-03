@@ -229,7 +229,11 @@ export function DemoFormSection() {
                         onSelect={(date) =>
                           field.handleChange(date ? format(date, "yyyy-MM-dd") : "")
                         }
-                        disabled={(date) => date < new Date()}
+                        disabled={(date) => {
+                          const today = new Date()
+                          today.setHours(0, 0, 0, 0)
+                          return date < today
+                        }}
                         locale={dateLocale}
                       />
                     </PopoverContent>
