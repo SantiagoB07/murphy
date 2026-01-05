@@ -75,7 +75,7 @@ export function QuarterlyView({
           ? Math.round(values.reduce((a, b) => a + b, 0) / values.length)
           : null
 
-      const inRange = values.filter((v) => v >= 70 && v <= 180).length
+      const inRange = values.filter((v) => v >= 90 && v <= 140).length
       const inRangePercent =
         values.length > 0 ? Math.round((inRange / values.length) * 100) : null
 

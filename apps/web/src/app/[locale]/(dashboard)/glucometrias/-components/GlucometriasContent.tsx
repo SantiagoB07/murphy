@@ -129,7 +129,7 @@ export function GlucometriasContent() {
       avg: Math.round(values.reduce((a, b) => a + b, 0) / values.length),
       min: Math.min(...values),
       max: Math.max(...values),
-      inRange: values.filter((v) => v >= 70 && v <= 180).length,
+      inRange: values.filter((v) => v >= 90 && v <= 140).length,
     }
   }, [dayRecords])
 

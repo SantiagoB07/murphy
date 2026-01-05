@@ -187,10 +187,10 @@ export async function getStats(
   const min = Math.min(...values);
   const max = Math.max(...values);
 
-  // Count values in range (70-180 mg/dL is typical target range)
-  const inRange = values.filter((v) => v >= 70 && v <= 180).length;
-  const belowRange = values.filter((v) => v < 70).length;
-  const aboveRange = values.filter((v) => v > 180).length;
+  // Count values in range (90-140 mg/dL is typical target range)
+  const inRange = values.filter((v) => v >= 90 && v <= 140).length;
+  const belowRange = values.filter((v) => v < 90).length;
+  const aboveRange = values.filter((v) => v > 140).length;
 
   return {
     count: records.length,
