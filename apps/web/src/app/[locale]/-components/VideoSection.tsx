@@ -1,8 +1,11 @@
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { StatCard } from "./landing"
 
 export function VideoSection() {
   const t = useTranslations("Landing")
+  const locale = useLocale()
+
+  const videoUrl = locale === "es" ? "https://www.youtube.com/embed/gZUBpbIfQrI" : "https://www.youtube.com/embed/x_tt2IlcfT0"
 
   return (
     <section className="pt-32 pb-20 px-4">
@@ -23,7 +26,7 @@ export function VideoSection() {
           >
             <div className="aspect-video rounded-xl overflow-hidden">
               <iframe
-                src="https://www.youtube.com/embed/gZUBpbIfQrI"
+                src={videoUrl}
                 title="Murphy - Somos Murphy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
