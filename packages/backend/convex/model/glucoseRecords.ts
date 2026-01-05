@@ -99,7 +99,7 @@ export async function listByPatient(
 
   let records = await ctx.db
     .query("glucoseRecords")
-    .withIndex("by_patient_date", (q) => q.eq("patientId", patientId))
+    .withIndex("by_patient_recordedAt", (q) => q.eq("patientId", patientId))
     .order("desc")
     .collect();
 
@@ -144,7 +144,7 @@ export async function getRecent(
 ): Promise<Doc<"glucoseRecords">[]> {
   return ctx.db
     .query("glucoseRecords")
-    .withIndex("by_patient_date", (q) => q.eq("patientId", patientId))
+    .withIndex("by_patient_recordedAt", (q) => q.eq("patientId", patientId))
     .order("desc")
     .take(limit);
 }
