@@ -60,9 +60,9 @@ export function GlucoseChart({
 
   const chartData = useMemo(() => {
     return [...data]
-      /* .sort(
+      .sort(
         (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      ) */
+      )
       .map((reading) => ({
         ...reading,
         time: new Date(reading.timestamp).toLocaleTimeString(locale === "en" ? "en-US" : "es-ES", {
@@ -76,6 +76,8 @@ export function GlucoseChart({
         inRange: reading.value >= 70 && reading.value <= 180,
       }))
   }, [data, locale])
+
+  console.log("chartData", chartData)
 
   const stats = useMemo(() => {
     if (data.length === 0) return { avg: 0, min: 0, max: 0, inRange: 0 }
