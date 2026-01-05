@@ -2,7 +2,6 @@
 
 import { useMemo } from "react"
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -63,8 +62,9 @@ export function GlucoseChart({
       .sort(
         (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       )
-      .map((reading) => ({
+      .map((reading, index) => ({
         ...reading,
+        index, // Sequential index for X-axis positioning
         time: new Date(reading.timestamp).toLocaleTimeString(locale === "en" ? "en-US" : "es-ES", {
           hour: "2-digit",
           minute: "2-digit",
@@ -250,25 +250,6 @@ export function GlucoseChart({
               vertical={false}
             />
 
-            {/* Marcadores verticales para los 6 momentos de medición */}
-            {MEASUREMENT_TIMES.map((slot) => (
-              <ReferenceLine
-                key={slot.time}
-                x={slot.time}
-                stroke={PERIOD_COLORS[slot.period]}
-                strokeDasharray="4 4"
-                strokeOpacity={0.25}
-                label={{
-                  value: slot.label,
-                  position: "top",
-                  fill: PERIOD_COLORS[slot.period],
-                  fontSize: 10,
-                  fontWeight: 500,
-                  opacity: 0.7,
-                }}
-              />
-            ))}
-
             {showTargetRange && (
               <>
                 <ReferenceLine
@@ -287,7 +268,14 @@ export function GlucoseChart({
             )}
 
             <XAxis
-              dataKey="time"
+              dataKey="index"
+              type="number"
+              domain={[0, "dataMax"]}
+              tickFormatter={(index: number) => {
+                const point = chartData[index]
+                if (!point) return ""
+                return `${point.date} ${point.time}`
+              }}
               tick={{ fill: "hsl(275, 15%, 70%)", fontSize: 11 }}
               tickLine={{ stroke: "hsl(275, 40%, 15%)" }}
               axisLine={{ stroke: "hsl(275, 40%, 15%)" }}
