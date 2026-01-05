@@ -80,7 +80,6 @@ export default function ConfiguracionPage() {
   // Build path with locale prefix for non-default locales
   const basePath = locale === "es" ? "/configuracion" : `/${locale}/configuracion`
 
-  console.log("Rendering ConfiguracionPage with role:", role)
 
   if (isLoading) {
     return <ConfiguracionSkeleton />

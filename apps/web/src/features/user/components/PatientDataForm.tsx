@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { usePatientDataForm } from "../hooks/usePatientDataForm"
+import { DIABETES_TYPES, GENDER_TYPES } from "../user.types"
 import type { PatientFormData } from "../user.types"
 
 function getErrorMessage(error: unknown): string {
@@ -35,9 +36,6 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
     e.preventDefault()
     form.handleSubmit()
   }
-
-  const diabetesTypes = ["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"] as const
-  const genderOptions = ["masculino", "femenino", "otro", "prefiero_no_decir"] as const
 
   return (
     <div className="space-y-6">
@@ -135,7 +133,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                       <SelectValue placeholder={t("fields.diabetesType.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {diabetesTypes.map((type) => (
+                      {DIABETES_TYPES.map((type) => (
                         <SelectItem key={type} value={type}>
                           {t(`fields.diabetesType.types.${type}`)}
                         </SelectItem>
@@ -240,7 +238,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                     <SelectValue placeholder={t("fields.gender.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {genderOptions.map((option) => (
+                    {GENDER_TYPES.map((option) => (
                       <SelectItem key={option} value={option}>
                         {t(`fields.gender.options.${option}`)}
                       </SelectItem>
