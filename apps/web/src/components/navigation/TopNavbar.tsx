@@ -2,11 +2,11 @@
 
 import { Link, usePathname } from "@/i18n/navigation"
 import { Settings, Activity } from "lucide-react"
-import { UserButton } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { getNavItems, getHomeRoute, getSettingsRoute } from "@/lib/navigation"
 import { LocaleSwitcher } from "@/components/LocaleSwitcher"
+import { UserButton } from "@/components/user-button"
 
 interface TopNavbarProps {
   userName: string
