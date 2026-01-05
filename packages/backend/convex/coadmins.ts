@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { createClerkClient } from "@clerk/backend";
 import { getCurrentPatient } from "./lib/auth";
+import { getAuthenticatedUser } from "./lib/auth";
 
 // ============================================
 // Queries
@@ -56,6 +57,34 @@ export const getPatientCoadmins = query({
       .collect();
 
     return coadmins;
+  },
+});
+
+/**
+ * Gets the coadmin's own profile (for coadmin users)
+ */
+export const getCoadminOwnProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const coadmin = await ctx.db
+      .query("coadminProfiles")
+      .withIndex("by_clerk_user", (q) => q.eq("clerkUserId", identity.subject))
+      .unique();
+
+    if (!coadmin) {
+      return null;
+    }
+
+    return {
+      _id: coadmin._id,
+      fullName: coadmin.fullName,
+      phoneNumber: coadmin.phoneNumber,
+    };
   },
 });
 
@@ -133,6 +162,40 @@ export const createCoadminProfile = internalMutation({
     });
 
     return coadminId;
+  },
+});
+
+/**
+ * Updates the coadmin's own profile
+ */
+export const updateCoadminProfile = mutation({
+  args: {
+    fullName: v.optional(v.string()),
+    phoneNumber: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+
+    if (user.role !== "coadmin") {
+      throw new Error("Only coadmins can update their own profile");
+    }
+
+    const coadmin = await ctx.db
+      .query("coadminProfiles")
+      .withIndex("by_clerk_user", (q) => q.eq("clerkUserId", user.clerkUserId))
+      .unique();
+
+    if (!coadmin) {
+      throw new Error("Coadmin profile not found");
+    }
+
+    await ctx.db.patch(coadmin._id, {
+      fullName: args.fullName ?? coadmin.fullName,
+      phoneNumber: args.phoneNumber ?? coadmin.phoneNumber,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
   },
 });
 

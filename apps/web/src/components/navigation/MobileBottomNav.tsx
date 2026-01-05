@@ -4,6 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { getMobileNavItems } from "@/lib/navigation"
+import { UserButton } from "@/components/user-button"
 
 export function MobileBottomNav() {
   const pathname = usePathname()
@@ -74,6 +75,9 @@ export function MobileBottomNav() {
             </Link>
           )
         })}
+        <div className="flex flex-col items-center justify-center gap-1 min-w-[56px] py-2 px-1 min-h-[44px]">
+          <UserButton />
+        </div>
       </div>
     </nav>
   )

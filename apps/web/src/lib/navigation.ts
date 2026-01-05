@@ -3,7 +3,6 @@ import {
   Activity,
   Bell,
   Syringe,
-  Settings,
   type LucideIcon,
 } from "lucide-react"
 
@@ -38,7 +37,6 @@ const patientMobileNavItems: NavItem[] = [
   { label: "insulina", href: "/insulina", icon: Syringe },
   { label: "glucometrias", href: "/glucometrias", icon: Activity, isCenter: true },
   { label: "alertas", href: "/alertas", icon: Bell },
-  { label: "settings", href: "/configuracion", icon: Settings },
 ]
 
 export function getNavItems(): NavItem[] {
