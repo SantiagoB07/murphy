@@ -32,8 +32,8 @@ import { useGlucoseMutations } from "../hooks/useGlucoseMutations"
 
 const GLUCOSE_RANGES = {
   critical_low: 54,
-  low: 70,
-  high: 180,
+  low: 90,
+  high: 140,
   critical_high: 250,
 }
 

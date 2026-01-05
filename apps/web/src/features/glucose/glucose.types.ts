@@ -48,11 +48,11 @@ export interface PeriodStats {
 // Glucose ranges for color coding
 export const GLUCOSE_RANGES = {
   critical_low: 54,
-  low: 70,
-  normal: { min: 70, max: 140 },
-  preprandial: { min: 70, max: 130 },
-  postprandial: { max: 180 },
-  high: 180,
+  low: 90,
+  normal: { min: 90, max: 140 },
+  preprandial: { min: 90, max: 130 },
+  postprandial: { max: 140 },
+  high: 140,
   critical_high: 250,
 } as const
 

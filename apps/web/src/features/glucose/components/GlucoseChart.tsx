@@ -73,14 +73,14 @@ export function GlucoseChart({
           day: "numeric",
           month: "short",
         }),
-        inRange: reading.value >= 70 && reading.value <= 180,
+        inRange: reading.value >= 90 && reading.value <= 140,
       }))
   }, [data, locale])
 
   const stats = useMemo(() => {
     if (data.length === 0) return { avg: 0, min: 0, max: 0, inRange: 0 }
     const values = data.map((d) => d.value)
-    const inRangeCount = values.filter((v) => v >= 70 && v <= 180).length
+    const inRangeCount = values.filter((v) => v >= 90 && v <= 140).length
     return {
       avg: Math.round(values.reduce((a, b) => a + b, 0) / values.length),
       min: Math.min(...values),
@@ -92,8 +92,8 @@ export function GlucoseChart({
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
-      const isHigh = data.value > 180
-      const isLow = data.value < 70
+      const isHigh = data.value > 140
+      const isLow = data.value < 90
 
       return (
         <div className="bg-card/95 backdrop-blur-sm p-3 rounded-hig border border-border/50 elevation-2">
@@ -251,13 +251,13 @@ export function GlucoseChart({
             {showTargetRange && (
               <>
                 <ReferenceLine
-                  y={180}
+                  y={140}
                   stroke="hsl(0, 84%, 60%)"
                   strokeDasharray="6 4"
                   strokeOpacity={0.4}
                 />
                 <ReferenceLine
-                  y={70}
+                  y={90}
                   stroke="hsl(38, 92%, 50%)"
                   strokeDasharray="6 4"
                   strokeOpacity={0.4}
@@ -302,8 +302,8 @@ export function GlucoseChart({
               strokeWidth={2.5}
               dot={(props: any) => {
                 const { cx, cy, payload } = props
-                const isHigh = payload.value > 180
-                const isLow = payload.value < 70
+                const isHigh = payload.value > 140
+                const isLow = payload.value < 90
                 const color = isHigh
                   ? "hsl(0, 84%, 60%)"
                   : isLow
