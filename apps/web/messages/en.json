@@ -1,6 +1,13 @@
 {
   "Common": {
-    "changeLanguage": "Change language"
+    "changeLanguage": "Change language",
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "description": "You have unsaved changes. Are you sure you want to leave? Your changes will be lost.",
+      "stay": "Stay",
+      "discard": "Discard changes",
+      "browserWarning": "You have unsaved changes. Are you sure you want to leave?"
+    }
   },
   "Navigation": {
     "mainNavigation": "Main navigation",

@@ -15,6 +15,14 @@ import {
 import { usePatientDataForm } from "../hooks/usePatientDataForm"
 import type { PatientFormData } from "../user.types"
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") return error
+  if (error && typeof error === "object" && "message" in error) {
+    return String(error.message)
+  }
+  return String(error)
+}
+
 interface PatientDataFormProps {
   initialData: PatientFormData
 }
@@ -40,55 +48,65 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             {t("sections.personalInfo")}
           </h3>
 
-          <form.Field
-            name="fullName"
-            validators={{
-              onChange: ({ value }) =>
-                !value ? t("fields.fullName.required") : undefined,
+          <form.Field name="fullName">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <div>
+                  <Label htmlFor={field.name}>{t("fields.fullName.label")} *</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder={t("fields.fullName.placeholder")}
+                    className="bg-secondary/30"
+                    aria-invalid={isInvalid}
+                    disabled={isPending}
+                  />
+                  {isInvalid && field.state.meta.errors.length > 0 && (
+                    <p className="text-sm text-destructive mt-1">
+                      {getErrorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )
             }}
-          >
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>{t("fields.fullName.label")} *</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={t("fields.fullName.placeholder")}
-                  className="bg-secondary/30"
-                  disabled={isPending}
-                />
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-destructive mt-1">
-                    {field.state.meta.errors[0]}
-                  </p>
-                )}
-              </div>
-            )}
           </form.Field>
 
           <form.Field name="phoneNumber">
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>{t("fields.phoneNumber.label")}</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value ?? ""}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => {
-                    const numericValue = e.target.value.replace(/\D/g, "")
-                    field.handleChange(numericValue)
-                  }}
-                  placeholder={t("fields.phoneNumber.placeholder")}
-                  className="bg-secondary/30"
-                  maxLength={10}
-                  disabled={isPending}
-                />
-              </div>
-            )}
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <div>
+                  <Label htmlFor={field.name}>{t("fields.phoneNumber.label")}</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value ?? ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      const sanitized = value.startsWith("+")
+                        ? "+" + value.slice(1).replace(/\D/g, "")
+                        : value.replace(/\D/g, "")
+                      field.handleChange(sanitized)
+                    }}
+                    placeholder={t("fields.phoneNumber.placeholder")}
+                    className="bg-secondary/30"
+                    maxLength={15}
+                    aria-invalid={isInvalid}
+                    disabled={isPending}
+                  />
+                  {isInvalid && field.state.meta.errors.length > 0 && (
+                    <p className="text-sm text-destructive mt-1">
+                      {getErrorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )
+            }}
           </form.Field>
         </div>
 
@@ -98,82 +116,70 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             {t("sections.medicalInfo")}
           </h3>
 
-          <form.Field
-            name="diabetesType"
-            validators={{
-              onChange: ({ value }) =>
-                !value ? t("fields.diabetesType.required") : undefined,
+          <form.Field name="diabetesType">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <div>
+                  <Label htmlFor={field.name}>{t("fields.diabetesType.label")} *</Label>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) =>
+                      field.handleChange(
+                        value as "Tipo 1" | "Tipo 2" | "Gestacional" | "LADA" | "MODY"
+                      )
+                    }
+                    disabled={isPending}
+                  >
+                    <SelectTrigger className="bg-secondary/30" id={field.name} aria-invalid={isInvalid}>
+                      <SelectValue placeholder={t("fields.diabetesType.placeholder")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {diabetesTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {t(`fields.diabetesType.types.${type}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {isInvalid && field.state.meta.errors.length > 0 && (
+                    <p className="text-sm text-destructive mt-1">
+                      {getErrorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )
             }}
-          >
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>{t("fields.diabetesType.label")} *</Label>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) =>
-                    field.handleChange(
-                      value as "Tipo 1" | "Tipo 2" | "Gestacional" | "LADA" | "MODY"
-                    )
-                  }
-                  disabled={isPending}
-                >
-                  <SelectTrigger className="bg-secondary/30" id={field.name}>
-                    <SelectValue placeholder={t("fields.diabetesType.placeholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {diabetesTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(`fields.diabetesType.types.${type}`)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-destructive mt-1">
-                    {field.state.meta.errors[0]}
-                  </p>
-                )}
-              </div>
-            )}
           </form.Field>
 
-          <form.Field
-            name="diagnosisYear"
-            validators={{
-              onChange: ({ value }) => {
-                if (!value) return undefined
-                const year = parseInt(value)
-                if (isNaN(year)) return t("fields.diagnosisYear.validation.mustBeNumber")
-                if (year < 1950) return t("fields.diagnosisYear.validation.after1950")
-                if (year > new Date().getFullYear())
-                  return t("fields.diagnosisYear.validation.cannotBeFuture")
-                return undefined
-              },
+          <form.Field name="diagnosisYear">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <div>
+                  <Label htmlFor={field.name}>{t("fields.diagnosisYear.label")}</Label>
+                  <Input
+                    id={field.name}
+                    type="number"
+                    name={field.name}
+                    value={field.state.value ?? ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder={t("fields.diagnosisYear.placeholder", { year: new Date().getFullYear() - 5 })}
+                    className="bg-secondary/30"
+                    min={1950}
+                    max={new Date().getFullYear()}
+                    aria-invalid={isInvalid}
+                    disabled={isPending}
+                  />
+                  {isInvalid && field.state.meta.errors.length > 0 && (
+                    <p className="text-sm text-destructive mt-1">
+                      {getErrorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )
             }}
-          >
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>{t("fields.diagnosisYear.label")}</Label>
-                <Input
-                  id={field.name}
-                  type="number"
-                  name={field.name}
-                  value={field.state.value ?? ""}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={t("fields.diagnosisYear.placeholder", { year: new Date().getFullYear() - 5 })}
-                  className="bg-secondary/30"
-                  min={1950}
-                  max={new Date().getFullYear()}
-                  disabled={isPending}
-                />
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-destructive mt-1">
-                    {field.state.meta.errors[0]}
-                  </p>
-                )}
-              </div>
-            )}
           </form.Field>
         </div>
 
@@ -278,21 +284,79 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => form.reset()}
-            disabled={isPending}
-          >
-            {t("actions.cancel")}
-          </Button>
-          <Button type="submit" className="flex-1" disabled={isPending}>
-            {isPending ? t("actions.saving") : t("actions.save")}
-          </Button>
-        </div>
+        <form.Subscribe
+          selector={(state) => ({
+            canSubmit: state.canSubmit,
+            isSubmitting: state.isSubmitting,
+            values: state.values,
+          })}
+        >
+          {({ canSubmit, isSubmitting, values }) => {
+            const hasChanges =
+              values.fullName !== initialData.fullName ||
+              (values.phoneNumber ?? "") !== (initialData.phoneNumber ?? "") ||
+              values.diabetesType !== initialData.diabetesType ||
+              (values.diagnosisYear ?? "") !== (initialData.diagnosisYear ?? "") ||
+              (values.birthDate ?? "") !== (initialData.birthDate ?? "") ||
+              (values.gender ?? "") !== (initialData.gender ?? "") ||
+              (values.city ?? "") !== (initialData.city ?? "") ||
+              (values.estrato ?? "") !== (initialData.estrato ?? "")
+
+            return (
+              <FormActions
+                hasChanges={hasChanges}
+                canSubmit={canSubmit}
+                isSubmitting={isSubmitting}
+                isPending={isPending}
+                onReset={() => form.reset()}
+                t={t}
+              />
+            )
+          }}
+        </form.Subscribe>
       </form>
     </div>
+  )
+}
+
+interface FormActionsProps {
+  hasChanges: boolean
+  canSubmit: boolean
+  isSubmitting: boolean
+  isPending: boolean
+  onReset: () => void
+  t: ReturnType<typeof useTranslations<"Configuracion.patientDataForm">>
+}
+
+function FormActions({
+  hasChanges,
+  canSubmit,
+  isSubmitting,
+  isPending,
+  onReset,
+  t,
+}: FormActionsProps) {
+
+  return (
+    <>
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={onReset}
+          disabled={isPending || !hasChanges}
+        >
+          {t("actions.cancel")}
+        </Button>
+        <Button
+          type="submit"
+          className="flex-1"
+          disabled={isPending || isSubmitting || !canSubmit || !hasChanges}
+        >
+          {isPending ? t("actions.saving") : t("actions.save")}
+        </Button>
+      </div>
+    </>
   )
 }

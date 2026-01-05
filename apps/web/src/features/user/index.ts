@@ -1,5 +1,5 @@
 export type { UserRole, PatientFormData, CoadminProfileFormData, DiabetesType, GenderType } from "./user.types"
-export { DIABETES_TYPES, GENDER_TYPES, patientDataSchema, coadminProfileSchema } from "./user.types"
+export { DIABETES_TYPES, GENDER_TYPES} from "./user.types"
 export { useUserRole } from "./hooks/useUserRole"
 export { usePatientDataForm } from "./hooks/usePatientDataForm"
 export { useCoadminProfileForm } from "./hooks/useCoadminProfileForm"

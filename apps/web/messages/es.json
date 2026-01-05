@@ -1,6 +1,13 @@
 {
   "Common": {
-    "changeLanguage": "Cambiar idioma"
+    "changeLanguage": "Cambiar idioma",
+    "unsavedChanges": {
+      "title": "Cambios sin guardar",
+      "description": "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir? Los cambios se perderán.",
+      "stay": "Quedarse",
+      "discard": "Descartar cambios",
+      "browserWarning": "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?"
+    }
   },
   "Navigation": {
     "mainNavigation": "Navegación principal",

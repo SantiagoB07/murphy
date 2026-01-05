@@ -6,10 +6,11 @@ import { useConvexMutation } from "@convex-dev/react-query"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { api } from "@murphy/backend/convex/_generated/api"
-import type { PatientFormData } from "../user.types"
+import { createPatientDataSchema, type PatientFormData } from "../user.types"
 
 export function usePatientDataForm(initialData: PatientFormData) {
-  const t = useTranslations("Configuracion.patientDataForm.toast")
+  const t = useTranslations("Configuracion.patientDataForm")
+  const tToast = useTranslations("Configuracion.patientDataForm.toast")
   const updateProfileMutation = useConvexMutation(api.patients.updateProfile)
 
   const { mutate: updateProfile, isPending } = useMutation({
@@ -26,16 +27,21 @@ export function usePatientDataForm(initialData: PatientFormData) {
       })
     },
     onSuccess: () => {
-      toast.success(t("successMessage"))
+      toast.success(tToast("successMessage"))
     },
     onError: (error) => {
       console.error("Error updating profile:", error)
-      toast.error(t("errorMessage"))
+      toast.error(tToast("errorMessage"))
     },
   })
 
+  const formSchema = createPatientDataSchema(t)
+
   const form = useForm({
     defaultValues: initialData,
+    validators: {
+      onBlur: formSchema,
+    },
     onSubmit: async ({ value }) => {
       updateProfile(value)
     },
