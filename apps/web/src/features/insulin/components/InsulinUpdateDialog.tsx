@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -66,6 +67,14 @@ export function InsulinUpdateDialog({
       timesPerDay: currentSchedule?.timesPerDay ?? 1,
     },
   })
+
+  // Reset form values when the schedule type or data changes
+  useEffect(() => {
+    form.reset({
+      unitsPerDose: currentSchedule?.unitsPerDose ?? 0,
+      timesPerDay: currentSchedule?.timesPerDay ?? 1,
+    })
+  }, [type, currentSchedule, form])
 
   const handleSubmit = (data: FormData) => {
     onSave({

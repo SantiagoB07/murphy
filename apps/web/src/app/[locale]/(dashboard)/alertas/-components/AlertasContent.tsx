@@ -5,10 +5,6 @@ import { useTranslations } from "next-intl"
 import { AlertasHeader } from "./AlertasHeader"
 import {
   Bell,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Info,
   Plus,
   Trash2,
   MessageCircle,
@@ -19,90 +15,16 @@ import {
   Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
 import {
   CreateAlertDialog,
   useAlertSchedules,
   type AlertChannel,
   type AlertScheduleType,
   type ScheduleFrequency,
-  type AlertSeverity,
 } from "@/features/alerts"
-
-interface AlertHistoryItem {
-  id: number
-  type: AlertSeverity
-  title: string
-  time: string
-  value: string
-  read: boolean
-}
-
-const getAlertIcon = (type: AlertSeverity) => {
-  switch (type) {
-    case "warning":
-      return <AlertTriangle className="w-5 h-5 text-warning" />
-    case "critical":
-      return <AlertTriangle className="w-5 h-5 text-destructive" />
-    case "success":
-      return <CheckCircle className="w-5 h-5 text-success" />
-    case "info":
-    default:
-      return <Info className="w-5 h-5 text-info" />
-  }
-}
-
-const getAlertBgColor = (type: AlertSeverity) => {
-  switch (type) {
-    case "warning":
-      return "bg-warning/20"
-    case "critical":
-      return "bg-destructive/20"
-    case "success":
-      return "bg-success/20"
-    case "info":
-    default:
-      return "bg-info/20"
-  }
-}
 
 export function AlertasContent() {
   const t = useTranslations("Alertas")
-
-  const initialAlerts: AlertHistoryItem[] = [
-    {
-      id: 1,
-      type: "warning",
-      title: t("sampleAlerts.highGlucose"),
-      time: t("sampleAlerts.time2Hours"),
-      value: "185 mg/dL",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "info",
-      title: t("sampleAlerts.measurementReminder"),
-      time: t("sampleAlerts.time4Hours"),
-      value: t("sampleAlerts.beforeLunch"),
-      read: false,
-    },
-    {
-      id: 3,
-      type: "success",
-      title: t("sampleAlerts.weeklyGoalMet"),
-      time: t("sampleAlerts.yesterday"),
-      value: t("sampleAlerts.inRange"),
-      read: true,
-    },
-    {
-      id: 4,
-      type: "critical",
-      title: t("sampleAlerts.hypoglycemiaDetected"),
-      time: t("sampleAlerts.time3Days"),
-      value: "62 mg/dL",
-      read: true,
-    },
-  ]
 
   const ALERT_TYPE_CONFIG = {
     glucometry: { label: t("alertTypes.glucometry"), icon: Droplet, color: "red-500" },
@@ -121,7 +43,6 @@ export function AlertasContent() {
     once: t("frequency.once"),
   }
 
-  const [alerts, setAlerts] = useState<AlertHistoryItem[]>(initialAlerts)
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
 
   // Alert schedules from Convex
@@ -132,19 +53,6 @@ export function AlertasContent() {
     isLoading: isLoadingSchedules,
     isPending: isSchedulesPending,
   } = useAlertSchedules()
-
-  const unreadCount = alerts.filter((a) => !a.read).length
-
-  const handleMarkAllRead = () => {
-    setAlerts((prev) => prev.map((a) => ({ ...a, read: true })))
-    toast.success(t("messages.allMarkedRead"))
-  }
-
-  const handleMarkRead = (id: number) => {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, read: true } : a))
-    )
-  }
 
   const handleAddAlert = async (
     time: string,
@@ -161,7 +69,7 @@ export function AlertasContent() {
 
   return (
     <div className="space-y-6">
-      <AlertasHeader unreadCount={unreadCount} onMarkAllRead={handleMarkAllRead} />
+      <AlertasHeader />
 
       {/* Alert Schedules Section */}
       <section className="space-y-3">
@@ -243,54 +151,6 @@ export function AlertasContent() {
         )}
       </section>
 
-      {/* Alerts History */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Bell className="w-5 h-5" />
-          {t("history.title")}
-        </h2>
-
-        {alerts.length === 0 ? (
-          <div className="glass-card p-8 text-center">
-            <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">{t("history.noAlerts")}</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {alerts.map((alert) => (
-              <button
-                key={alert.id}
-                onClick={() => handleMarkRead(alert.id)}
-                className={`glass-card p-4 flex items-start gap-4 w-full text-left transition-opacity ${
-                  alert.read ? "opacity-60" : ""
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getAlertBgColor(
-                    alert.type
-                  )}`}
-                >
-                  {getAlertIcon(alert.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground">{alert.title}</p>
-                    {!alert.read && (
-                      <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{alert.value}</p>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                  <Clock className="w-3 h-3" />
-                  {alert.time}
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Create Alert Dialog */}
       <CreateAlertDialog
         open={showCreateAlertDialog}
@@ -300,4 +160,3 @@ export function AlertasContent() {
     </div>
   )
 }
-

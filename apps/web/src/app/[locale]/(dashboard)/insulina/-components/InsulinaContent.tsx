@@ -71,27 +71,6 @@ export function InsulinaContent() {
     <div className="space-y-6">
       <InsulinaHeader />
 
-      {/* Config cards */}
-      {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="h-[280px] bg-muted/20 rounded-lg animate-pulse" />
-          <div className="h-[280px] bg-muted/20 rounded-lg animate-pulse" />
-        </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          <InsulinConfigCard
-            type="rapid"
-            schedule={rapidSchedule}
-            onUpdate={() => handleOpenUpdate("rapid")}
-          />
-          <InsulinConfigCard
-            type="basal"
-            schedule={basalSchedule}
-            onUpdate={() => handleOpenUpdate("basal")}
-          />
-        </div>
-      )}
-
       {/* Summary card */}
       {totalDailyUnits > 0 && (
         <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
@@ -150,6 +129,27 @@ export function InsulinaContent() {
           isLogging={isCreating}
           isDeleting={isDeleting}
         />
+      )}
+
+      {/* Config cards */}
+      {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="h-[280px] bg-muted/20 rounded-lg animate-pulse" />
+          <div className="h-[280px] bg-muted/20 rounded-lg animate-pulse" />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          <InsulinConfigCard
+            type="rapid"
+            schedule={rapidSchedule}
+            onUpdate={() => handleOpenUpdate("rapid")}
+          />
+          <InsulinConfigCard
+            type="basal"
+            schedule={basalSchedule}
+            onUpdate={() => handleOpenUpdate("basal")}
+          />
+        </div>
       )}
 
       {/* Update dialog */}
