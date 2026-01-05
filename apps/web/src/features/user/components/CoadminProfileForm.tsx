@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { User } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ interface CoadminProfileFormProps {
 }
 
 export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
+  const t = useTranslations("Configuracion.coadminProfileForm")
   const { form, isPending } = useCoadminProfileForm(initialData)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,26 +27,26 @@ export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
         <div className="glass-card p-6 space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <User className="w-5 h-5 text-primary" aria-hidden="true" />
-            Mi Perfil
+            {t("title")}
           </h3>
 
           <form.Field
             name="fullName"
             validators={{
               onChange: ({ value }) =>
-                !value ? "Nombre es requerido" : undefined,
+                !value ? t("fields.fullName.required") : undefined,
             }}
           >
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Nombre completo *</Label>
+                <Label htmlFor={field.name}>{t("fields.fullName.label")} *</Label>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Ej: Juan Pérez"
+                  placeholder={t("fields.fullName.placeholder")}
                   className="bg-secondary/30"
                   disabled={isPending}
                 />
@@ -60,7 +62,7 @@ export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
           <form.Field name="phoneNumber">
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Teléfono WhatsApp</Label>
+                <Label htmlFor={field.name}>{t("fields.phoneNumber.label")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -70,7 +72,7 @@ export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
                     const numericValue = e.target.value.replace(/\D/g, "")
                     field.handleChange(numericValue)
                   }}
-                  placeholder="3001234567"
+                  placeholder={t("fields.phoneNumber.placeholder")}
                   className="bg-secondary/30"
                   maxLength={10}
                   disabled={isPending}
@@ -88,10 +90,10 @@ export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
             onClick={() => form.reset()}
             disabled={isPending}
           >
-            Cancelar
+            {t("actions.cancel")}
           </Button>
           <Button type="submit" className="flex-1" disabled={isPending}>
-            {isPending ? "Guardando..." : "Guardar"}
+            {isPending ? t("actions.saving") : t("actions.save")}
           </Button>
         </div>
       </form>

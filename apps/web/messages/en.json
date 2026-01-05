@@ -827,6 +827,29 @@
         "errorTitle": "Error",
         "errorMessage": "Could not update data"
       }
+    },
+    "coadminProfileForm": {
+      "title": "My Profile",
+      "fields": {
+        "fullName": {
+          "label": "Full name",
+          "placeholder": "E.g: Juan Pérez",
+          "required": "Name is required"
+        },
+        "phoneNumber": {
+          "label": "WhatsApp Phone",
+          "placeholder": "3001234567"
+        }
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving..."
+      },
+      "toast": {
+        "successMessage": "Profile updated successfully",
+        "errorMessage": "Could not update profile"
+      }
     }
   }
 }

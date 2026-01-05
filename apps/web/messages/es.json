@@ -827,6 +827,29 @@
         "errorTitle": "Error",
         "errorMessage": "Error al actualizar los datos"
       }
+    },
+    "coadminProfileForm": {
+      "title": "Mi Perfil",
+      "fields": {
+        "fullName": {
+          "label": "Nombre completo",
+          "placeholder": "Ej: Juan Pérez",
+          "required": "Nombre es requerido"
+        },
+        "phoneNumber": {
+          "label": "Teléfono WhatsApp",
+          "placeholder": "3001234567"
+        }
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando..."
+      },
+      "toast": {
+        "successMessage": "Perfil actualizado correctamente",
+        "errorMessage": "Error al actualizar el perfil"
+      }
     }
   }
 }
