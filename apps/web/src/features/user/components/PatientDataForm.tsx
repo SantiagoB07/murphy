@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { User, Calendar, Activity } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -19,6 +20,7 @@ interface PatientDataFormProps {
 }
 
 export function PatientDataForm({ initialData }: PatientDataFormProps) {
+  const t = useTranslations("Configuracion.patientDataForm")
   const { form, isPending } = usePatientDataForm(initialData)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,32 +28,35 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
     form.handleSubmit()
   }
 
+  const diabetesTypes = ["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"] as const
+  const genderOptions = ["masculino", "femenino", "otro", "prefiero_no_decir"] as const
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="glass-card p-6 space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <User className="w-5 h-5 text-primary" aria-hidden="true" />
-            Información Personal
+            {t("sections.personalInfo")}
           </h3>
 
           <form.Field
             name="fullName"
             validators={{
               onChange: ({ value }) =>
-                !value ? "Nombre es requerido" : undefined,
+                !value ? t("fields.fullName.required") : undefined,
             }}
           >
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Nombre completo *</Label>
+                <Label htmlFor={field.name}>{t("fields.fullName.label")} *</Label>
                 <Input
                   id={field.name}
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Ej: María García López"
+                  placeholder={t("fields.fullName.placeholder")}
                   className="bg-secondary/30"
                   disabled={isPending}
                 />
@@ -67,7 +72,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
           <form.Field name="phoneNumber">
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Teléfono WhatsApp</Label>
+                <Label htmlFor={field.name}>{t("fields.phoneNumber.label")}</Label>
                 <Input
                   id={field.name}
                   name={field.name}
@@ -77,7 +82,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                     const numericValue = e.target.value.replace(/\D/g, "")
                     field.handleChange(numericValue)
                   }}
-                  placeholder="3001234567"
+                  placeholder={t("fields.phoneNumber.placeholder")}
                   className="bg-secondary/30"
                   maxLength={10}
                   disabled={isPending}
@@ -90,19 +95,19 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
         <div className="glass-card p-6 space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" aria-hidden="true" />
-            Información Médica
+            {t("sections.medicalInfo")}
           </h3>
 
           <form.Field
             name="diabetesType"
             validators={{
               onChange: ({ value }) =>
-                !value ? "Tipo de diabetes es requerido" : undefined,
+                !value ? t("fields.diabetesType.required") : undefined,
             }}
           >
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Tipo de diabetes *</Label>
+                <Label htmlFor={field.name}>{t("fields.diabetesType.label")} *</Label>
                 <Select
                   value={field.state.value}
                   onValueChange={(value) =>
@@ -113,14 +118,12 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                   disabled={isPending}
                 >
                   <SelectTrigger className="bg-secondary/30" id={field.name}>
-                    <SelectValue placeholder="Seleccionar" />
+                    <SelectValue placeholder={t("fields.diabetesType.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {(
-                      ["Tipo 1", "Tipo 2", "Gestacional", "LADA", "MODY"] as const
-                    ).map((type) => (
+                    {diabetesTypes.map((type) => (
                       <SelectItem key={type} value={type}>
-                        {type}
+                        {t(`fields.diabetesType.types.${type}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -140,17 +143,17 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
               onChange: ({ value }) => {
                 if (!value) return undefined
                 const year = parseInt(value)
-                if (isNaN(year)) return "El año debe ser un número"
-                if (year < 1950) return "El año debe ser posterior a 1950"
+                if (isNaN(year)) return t("fields.diagnosisYear.validation.mustBeNumber")
+                if (year < 1950) return t("fields.diagnosisYear.validation.after1950")
                 if (year > new Date().getFullYear())
-                  return "El año no puede ser futuro"
+                  return t("fields.diagnosisYear.validation.cannotBeFuture")
                 return undefined
               },
             }}
           >
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Año de diagnóstico</Label>
+                <Label htmlFor={field.name}>{t("fields.diagnosisYear.label")}</Label>
                 <Input
                   id={field.name}
                   type="number"
@@ -158,7 +161,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                   value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={`Ej: ${new Date().getFullYear() - 5}`}
+                  placeholder={t("fields.diagnosisYear.placeholder", { year: new Date().getFullYear() - 5 })}
                   className="bg-secondary/30"
                   min={1950}
                   max={new Date().getFullYear()}
@@ -177,13 +180,13 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
         <div className="glass-card p-6 space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" aria-hidden="true" />
-            Información Adicional
+            {t("sections.additionalInfo")}
           </h3>
 
           <form.Field name="birthDate">
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Fecha de nacimiento</Label>
+                <Label htmlFor={field.name}>{t("fields.birthDate.label")}</Label>
                 <Input
                   id={field.name}
                   type="date"
@@ -201,7 +204,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
           <form.Field name="gender">
             {(field) => (
               <div>
-                <Label htmlFor={field.name}>Sexo</Label>
+                <Label htmlFor={field.name}>{t("fields.gender.label")}</Label>
                 <Select
                   value={field.state.value}
                   onValueChange={(value) =>
@@ -216,15 +219,14 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
                   disabled={isPending}
                 >
                   <SelectTrigger className="bg-secondary/30" id={field.name}>
-                    <SelectValue placeholder="Seleccionar" />
+                    <SelectValue placeholder={t("fields.gender.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="masculino">Masculino</SelectItem>
-                    <SelectItem value="femenino">Femenino</SelectItem>
-                    <SelectItem value="otro">Otro</SelectItem>
-                    <SelectItem value="prefiero_no_decir">
-                      Prefiero no decir
-                    </SelectItem>
+                    {genderOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {t(`fields.gender.options.${option}`)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -235,14 +237,14 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             <form.Field name="city">
               {(field) => (
                 <div>
-                  <Label htmlFor={field.name}>Ciudad de residencia</Label>
+                  <Label htmlFor={field.name}>{t("fields.city.label")}</Label>
                   <Input
                     id={field.name}
                     name={field.name}
                     value={field.state.value ?? ""}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="Ej: Bogotá"
+                    placeholder={t("fields.city.placeholder")}
                     className="bg-secondary/30"
                     disabled={isPending}
                   />
@@ -253,19 +255,19 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             <form.Field name="estrato">
               {(field) => (
                 <div>
-                  <Label htmlFor={field.name}>Estrato</Label>
+                  <Label htmlFor={field.name}>{t("fields.estrato.label")}</Label>
                   <Select
                     value={field.state.value}
                     onValueChange={(value) => field.handleChange(value)}
                     disabled={isPending}
                   >
                     <SelectTrigger className="bg-secondary/30" id={field.name}>
-                      <SelectValue placeholder="Seleccionar" />
+                      <SelectValue placeholder={t("fields.estrato.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       {[1, 2, 3, 4, 5, 6].map((estrato) => (
                         <SelectItem key={estrato} value={estrato.toString()}>
-                          Estrato {estrato}
+                          {t("fields.estrato.option", { number: estrato })}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -284,10 +286,10 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             onClick={() => form.reset()}
             disabled={isPending}
           >
-            Cancelar
+            {t("actions.cancel")}
           </Button>
           <Button type="submit" className="flex-1" disabled={isPending}>
-            {isPending ? "Guardando..." : "Guardar"}
+            {isPending ? t("actions.saving") : t("actions.save")}
           </Button>
         </div>
       </form>

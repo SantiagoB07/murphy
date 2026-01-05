@@ -649,16 +649,24 @@
       "title": "General settings",
       "openAria": "Open {label}"
     },
-    "settingsItems": {
-      "personal": {
-        "label": "Personal data",
-        "description": "Name, email, date of birth"
-      },
-      "coadmin": {
-        "label": "Co-administrators",
-        "description": "Family members with account access"
-      }
-    },
+     "settingsItems": {
+       "personal": {
+         "label": "Personal data",
+         "description": "Name, email, date of birth"
+       },
+       "coadmin": {
+         "label": "Co-administrators",
+         "description": "Family members with account access"
+       },
+       "coadminProfile": {
+         "label": "My Profile",
+         "description": "Your profile information"
+       },
+       "patientData": {
+         "label": "Patient Data",
+         "description": "Information about the patient in your care"
+       }
+     },
     "personalData": {
       "sheet": {
         "title": "Personal data",
@@ -742,6 +750,82 @@
       },
       "validation": {
         "emailInvalid": "Enter a valid email address"
+      }
+    },
+    "patientView": {
+      "managing": "Managing:",
+      "patient": "Patient"
+    },
+    "patientDataForm": {
+      "sections": {
+        "personalInfo": "Personal Information",
+        "medicalInfo": "Medical Information",
+        "additionalInfo": "Additional Information"
+      },
+      "fields": {
+        "fullName": {
+          "label": "Full name",
+          "placeholder": "E.g: María García López",
+          "required": "Name is required"
+        },
+        "phoneNumber": {
+          "label": "WhatsApp Phone",
+          "placeholder": "3001234567"
+        },
+        "diabetesType": {
+          "label": "Diabetes type",
+          "placeholder": "Select",
+          "required": "Diabetes type is required",
+          "types": {
+            "Tipo 1": "Type 1",
+            "Tipo 2": "Type 2",
+            "Gestacional": "Gestational",
+            "LADA": "LADA",
+            "MODY": "MODY"
+          }
+        },
+        "diagnosisYear": {
+          "label": "Year of diagnosis",
+          "placeholder": "E.g: {year}",
+          "validation": {
+            "mustBeNumber": "Year must be a number",
+            "after1950": "Year must be after 1950",
+            "cannotBeFuture": "Year cannot be in the future"
+          }
+        },
+        "birthDate": {
+          "label": "Date of birth"
+        },
+        "gender": {
+          "label": "Gender",
+          "placeholder": "Select",
+          "options": {
+            "masculino": "Male",
+            "femenino": "Female",
+            "otro": "Other",
+            "prefiero_no_decir": "Prefer not to say"
+          }
+        },
+        "city": {
+          "label": "City of residence",
+          "placeholder": "E.g: Bogotá"
+        },
+        "estrato": {
+          "label": "Socioeconomic level",
+          "placeholder": "Select",
+          "option": "Level {number}"
+        }
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving..."
+      },
+      "toast": {
+        "successTitle": "Data updated",
+        "successMessage": "Your data has been saved successfully",
+        "errorTitle": "Error",
+        "errorMessage": "Could not update data"
       }
     }
   }

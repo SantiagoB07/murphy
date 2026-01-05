@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useQuery } from "@tanstack/react-query"
 import { convexQuery } from "@convex-dev/react-query"
 import { api } from "@murphy/backend/convex/_generated/api"
@@ -7,6 +8,7 @@ import { PatientDataForm } from "@/features/user"
 import { ConfiguracionSkeleton } from "./ConfiguracionSkeleton"
 
 export function CoadminPatientView() {
+  const t = useTranslations("Configuracion.patientView")
   const { data: profile, isPending } = useQuery(
     convexQuery(api.patients.getCurrentProfile, {})
   )
@@ -18,8 +20,8 @@ export function CoadminPatientView() {
   return (
     <div className="space-y-6">
       <div className="text-sm text-muted-foreground">
-        Gestionando:{" "}
-        <span className="font-medium text-foreground">{profile.fullName ?? "Paciente"}</span>
+        {t("managing")}{" "}
+        <span className="font-medium text-foreground">{profile.fullName ?? t("patient")}</span>
       </div>
       <PatientDataForm
         initialData={{

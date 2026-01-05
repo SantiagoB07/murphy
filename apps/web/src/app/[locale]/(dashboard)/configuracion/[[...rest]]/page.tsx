@@ -41,11 +41,17 @@ function PatientUserProfile({
   )
 }
 
-function CoadminUserProfile({ basePath }: { basePath: string }) {
+function CoadminUserProfile({
+  t,
+  basePath,
+}: {
+  t: (key: string) => string
+  basePath: string
+}) {
   return (
     <UserProfile path={basePath} routing="path">
       <UserProfile.Page
-        label="Mi Perfil"
+        label={t("settingsItems.coadminProfile.label")}
         url="mi-perfil"
         labelIcon={<UserIcon className="w-4 h-4" />}
       >
@@ -53,7 +59,7 @@ function CoadminUserProfile({ basePath }: { basePath: string }) {
       </UserProfile.Page>
 
       <UserProfile.Page
-        label="Datos del Paciente"
+        label={t("settingsItems.patientData.label")}
         url="paciente"
         labelIcon={<HeartPulseIcon className="w-4 h-4" />}
       >
@@ -84,5 +90,5 @@ export default function ConfiguracionPage() {
     return <PatientUserProfile t={t} basePath={basePath} />
   }
 
-  return <CoadminUserProfile basePath={basePath} />
+  return <CoadminUserProfile t={t} basePath={basePath} />
 }

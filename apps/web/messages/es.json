@@ -649,16 +649,24 @@
       "title": "Ajustes generales",
       "openAria": "Abrir {label}"
     },
-    "settingsItems": {
-      "personal": {
-        "label": "Datos personales",
-        "description": "Nombre, email, fecha de nacimiento"
-      },
-      "coadmin": {
-        "label": "Coadministradores",
-        "description": "Familiares con acceso a tu cuenta"
-      }
-    },
+     "settingsItems": {
+       "personal": {
+         "label": "Datos personales",
+         "description": "Nombre, email, fecha de nacimiento"
+       },
+       "coadmin": {
+         "label": "Coadministradores",
+         "description": "Familiares con acceso a tu cuenta"
+       },
+       "coadminProfile": {
+         "label": "Mi Perfil",
+         "description": "Información de tu perfil"
+       },
+       "patientData": {
+         "label": "Datos del Paciente",
+         "description": "Información del paciente a tu cargo"
+       }
+     },
     "personalData": {
       "sheet": {
         "title": "Datos personales",
@@ -742,6 +750,82 @@
       },
       "validation": {
         "emailInvalid": "Ingresa un correo electrónico válido"
+      }
+    },
+    "patientView": {
+      "managing": "Gestionando:",
+      "patient": "Paciente"
+    },
+    "patientDataForm": {
+      "sections": {
+        "personalInfo": "Información Personal",
+        "medicalInfo": "Información Médica",
+        "additionalInfo": "Información Adicional"
+      },
+      "fields": {
+        "fullName": {
+          "label": "Nombre completo",
+          "placeholder": "Ej: María García López",
+          "required": "Nombre es requerido"
+        },
+        "phoneNumber": {
+          "label": "Teléfono WhatsApp",
+          "placeholder": "3001234567"
+        },
+        "diabetesType": {
+          "label": "Tipo de diabetes",
+          "placeholder": "Seleccionar",
+          "required": "Tipo de diabetes es requerido",
+          "types": {
+            "Tipo 1": "Tipo 1",
+            "Tipo 2": "Tipo 2",
+            "Gestacional": "Gestacional",
+            "LADA": "LADA",
+            "MODY": "MODY"
+          }
+        },
+        "diagnosisYear": {
+          "label": "Año de diagnóstico",
+          "placeholder": "Ej: {year}",
+          "validation": {
+            "mustBeNumber": "El año debe ser un número",
+            "after1950": "El año debe ser posterior a 1950",
+            "cannotBeFuture": "El año no puede ser futuro"
+          }
+        },
+        "birthDate": {
+          "label": "Fecha de nacimiento"
+        },
+        "gender": {
+          "label": "Sexo",
+          "placeholder": "Seleccionar",
+          "options": {
+            "masculino": "Masculino",
+            "femenino": "Femenino",
+            "otro": "Otro",
+            "prefiero_no_decir": "Prefiero no decir"
+          }
+        },
+        "city": {
+          "label": "Ciudad de residencia",
+          "placeholder": "Ej: Bogotá"
+        },
+        "estrato": {
+          "label": "Estrato",
+          "placeholder": "Seleccionar",
+          "option": "Estrato {number}"
+        }
+      },
+      "actions": {
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando..."
+      },
+      "toast": {
+        "successTitle": "Datos actualizados",
+        "successMessage": "Tus datos se han guardado correctamente",
+        "errorTitle": "Error",
+        "errorMessage": "Error al actualizar los datos"
       }
     }
   }

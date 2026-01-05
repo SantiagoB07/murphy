@@ -3,11 +3,13 @@
 import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import { useConvexMutation } from "@convex-dev/react-query"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import { api } from "@murphy/backend/convex/_generated/api"
 import type { PatientFormData } from "../user.types"
 
 export function usePatientDataForm(initialData: PatientFormData) {
+  const t = useTranslations("Configuracion.patientDataForm.toast")
   const updateProfileMutation = useConvexMutation(api.patients.updateProfile)
 
   const { mutate: updateProfile, isPending } = useMutation({
@@ -24,11 +26,11 @@ export function usePatientDataForm(initialData: PatientFormData) {
       })
     },
     onSuccess: () => {
-      toast.success("Datos actualizados correctamente")
+      toast.success(t("successMessage"))
     },
     onError: (error) => {
       console.error("Error updating profile:", error)
-      toast.error("Error al actualizar los datos")
+      toast.error(t("errorMessage"))
     },
   })
 
