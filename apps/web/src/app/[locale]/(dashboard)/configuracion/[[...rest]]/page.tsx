@@ -2,7 +2,7 @@
 
 import { UserProfile } from "@clerk/nextjs"
 import { UserIcon, UsersIcon, HeartPulseIcon } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useUserRole } from "@/features/user"
 import { PatientSettingsView } from "../-components/PatientSettingsView"
 import { CoadminPersonalView } from "../-components/CoadminPersonalView"
@@ -10,9 +10,15 @@ import { CoadminPatientView } from "../-components/CoadminPatientView"
 import { CoadminPageContent } from "../-components/CoadminPageContent"
 import { ConfiguracionSkeleton } from "../-components/ConfiguracionSkeleton"
 
-function PatientUserProfile({ t }: { t: (key: string) => string }) {
+function PatientUserProfile({
+  t,
+  basePath,
+}: {
+  t: (key: string) => string
+  basePath: string
+}) {
   return (
-    <UserProfile path="/configuracion" routing="path">
+    <UserProfile path={basePath} routing="path">
       <UserProfile.Page
         label={t("settingsItems.personal.label")}
         url="mis-datos"
@@ -35,9 +41,9 @@ function PatientUserProfile({ t }: { t: (key: string) => string }) {
   )
 }
 
-function CoadminUserProfile() {
+function CoadminUserProfile({ basePath }: { basePath: string }) {
   return (
-    <UserProfile path="/configuracion" routing="path">
+    <UserProfile path={basePath} routing="path">
       <UserProfile.Page
         label="Mi Perfil"
         url="mi-perfil"
@@ -62,15 +68,21 @@ function CoadminUserProfile() {
 
 export default function ConfiguracionPage() {
   const t = useTranslations("Configuracion")
+  const locale = useLocale()
   const { role, isLoading } = useUserRole()
+
+  // Build path with locale prefix for non-default locales
+  const basePath = locale === "es" ? "/configuracion" : `/${locale}/configuracion`
+
+  console.log("Rendering ConfiguracionPage with role:", role)
 
   if (isLoading) {
     return <ConfiguracionSkeleton />
   }
 
   if (role === "patient") {
-    return <PatientUserProfile t={t} />
+    return <PatientUserProfile t={t} basePath={basePath} />
   }
 
-  return <CoadminUserProfile />
+  return <CoadminUserProfile basePath={basePath} />
 }
