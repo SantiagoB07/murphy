@@ -1,23 +1,24 @@
 "use client"
 
 import { UserProfile } from "@clerk/nextjs"
-import { UserIcon, UsersIcon } from "lucide-react"
+import { UserIcon, UsersIcon, HeartPulseIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { PersonalDataPageContent } from "../-components/PersonalDataPageContent"
+import { useUserRole } from "@/features/user"
+import { PatientSettingsView } from "../-components/PatientSettingsView"
+import { CoadminPersonalView } from "../-components/CoadminPersonalView"
+import { CoadminPatientView } from "../-components/CoadminPatientView"
 import { CoadminPageContent } from "../-components/CoadminPageContent"
+import { ConfiguracionSkeleton } from "../-components/ConfiguracionSkeleton"
 
-export default function ConfiguracionPage() {
-  const t = useTranslations("Configuracion")
-
+function PatientUserProfile({ t }: { t: (key: string) => string }) {
   return (
     <UserProfile path="/configuracion" routing="path">
-      {/* Custom pages first */}
       <UserProfile.Page
         label={t("settingsItems.personal.label")}
-        url="personal-data"
+        url="mis-datos"
         labelIcon={<UserIcon className="w-4 h-4" />}
       >
-        <PersonalDataPageContent />
+        <PatientSettingsView />
       </UserProfile.Page>
 
       <UserProfile.Page
@@ -28,9 +29,48 @@ export default function ConfiguracionPage() {
         <CoadminPageContent />
       </UserProfile.Page>
 
-      {/* Reorder default Clerk pages after custom ones */}
       <UserProfile.Page label="account" />
       <UserProfile.Page label="security" />
     </UserProfile>
   )
+}
+
+function CoadminUserProfile() {
+  return (
+    <UserProfile path="/configuracion" routing="path">
+      <UserProfile.Page
+        label="Mi Perfil"
+        url="mi-perfil"
+        labelIcon={<UserIcon className="w-4 h-4" />}
+      >
+        <CoadminPersonalView />
+      </UserProfile.Page>
+
+      <UserProfile.Page
+        label="Datos del Paciente"
+        url="paciente"
+        labelIcon={<HeartPulseIcon className="w-4 h-4" />}
+      >
+        <CoadminPatientView />
+      </UserProfile.Page>
+
+      <UserProfile.Page label="account" />
+      <UserProfile.Page label="security" />
+    </UserProfile>
+  )
+}
+
+export default function ConfiguracionPage() {
+  const t = useTranslations("Configuracion")
+  const { role, isLoading } = useUserRole()
+
+  if (isLoading) {
+    return <ConfiguracionSkeleton />
+  }
+
+  if (role === "patient") {
+    return <PatientUserProfile t={t} />
+  }
+
+  return <CoadminUserProfile />
 }

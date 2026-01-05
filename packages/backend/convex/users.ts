@@ -1,8 +1,9 @@
-import { internalMutation, action } from "./_generated/server";
+import { internalMutation, action, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { createClerkClient } from "@clerk/backend";
 import { diabetesTypes, genderTypes } from "./lib/validators";
+import { getAuthenticatedUser } from "./lib/auth";
 
 export const createUser = internalMutation({
   args: {
@@ -54,5 +55,13 @@ export const onboardUser = action({
       ...args,
       clerkUserId: user.subject,
     });
+  },
+});
+
+export const getUserRole = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getAuthenticatedUser(ctx);
+    return user.role;
   },
 });
