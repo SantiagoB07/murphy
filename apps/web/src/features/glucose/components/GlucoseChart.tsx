@@ -77,8 +77,6 @@ export function GlucoseChart({
       }))
   }, [data, locale])
 
-  console.log("chartData", chartData)
-
   const stats = useMemo(() => {
     if (data.length === 0) return { avg: 0, min: 0, max: 0, inRange: 0 }
     const values = data.map((d) => d.value)

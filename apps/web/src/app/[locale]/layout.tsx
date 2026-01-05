@@ -6,13 +6,12 @@ import { notFound } from "next/navigation"
 import { routing } from "@/i18n/routing"
 import "../../index.css"
 import BaseProviders from "@/components/providers/base"
-import Devtools from "@/lib/devtools-setup"
 
-/* let Devtools: React.ComponentType | null = null
+let Devtools: React.ComponentType | null = null
 if (process.env.NODE_ENV === "development") {
   const module = await import("@/lib/devtools-setup")
   Devtools = module.default
-} */
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,7 +52,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <div className="grid grid-rows-[auto_1fr] h-svh">
               {children}
             </div>
-            {<Devtools />}
+            {Devtools && <Devtools />}
           </BaseProviders>
         </NextIntlClientProvider>
       </body>
