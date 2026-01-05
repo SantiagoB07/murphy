@@ -47,7 +47,11 @@ export const createPatientDataSchema = (t: (key: string) => string) =>
           })
         }
       }),
-    birthDate: z.string().optional(),
+    age: z
+      .number()
+      .min(1, t("fields.age.validation.minAge"))
+      .max(120, t("fields.age.validation.maxAge"))
+      .optional(),
     gender: z.enum(GENDER_TYPES).optional(),
     city: z.string().optional(),
     estrato: z.string().optional(),

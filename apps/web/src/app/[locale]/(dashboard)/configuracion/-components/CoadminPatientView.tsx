@@ -29,7 +29,7 @@ export function CoadminPatientView() {
           phoneNumber: profile.phoneNumber,
           diabetesType: profile.diabetesType,
           diagnosisYear: profile.diagnosisYear?.toString(),
-          birthDate: profile.birthDate,
+          age: profile.age,
           gender: profile.gender,
           city: profile.city,
           estrato: profile.estrato?.toString(),

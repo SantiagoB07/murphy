@@ -20,7 +20,7 @@ export function usePatientDataForm(initialData: PatientFormData) {
         phoneNumber: data.phoneNumber || undefined,
         diabetesType: data.diabetesType,
         diagnosisYear: data.diagnosisYear ? parseInt(data.diagnosisYear) : undefined,
-        birthDate: data.birthDate || undefined,
+        age: data.age,
         gender: data.gender,
         city: data.city || undefined,
         estrato: data.estrato ? parseInt(data.estrato) : undefined,

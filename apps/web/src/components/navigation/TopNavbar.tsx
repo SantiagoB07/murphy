@@ -17,7 +17,6 @@ export function TopNavbar({ userName }: TopNavbarProps) {
   const t = useTranslations("Navigation")
   const navItems = getNavItems()
   const homeRoute = getHomeRoute()
-  const settingsRoute = getSettingsRoute()
 
   const isActive = (path: string) => pathname === path
 
@@ -88,7 +87,7 @@ export function TopNavbar({ userName }: TopNavbarProps) {
           <LocaleSwitcher />
 
           {/* Settings Button */}
-          <Link
+          {/* <Link
             href={settingsRoute as "/configuracion"}
             aria-label={t("settings")}
             className={cn(
@@ -101,7 +100,7 @@ export function TopNavbar({ userName }: TopNavbarProps) {
             )}
           >
             <Settings className="w-5 h-5" aria-hidden="true" />
-          </Link>
+          </Link> */}
 
           {/* User Button */}
           <div className="pl-3 border-l border-border/50">

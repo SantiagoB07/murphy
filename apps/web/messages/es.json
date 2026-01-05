@@ -800,8 +800,13 @@
             "cannotBeFuture": "El año no puede ser futuro"
           }
         },
-        "birthDate": {
-          "label": "Fecha de nacimiento"
+        "age": {
+          "label": "Edad",
+          "placeholder": "Ej: 45",
+          "validation": {
+            "minAge": "La edad debe ser al menos 1",
+            "maxAge": "La edad debe ser máximo 120"
+          }
         },
         "gender": {
           "label": "Sexo",

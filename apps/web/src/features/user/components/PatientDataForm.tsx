@@ -189,22 +189,34 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
             {t("sections.additionalInfo")}
           </h3>
 
-          <form.Field name="birthDate">
-            {(field) => (
-              <div>
-                <Label htmlFor={field.name}>{t("fields.birthDate.label")}</Label>
-                <Input
-                  id={field.name}
-                  type="date"
-                  name={field.name}
-                  value={field.state.value ?? ""}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="bg-secondary/30"
-                  disabled={isPending}
-                />
-              </div>
-            )}
+          <form.Field name="age">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <div>
+                  <Label htmlFor={field.name}>{t("fields.age.label")}</Label>
+                  <Input
+                    id={field.name}
+                    type="number"
+                    name={field.name}
+                    value={field.state.value ?? ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : undefined)}
+                    placeholder={t("fields.age.placeholder")}
+                    className="bg-secondary/30"
+                    min={1}
+                    max={120}
+                    aria-invalid={isInvalid}
+                    disabled={isPending}
+                  />
+                  {isInvalid && field.state.meta.errors.length > 0 && (
+                    <p className="text-sm text-destructive mt-1">
+                      {getErrorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )
+            }}
           </form.Field>
 
           <form.Field name="gender">
@@ -297,7 +309,7 @@ export function PatientDataForm({ initialData }: PatientDataFormProps) {
               (values.phoneNumber ?? "") !== (initialData.phoneNumber ?? "") ||
               values.diabetesType !== initialData.diabetesType ||
               (values.diagnosisYear ?? "") !== (initialData.diagnosisYear ?? "") ||
-              (values.birthDate ?? "") !== (initialData.birthDate ?? "") ||
+              (values.age ?? "") !== (initialData.age ?? "") ||
               (values.gender ?? "") !== (initialData.gender ?? "") ||
               (values.city ?? "") !== (initialData.city ?? "") ||
               (values.estrato ?? "") !== (initialData.estrato ?? "")
