@@ -60,9 +60,9 @@ export function GlucoseChart({
 
   const chartData = useMemo(() => {
     return [...data]
-      .sort(
+      /* .sort(
         (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-      )
+      ) */
       .map((reading) => ({
         ...reading,
         time: new Date(reading.timestamp).toLocaleTimeString(locale === "en" ? "en-US" : "es-ES", {
