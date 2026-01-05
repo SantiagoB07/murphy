@@ -105,7 +105,9 @@ export default defineSchema({
     slot: v.optional(glucoseSlots), // Meal timing slot (e.g., "before_breakfast")
     notes: v.optional(v.string()), // Optional note
     updatedAt: v.number(),
-  }).index("by_patient_date", ["patientId", "date"]),
+  })
+    .index("by_patient_date", ["patientId", "date"])
+    .index("by_patient_recordedAt", ["patientId", "recordedAt"]),
 
   // Esquemas de insulina
   insulinSchedules: defineTable({
