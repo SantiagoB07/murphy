@@ -1,17 +1,13 @@
 "use client"
 
 import { useForm } from "@tanstack/react-form"
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { convexQuery, useConvexMutation } from "@convex-dev/react-query"
+import { useMutation } from "@tanstack/react-query"
+import { useConvexMutation } from "@convex-dev/react-query"
 import { toast } from "sonner"
 import { api } from "@murphy/backend/convex/_generated/api"
 import type { CoadminProfileFormData } from "../user.types"
 
-export function useCoadminProfileForm() {
-  const { data: profile, isPending: isLoadingProfile } = useQuery(
-    convexQuery(api.coadmins.getCoadminOwnProfile, {})
-  )
-
+export function useCoadminProfileForm(initialData: CoadminProfileFormData) {
   const updateProfileMutation = useConvexMutation(api.coadmins.updateCoadminProfile)
 
   const { mutate: updateProfile, isPending } = useMutation({
@@ -31,10 +27,7 @@ export function useCoadminProfileForm() {
   })
 
   const form = useForm({
-    defaultValues: {
-      fullName: profile?.fullName ?? "",
-      phoneNumber: profile?.phoneNumber ?? "",
-    } as CoadminProfileFormData,
+    defaultValues: initialData,
     onSubmit: async ({ value }) => {
       updateProfile(value)
     },
@@ -43,6 +36,5 @@ export function useCoadminProfileForm() {
   return {
     form,
     isPending,
-    isLoading: isLoadingProfile,
   }
 }

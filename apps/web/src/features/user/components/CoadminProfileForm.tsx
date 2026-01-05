@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useCoadminProfileForm } from "../hooks/useCoadminProfileForm"
-import { ConfiguracionSkeleton } from "@/app/[locale]/(dashboard)/configuracion/-components/ConfiguracionSkeleton"
+import type { CoadminProfileFormData } from "../user.types"
 
-export function CoadminProfileForm() {
-  const { form, isPending, isLoading } = useCoadminProfileForm()
+interface CoadminProfileFormProps {
+  initialData: CoadminProfileFormData
+}
 
-  if (isLoading) {
-    return <ConfiguracionSkeleton />
-  }
+export function CoadminProfileForm({ initialData }: CoadminProfileFormProps) {
+  const { form, isPending } = useCoadminProfileForm(initialData)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +64,7 @@ export function CoadminProfileForm() {
                 <Input
                   id={field.name}
                   name={field.name}
-                  value={field.state.value}
+                  value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => {
                     const numericValue = e.target.value.replace(/\D/g, "")

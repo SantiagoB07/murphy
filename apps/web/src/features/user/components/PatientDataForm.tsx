@@ -12,14 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { usePatientDataForm } from "../hooks/usePatientDataForm"
-import { ConfiguracionSkeleton } from "@/app/[locale]/(dashboard)/configuracion/-components/ConfiguracionSkeleton"
+import type { PatientFormData } from "../user.types"
 
-export function PatientDataForm() {
-  const { form, isPending, isLoading } = usePatientDataForm()
+interface PatientDataFormProps {
+  initialData: PatientFormData
+}
 
-  if (isLoading) {
-    return <ConfiguracionSkeleton />
-  }
+export function PatientDataForm({ initialData }: PatientDataFormProps) {
+  const { form, isPending } = usePatientDataForm(initialData)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,7 +71,7 @@ export function PatientDataForm() {
                 <Input
                   id={field.name}
                   name={field.name}
-                  value={field.state.value}
+                  value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => {
                     const numericValue = e.target.value.replace(/\D/g, "")
@@ -155,7 +155,7 @@ export function PatientDataForm() {
                   id={field.name}
                   type="number"
                   name={field.name}
-                  value={field.state.value}
+                  value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder={`Ej: ${new Date().getFullYear() - 5}`}
@@ -188,7 +188,7 @@ export function PatientDataForm() {
                   id={field.name}
                   type="date"
                   name={field.name}
-                  value={field.state.value}
+                  value={field.state.value ?? ""}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
                   className="bg-secondary/30"
@@ -239,7 +239,7 @@ export function PatientDataForm() {
                   <Input
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
+                    value={field.state.value ?? ""}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder="Ej: Bogotá"
