@@ -7,7 +7,6 @@ import { VideoSection } from "./VideoSection"
 import { ProblemSection } from "./ProblemSection"
 import { SolutionSection } from "./SolutionSection"
 import { BenefitsSection } from "./BenefitsSection"
-import { DemoFormSection } from "./DemoFormSection"
 import { LandingFooter } from "./LandingFooter"
 
 export function LandingContent() {
@@ -15,15 +14,11 @@ export function LandingContent() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
   }, [])
 
-  const scrollToContact = useCallback(() => {
-    scrollToSection("contacto")
-  }, [scrollToSection])
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <LandingHeader onScrollToSection={scrollToSection} />
 
-      <HeroSection onScrollToContact={scrollToContact} />
+      <HeroSection />
 
       <VideoSection />
 
@@ -38,8 +33,6 @@ export function LandingContent() {
       </section>
 
       <BenefitsSection />
-
-      <DemoFormSection />
 
       <LandingFooter />
     </div>

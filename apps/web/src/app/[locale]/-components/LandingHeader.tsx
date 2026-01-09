@@ -6,6 +6,7 @@ import { SignInButton, useAuth } from "@clerk/nextjs"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
 import { LocaleSwitcher } from "@/components/LocaleSwitcher"
+import { EXTERNAL_LINKS } from "@/lib/constants"
 
 interface LandingHeaderProps {
   onScrollToSection: (id: string) => void
@@ -42,12 +43,14 @@ export function LandingHeader({ onScrollToSection }: LandingHeaderProps) {
           >
             {t("nav.beneficios")}
           </button>
-          <button
-            onClick={() => onScrollToSection("contacto")}
+          <a
+            href={EXTERNAL_LINKS.CAL_COM_DEMO}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors"
           >
             {t("nav.contacto")}
-          </button>
+          </a>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -66,8 +69,14 @@ export function LandingHeader({ onScrollToSection }: LandingHeaderProps) {
                   {t("cta.signIn")}
                 </Button>
               </SignInButton>
-              <Button onClick={() => onScrollToSection("contacto")} className="btn-neon">
-                {t("cta.scheduleDemo")}
+              <Button asChild className="btn-neon">
+                <a
+                  href={EXTERNAL_LINKS.CAL_COM_DEMO}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("cta.scheduleDemo")}
+                </a>
               </Button>
             </>
           )}

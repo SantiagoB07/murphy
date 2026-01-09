@@ -5,12 +5,9 @@ import { useTranslations } from "next-intl"
 import { SignInButton, useAuth } from "@clerk/nextjs"
 import { Link } from "@/i18n/navigation"
 import { Button } from "@/components/ui/button"
+import { EXTERNAL_LINKS } from "@/lib/constants"
 
-interface HeroSectionProps {
-  onScrollToContact: () => void
-}
-
-export function HeroSection({ onScrollToContact }: HeroSectionProps) {
+export function HeroSection() {
   const t = useTranslations("Landing")
   const { isSignedIn } = useAuth()
 
@@ -53,12 +50,18 @@ export function HeroSection({ onScrollToContact }: HeroSectionProps) {
                 </Button>
               </SignInButton>
               <Button
-                onClick={onScrollToContact}
+                asChild
                 size="lg"
                 className="btn-neon w-full sm:w-auto min-w-[160px]"
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {t("cta.scheduleDemo")}
+                <a
+                  href={EXTERNAL_LINKS.CAL_COM_DEMO}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {t("cta.scheduleDemo")}
+                </a>
               </Button>
             </>
           )}
