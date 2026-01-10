@@ -23,7 +23,6 @@ import type * as agent_webhooks from "../agent/webhooks.js";
 import type * as aiCallSchedules from "../aiCallSchedules.js";
 import type * as callRecords from "../callRecords.js";
 import type * as coadmins from "../coadmins.js";
-import type * as demoLeads from "../demoLeads.js";
 import type * as dizzinessRecords from "../dizzinessRecords.js";
 import type * as glucoseRecords from "../glucoseRecords.js";
 import type * as healthCheck from "../healthCheck.js";
@@ -73,7 +72,6 @@ declare const fullApi: ApiFromModules<{
   aiCallSchedules: typeof aiCallSchedules;
   callRecords: typeof callRecords;
   coadmins: typeof coadmins;
-  demoLeads: typeof demoLeads;
   dizzinessRecords: typeof dizzinessRecords;
   glucoseRecords: typeof glucoseRecords;
   healthCheck: typeof healthCheck;
